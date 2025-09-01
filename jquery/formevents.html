@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Form Events</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            width: 200px;
+            padding: 5px;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 15px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Form Events</h1>
+
+    <form id="myForm">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name">
+
+        <label for="class">Class</label>
+        <input type="text" id="class" name="class">
+
+        <label for="country">Country</label>
+        <select id="country" name="country">
+            <option value="india">India</option>
+            <option value="usa">USA</option>
+            <option value="uk">UK</option>
+            <option value="australia">Australia</option>
+        </select>
+
+        <br>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script src="jquery.js"></script>
+
+    <script>
+
+        $(document).ready(function(){
+// $('#name,#class,#country').focus(function(){
+
+//     $(this).css('background-color','red')
+// })
+
+$('#name,#class,#country').blur(function(){
+
+    $(this).css('background-color','orange')
+})
+
+$('#country').change(function(){
+
+    // $(this).css('background-color','green')
+
+    var a= $(this).val();
+    $('#line').html(a);
+})
+$('#name,#class').select(function(){
+
+    $(this).css('background-color','yellow')
+})
+
+$('#myForm').submit(function(){
+console.log("done");
+})
+
+
+        })
+    </script>
+
+    <div id="line" style="border: 2px solid red;margin-top: 20px;"></div>
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jQuery Window Events</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        #box {
+            width: 400px;
+            height: 200px;
+            overflow: scroll;
+            background: pink;
+            padding: 10px;
+            border: 2px solid #000;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>jQuery Window Events</h1>
+
+    <div id="box">
+        <h2>Test Box</h2>
+        <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. A ad aspernatur 
+            aliquid ratione consequuntur mollitia, earum, in veritatis culpa illo 
+            ducimus laudantium accusantium impedit ab, fugiat minus ullam incidunt 
+            adipisci. Veniam, architecto! Consequatur nam facere ipsum eos quaerat 
+            ab provident animi totam molestiae magni quo quod.Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quisquam neque 
+        quis deserunt, sapiente illo cum nihil facere incidunt officia deleniti 
+        quos fugiat molestias vero autem reprehenderit velit ipsam, explicabo, 
+        laudantium asperiores. Saepe praesentium nulla impedit vero provident 
+        molestias id earum, fuga perferendis blanditiis nam consequatur veniam 
+        odio facere, magnam explicabo. Nobis at quibusdam, excepturi ipsam velit, 
+        natus dolor necessitatibus!Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quisquam neque 
+        quis deserunt, sapiente illo cum nihil facere incidunt officia deleniti 
+        quos fugiat molestias vero autem reprehenderit velit ipsam, explicabo, 
+        laudantium asperiores. Saepe praesentium nulla impedit vero provident 
+        molestias id earum, fuga perferendis blanditiis nam consequatur veniam 
+        odio facere, magnam explicabo. Nobis at quibusdam, excepturi ipsam velit, 
+        natus dolor necessitatibus!vvLorem ipsum dolor sit amet, consectetur adipisicing elit. Quisquam neque 
+        quis deserunt, sapiente illo cum nihil facere incidunt officia deleniti 
+        quos fugiat molestias vero autem reprehenderit velit ipsam, explicabo, 
+        laudantium asperiores. Saepe praesentium nulla impedit vero provident 
+        molestias id earum, fuga perferendis blanditiis nam consequatur veniam 
+        odio facere, magnam explicabo. Nobis at quibusdam, excepturi ipsam velit, 
+        natus dolor necessitatibus!
+        </p>
+    </div>
+
+    <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quisquam neque 
+        quis deserunt, sapiente illo cum nihil facere incidunt officia deleniti 
+        quos fugiat molestias vero autem reprehenderit velit ipsam, explicabo, 
+        laudantium asperiores. Saepe praesentium nulla impedit vero provident 
+        molestias id earum, fuga perferendis blanditiis nam consequatur veniam 
+        odio facere, magnam explicabo. Nobis at quibusdam, excepturi ipsam velit, 
+        natus dolor necessitatibus!
+    </p>
+
+   <script src="jquery.js"></script>
+    
+<script>
+
+
+  $(document).ready(function(){
+    // Scroll event on #box
+    $("#box").scroll(function(){
+        console.log("you are scrolling");
+    });
+
+    // Resize event on window
+    $(window).resize(function(){
+        console.log("you are resizing");
+    });
+});
+
+</script>
+
+</body>
+</html>
