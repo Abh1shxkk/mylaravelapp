@@ -25,18 +25,50 @@
 
     <h1>jQuery Append & Prepend Methods</h1>
 
-    <div id="box">
+    <!-- <div id="box">
         <h2>Test Box</h2>
         <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Mollitia, laudantium.</p>
-    </div>
+    </div> -->
+
+    <ol>
+        <li>item1</li>
+          <li>item1</li>
+                    <li>item1</li>
+
+                              <li>item1</li>
+
+          
+          
+
+    </ol>
 
     <button id="append">Append</button>
     <button id="prepend">Prepend</button>
 
-  
-    <script src="jquery.js"></script>
+  <div>
 
     
+  </div>
+    <script src="jquery.js"></script>
+
+    <script>
+
+        $(document).ready(function(){
+
+            $("#append").click(function(){
+
+$("ol").append("newitem ")
+
+
+            })
+
+             $("#prepend").click(function(){
+
+$("ol").prepend("ok")
+
+            })
+        })
+    </script>
 
 </body>
 </html>

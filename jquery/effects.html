@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>jQuery Ancestor Methods</title>
+  <script src="jquery.js"></script>
+  <style>
+    #mainOuter {
+      background: lavender;
+      padding: 20px;
+    }
+    #outer {
+      background: moccasin;
+      padding: 20px;
+    }
+    #inner {
+      background: lightpink;
+      padding: 20px;
+    }
+    .box {
+      background: lightcyan;
+      border: 1px solid #000;
+      width: 50px;
+      height: 50px;
+      margin: 5px;
+      display: inline-block;
+      text-align: center;
+      line-height: 50px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<h1>jQuery Ancestor Methods</h1>
+
+<div id="mainOuter">
+  Main Outer
+  <div id="outer">
+    Outer
+    <div id="inner">
+      Inner
+      <div class="box">A</div>
+      <div class="box">B</div>
+      <div id="ca" class="box">C</div>
+      <div class="box">D</div>
+    </div>
+  </div>
+</div>
+
+<br>
+<button id="btn1">Parent</button>
+<button id="btn2">Parents</button>
+<button id="btn3">Parents Until</button>
+
+<script>
+$(document).ready(function(){
+    $("#btn3").click(function(){
+        $("#ca").parentsUntil("#outer").css({"background":"blue"})
+    })
+})
+</script>
+
+</body>
+</html>
