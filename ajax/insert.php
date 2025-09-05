@@ -44,10 +44,9 @@
                     <input type="text" id="fname" placeholder="Enter first name"
                         class="w-full px-4 py-2 rounded border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                     <!-- Error message for first name -->
-                    <!-- Error message for first name -->
-                    <div id="fnameError" class="text-red-700 text-sm mt-1 hidden">
-                        Please enter first name
-                    </div>
+                   <div id="fnameError" class="text-red-500 text-sm mt-1 font-medium hidden">
+    <i class="fas fa-exclamation-circle mr-1"></i> Please enter a valid first name
+</div>
 
                     <!-- Error message for last name -->
 
@@ -58,9 +57,9 @@
                     <input type="text" id="lname" placeholder="Enter last name"
                         class="w-full px-4 py-2 rounded border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                     <!-- Error message for last name -->
-                    <div id="lnameError" class="text-red-700 text-sm mt-1 hidden">
-                        Please enter last name
-                    </div>
+                   <div id="lnameError" class="text-red-500 text-sm mt-1 font-medium hidden">
+    <i class="fas fa-exclamation-circle mr-1"></i> Please enter a valid last name
+</div>
                 </div>
 
                 <button id="saveBtn"
@@ -244,54 +243,54 @@
                 loadData(searchQuery, 1);
             });
 
-            // Save Record
-            function saveRecord() {
-                var fname = $("#fname").val();
-                var lname = $("#lname").val();
-                var isValid = true;
+            /// Save Record
+function saveRecord(){
+    var fname = $("#fname").val().trim(); // trim() added
+    var lname = $("#lname").val().trim(); // trim() added
+    var isValid = true;
 
-                // Reset error messages
-                $("#fnameError").addClass("hidden");
-                $("#lnameError").addClass("hidden");
+    // Reset error messages
+    $("#fnameError").addClass("hidden");
+    $("#lnameError").addClass("hidden");
+    
+    // Remove error border classes
+    $("#fname").removeClass("border-red-500");
+    $("#lname").removeClass("border-red-500");
 
-                // Remove error border classes
-                $("#fname").removeClass("border-red-500");
-                $("#lname").removeClass("border-red-500");
+    // Validate first name (after trimming)
+    if(fname === ""){
+        $("#fnameError").removeClass("hidden");
+        $("#fname").addClass("border-red-500");
+        isValid = false;
+    }
 
-                // Validate first name
-                if (fname == "") {
-                    $("#fnameError").removeClass("hidden");
-                    $("#fname").addClass("border-red-500");
-                    isValid = false;
-                }
+    // Validate last name (after trimming)
+    if(lname === ""){
+        $("#lnameError").removeClass("hidden");
+        $("#lname").addClass("border-red-500");
+        isValid = false;
+    }
 
-                // Validate last name
-                if (lname == "") {
-                    $("#lnameError").removeClass("hidden");
-                    $("#lname").addClass("border-red-500");
-                    isValid = false;
-                }
+    if(!isValid){
+        return;
+    }
 
-                if (!isValid) {
-                    return;
-                }
-
-                $.ajax({
-                    url: "insertconn.php",
-                    type: "POST",
-                    data: { first_name: fname, last_name: lname },
-                    success: function (data) {
-                        // Show success message
-                        showSuccessMessage();
-
-                        // Clear search and reload all data
-                        $("#searchInput").val("");
-                        loadData("", 1);
-                        $("#fname").val("");
-                        $("#lname").val("");
-                    }
-                });
-            }
+    $.ajax({
+        url : "insertconn.php",
+        type : "POST",
+        data : { first_name : fname, last_name : lname },
+        success : function(data){
+            // Show success message
+            showSuccessMessage();
+            
+            // Clear search and reload all data
+            $("#searchInput").val("");
+            loadData("", 1);
+            $("#fname").val("");  
+            $("#lname").val("");
+        }
+    });
+}
 
             $("#saveBtn").on("click", function (e) {
                 e.preventDefault();

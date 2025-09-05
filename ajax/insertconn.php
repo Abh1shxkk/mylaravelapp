@@ -1,6 +1,11 @@
 <?php
-$first_name = $_POST['first_name'];
-$last_name = $_POST['last_name'];
+$first_name = trim($_POST['first_name']);
+$last_name = trim($_POST['last_name']);
+
+// Check for empty values after trimming
+if(empty($first_name) || empty($last_name)) {
+    die("error: Please fill all fields with valid data.");
+}
 
 $host = "localhost";
 $username = "root";
@@ -14,5 +19,3 @@ $results = mysqli_query($conn, $sql) or die("Insert query failed");
 
 mysqli_close($conn);
 ?>
-
-

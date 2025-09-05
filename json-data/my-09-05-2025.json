@@ -1,0 +1,62 @@
+[
+    {
+        "id": "4",
+        "name": "abhishek",
+        "city": "Lucknow",
+        "course": "BCA",
+        "batch": "3rd",
+        "year": "2021",
+        "age": "21",
+        "dob": "2002-12-18"
+    },
+    {
+        "id": "5",
+        "name": "ab",
+        "city": "Jaipur",
+        "course": "M.Tech",
+        "batch": "4th",
+        "year": "2020",
+        "age": "24",
+        "dob": "1999-07-30"
+    },
+    {
+        "id": "33",
+        "name": "rajat",
+        "city": "mzn",
+        "course": "mca",
+        "batch": "4th",
+        "year": "2021",
+        "age": "22",
+        "dob": "2001-03-02"
+    },
+    {
+        "id": "34",
+        "name": "rajat",
+        "city": "mzn",
+        "course": "mca",
+        "batch": "4th",
+        "year": "2021",
+        "age": "22",
+        "dob": "2001-03-02"
+    },
+    {
+        "id": "35",
+        "name": "rajat",
+        "city": "mzn",
+        "course": "mca",
+        "batch": "4th",
+        "year": "2021",
+        "age": "22",
+        "dob": "2001-03-02"
+    },
+    {
+        "id": "41",
+        "name": "abhishek chauhan",
+        "city": "meerut",
+        "course": "mca",
+        "batch": "4th",
+        "year": "2023",
+        "age": "77",
+        "dob": "2001-05-05"
+    }
+]
