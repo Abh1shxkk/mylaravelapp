@@ -1,4 +1,4 @@
-<!-- <?php
+<!-- <!-- <?php
 $myXMLData =
 "<?xml version='1.0' encoding='UTF-8'?>
 <note>
@@ -30,4 +30,27 @@ echo $xml->body;
 $xml=simplexml_load_file("books.xml") or die("Error: Cannot create object");
 echo $xml->book[0]->title . "<br>";
 echo $xml->book[1]->title;
+?> -->
+
+
+<?php
+$xml = "<note><to>John</to><from>Alice</from></note>";
+
+$parser = xml_parser_create();
+
+function startElement($parser, $name, $attrs) {
+    echo "Start: $name\n";
+}
+function endElement($parser, $name) {
+    echo "End: $name\n";
+}
+function charData($parser, $data) {
+    echo "Data: $data\n";
+}
+
+xml_set_element_handler($parser, "startElement", "endElement");
+xml_set_character_data_handler($parser, "charData");
+
+xml_parse($parser, $xml, true);
+xml_parser_free($parser);
 ?>
