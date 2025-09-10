@@ -4,14 +4,13 @@ include 'config.php';
 
 // Check if user is already logged in
 if (isset($_SESSION['user_id'])) {
-    header("Location: dashboard.php");
+    header("Location: admin_dashboard.php");
     exit();
 }
 
 $message = "";
 $error = "";
 
-// ... (rest of your existing code remains unchanged)
 // Get messages from session and clear them
 if (isset($_SESSION['success_message'])) {
     $message = $_SESSION['success_message'];
@@ -30,24 +29,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($username) || empty($password)) {
         $_SESSION['error_message'] = "Both username and password are required.";
     } else {
-        $check_query = "SELECT id, password FROM registration WHERE username = ?";
+        // Fetch id, password, and is_admin, ensuring is_admin = 1
+        $check_query = "SELECT id, password, is_admin FROM registration WHERE username = ? AND is_admin = 1";
         $check_stmt = mysqli_prepare($conn, $check_query);
         mysqli_stmt_bind_param($check_stmt, "s", $username);
         mysqli_stmt_execute($check_stmt);
         $check_result = mysqli_stmt_get_result($check_stmt);
 
         if (mysqli_num_rows($check_result) == 0) {
-            $_SESSION['error_message'] = "Username not found. Please sign up first.";
+            $_SESSION['error_message'] = "Invalid admin credentials or account is not an admin.";
         } else {
             $user_data = mysqli_fetch_assoc($check_result);
             $hashed_password = $user_data['password'];
 
             if (password_verify($password, $hashed_password)) {
+                // Regenerate session ID for security
+                session_regenerate_id(true);
                 $_SESSION['user_id'] = $user_data['id'];
                 $_SESSION['username'] = $username;
-
-                // Redirect to dashboard
-                header("Location: dashboard.php");
+                $_SESSION['is_admin'] = $user_data['is_admin'];
+                header("Location: admin_dashboard.php");
                 exit();
             } else {
                 $_SESSION['error_message'] = "Incorrect password. Please try again.";
@@ -67,14 +68,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign In</title>
+<title>Admin Sign In</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     
     :root {
-        --primary: rgba(102, 126, 234, 0.8);
-        --primary-solid: rgb(102, 126, 234);
+        --primary: rgba(220, 53, 69, 0.8); /* Reddish theme for admin */
+        --primary-solid: rgb(220, 53, 69);
         --secondary: rgba(118, 75, 162, 0.8);
         --glass: rgba(255, 255, 255, 0.15);
         --glass-dark: rgba(0, 0, 0, 0.1);
@@ -87,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     body{
         font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background:linear-gradient(135deg, #dc3545 0%, #764ba2 100%); /* Adjusted gradient for admin */
         min-height:100vh;
         display:flex;
         align-items:center;
@@ -452,8 +453,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     <div class="signin-container">
         <div class="signin-header">
-            <h2>Sign in</h2>
-            <p>Login to access your account</p>
+            <h2>Admin Sign In</h2>
+            <p>Login to access your admin dashboard</p>
         </div>
 
         <?php if (!empty($message)): ?>
@@ -466,14 +467,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" autocomplete="off" id="signinForm">
             <div class="form-group">
-                <label for="username"><i class="fas fa-user"></i> Username:</label>
+                <label for="username"><i class="fas fa-user"></i> Admin Username:</label>
                 <input 
                     type="text" 
                     id="username" 
                     name="username" 
                     value="<?php echo (!empty($error) && isset($username)) ? htmlspecialchars($username) : ''; ?>"
                     required
-                    placeholder="Enter your username"
+                    placeholder="Enter your admin username"
                     autocomplete="new-username"
                 >
             </div>
@@ -501,7 +502,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </form>
 
         <div class="signup-link">
-            <p>Don't have an account? <a href="signup.php">Sign up here</a></p>
+            <p>Not an admin? <a href="signin.php">Sign in as user</a></p>
         </div>
     </div>
 

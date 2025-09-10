@@ -2,17 +2,16 @@
 session_start();
 include 'config.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    header("Location: signin.php");
+// Check if user is logged in and is admin
+if (!isset($_SESSION['user_id']) || !$_SESSION['is_admin']) {
+    header("Location: admin.php");
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
 $username = $_SESSION['username'];
-$is_admin = $_SESSION['is_admin'] ?? 0; // Default to 0 (user) if not set
 
-// Get user profile data
+// Get user profile data (optional for admin, but kept for consistency)
 $profile_query = "SELECT * FROM user_profile WHERE user_id = ?";
 $stmt = mysqli_prepare($conn, $profile_query);
 mysqli_stmt_bind_param($stmt, "i", $user_id);
@@ -24,7 +23,7 @@ mysqli_stmt_close($stmt);
 // Handle logout
 if (isset($_GET['logout'])) {
     session_destroy();
-    header("Location: signin.php");
+    header("Location: admin.php");
     exit();
 }
 ?>
@@ -34,7 +33,7 @@ if (isset($_GET['logout'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - <?php echo htmlspecialchars($username); ?></title>
+    <title>Admin Dashboard - <?php echo htmlspecialchars($username); ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -44,8 +43,8 @@ if (isset($_GET['logout'])) {
         }
 
         :root {
-            --primary: rgba(102, 126, 234, 0.8);
-            --primary-solid: rgb(102, 126, 234);
+            --primary: rgba(220, 53, 69, 0.8); /* Reddish for admin */
+            --primary-solid: rgb(220, 53, 69);
             --secondary: rgba(118, 75, 162, 0.8);
             --glass: rgba(255, 255, 255, 0.15);
             --glass-dark: rgba(0, 0, 0, 0.1);
@@ -129,7 +128,7 @@ if (isset($_GET['logout'])) {
         }
 
         .menu-toggle:hover {
-            background-color: rgba(102, 126, 234, 0.1);
+            background-color: rgba(220, 53, 69, 0.1);
             transform: rotate(90deg);
         }
 
@@ -311,7 +310,7 @@ if (isset($_GET['logout'])) {
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(220, 53, 69, 0.1), transparent);
             transition: all 0.6s ease;
         }
 
@@ -321,7 +320,7 @@ if (isset($_GET['logout'])) {
 
         .sidebar-menu a:hover,
         .sidebar-menu a.active {
-            background: rgba(102, 126, 234, 0.1);
+            background: rgba(220, 53, 69, 0.1);
             color: var(--primary-solid);
             transform: translateX(5px);
         }
@@ -417,7 +416,7 @@ if (isset($_GET['logout'])) {
         }
 
         .dropdown-item:hover {
-            background-color: rgba(102, 126, 234, 0.1);
+            background-color: rgba(220, 53, 69, 0.1);
             padding-left: 1.5rem;
         }
 
@@ -536,7 +535,7 @@ if (isset($_GET['logout'])) {
 
         .stat-icon.blue { 
             background: linear-gradient(135deg, var(--primary), var(--secondary));
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
         }
         .stat-icon.green { 
             background: linear-gradient(135deg, rgba(86, 171, 47, 0.8), rgba(168, 230, 207, 0.8));
@@ -613,7 +612,7 @@ if (isset($_GET['logout'])) {
         }
     </style>
 </head>
-<body class="<?php echo $is_admin ? 'admin' : 'user'; ?>">
+<body class="admin">
     <!-- Header -->
     <header class="header">
         <div class="header-left">
@@ -622,7 +621,7 @@ if (isset($_GET['logout'])) {
             </button>
             <div class="logo">
                 <span><i class="fas fa-home"></i></span>
-                <span>Dashboard</span>
+                <span>Admin Dashboard</span>
             </div>
         </div>
 
@@ -635,25 +634,19 @@ if (isset($_GET['logout'])) {
             <div class="user-menu" onclick="toggleDropdown()">
                 <div class="user-avatar">
                     <?php if (!empty($profile_data['image'])): ?>
-                        <img src="Uploads/<?php echo htmlspecialchars($profile_data['image']); ?>" alt="Profile">
+                        <img src="uploads/<?php echo htmlspecialchars($profile_data['image']); ?>" alt="Profile">
                     <?php else: ?>
                         <?php echo strtoupper(substr($username, 0, 1)); ?>
                     <?php endif; ?>
                 </div>
                 <div class="user-info">
                     <div class="user-name"><?php echo htmlspecialchars($profile_data['firstname'] ?? $username); ?></div>
-                    <div class="user-role"><?php echo $is_admin ? 'Admin' : 'Member'; ?></div>
+                    <div class="user-role">Admin</div>
                 </div>
                 <span><i class="fas fa-chevron-down"></i></span>
 
                 <!-- Dropdown Menu -->
                 <div class="dropdown-menu" id="dropdownMenu">
-                    <?php if (!$is_admin): ?>
-                        <a href="profile.php" class="dropdown-item">
-                            <span><i class="fas fa-user"></i></span>
-                            <span>Profile</span>
-                        </a>
-                    <?php endif; ?>
                     <a href="?logout=1" class="dropdown-item logout">
                         <span><i class="fas fa-sign-out-alt"></i></span>
                         <span>Logout</span>
@@ -667,30 +660,19 @@ if (isset($_GET['logout'])) {
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-title">Navigation</div>
-            <div class="sidebar-subtitle">Manage your <?php echo $is_admin ? 'system' : 'account'; ?></div>
+            <div class="sidebar-subtitle">Manage your system</div>
         </div>
 
         <nav>
             <ul class="sidebar-menu">
                 <li><a href="#" class="active"><span class="icon"><i class="fas fa-home"></i></span>Dashboard</a></li>
-                <?php if (!$is_admin): ?>
-                    <li><a href="profile.php"><span class="icon"><i class="fas fa-user"></i></span>Profile</a></li>
-                    <li><a href="notes.php"><span class="icon"><i class="fas fa-sticky-note"></i></span>Notes</a></li>
-                    <li><a href="#"><span class="icon"><i class="fas fa-calendar"></i></span>Calendar</a></li>
-                <?php endif; ?>
-                <?php if ($is_admin): ?>
-                    <li><a href="analytics.php"><span class="icon"><i class="fas fa-chart-line"></i></span>Analytics</a></li>
-                    <li><a href="user_management.php"><span class="icon"><i class="fas fa-users"></i></span>User Management</a></li>
-                <?php endif; ?>
+                <li><a href="user_management.php"><span class="icon"><i class="fas fa-users"></i></span>User Management</a></li>
             </ul>
 
             <div class="sidebar-section">
                 <div class="sidebar-section-title">Tools</div>
                 <ul class="sidebar-menu">
                     <li><a href="#"><span class="icon"><i class="fas fa-bell"></i></span>Notifications</a></li>
-                    <?php if ($is_admin): ?>
-                        <li><a href="admin_tools.php"><span class="icon"><i class="fas fa-cog"></i></span>Admin Tools</a></li>
-                    <?php endif; ?>
                 </ul>
             </div>
 
@@ -711,77 +693,43 @@ if (isset($_GET['logout'])) {
             <h1 class="welcome-title">
                 Welcome back, <?php echo htmlspecialchars($profile_data['firstname'] ?? $username); ?>! 
                 <i class="fas fa-hand-wave"></i>
-                <?php if ($is_admin): ?>
-                    <span>(Admin)</span>
-                <?php endif; ?>
+                <span>(Admin)</span>
             </h1>
             <p class="welcome-subtitle">
-                <?php echo $is_admin ? 'Manage your system and users.' : 'Here\'s what\'s happening with your account today.'; ?>
+                Manage your system and users.
             </p>
         </div>
 
         <!-- Stats Grid -->
         <div class="stats-grid">
-            <?php if (!$is_admin): ?>
-                <div class="stat-card">
-                    <div class="stat-icon blue"><i class="fas fa-chart-bar"></i></div>
-                    <div class="stat-content">
-                        <h3>25</h3>
-                        <p>Total Projects</p>
-                    </div>
+            <div class="stat-card">
+                <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                <div class="stat-content">
+                    <h3>150</h3>
+                    <p>Total Users</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
-                    <div class="stat-content">
-                        <h3>18</h3>
-                        <p>Completed Tasks</p>
-                    </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green"><i class="fas fa-server"></i></div>
+                <div class="stat-content">
+                    <h3>99.9%</h3>
+                    <p>Server Uptime</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon orange"><i class="fas fa-folder"></i></div>
-                    <div class="stat-content">
-                        <h3>127</h3>
-                        <p>Files Uploaded</p>
-                    </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-content">
+                    <h3>3</h3>
+                    <p>Pending Reports</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon purple"><i class="fas fa-clock"></i></div>
-                    <div class="stat-content">
-                        <h3>8.5</h3>
-                        <p>Hours Today</p>
-                    </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon purple"><i class="fas fa-database"></i></div>
+                <div class="stat-content">
+                    <h3>1.2TB</h3>
+                    <p>Storage Used</p>
                 </div>
-            <?php endif; ?>
-            <?php if ($is_admin): ?>
-                <div class="stat-card">
-                    <div class="stat-icon blue"><i class="fas fa-users"></i></div>
-                    <div class="stat-content">
-                        <h3>150</h3>
-                        <p>Total Users</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon green"><i class="fas fa-server"></i></div>
-                    <div class="stat-content">
-                        <h3>99.9%</h3>
-                        <p>Server Uptime</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
-                    <div class="stat-content">
-                        <h3>3</h3>
-                        <p>Pending Reports</p>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon purple"><i class="fas fa-database"></i></div>
-                    <div class="stat-content">
-                        <h3>1.2TB</h3>
-                        <p>Storage Used</p>
-                    </div>
-                </div>
-            <?php endif; ?>
+            </div>
         </div>
     </main>
 
