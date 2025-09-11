@@ -1,4 +1,2 @@
-<h1>hello </h1>
-
-@include('subview.footer',['page'=>"this is footer"])
-
+<div>
+<h1>about</h1></div>
