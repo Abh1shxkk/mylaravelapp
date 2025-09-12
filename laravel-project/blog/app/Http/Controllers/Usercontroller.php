@@ -1,25 +1,14 @@
-<?php 
+<?php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
-class UserController 
+use Illuminate\Support\Facades\DB;
+class Usercontroller
 {
+    function users(){
 
-    // function show(){
-
-    //     return "student list";
-    // }
-
-    //  function row(){
-
-    //     return "student row";
-    // }
-
-        function about1($name){
-
-        return $name;
+       $users=  DB::select('select * from users');
+       return view('users',['users'=>$users]);
     }
 }
-
-
