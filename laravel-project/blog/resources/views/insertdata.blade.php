@@ -1,6 +1,6 @@
 <h1>user form </h1>
 
-<form action="" method="post">
+<form action="add" method="post">
 @csrf
 
 <input type="text" name="name" placeholder="enter name">
