@@ -4,27 +4,35 @@ namespace App\Http\Controllers;
 use App\Models\student;
 
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Storage;
 class Usercontroller4
 {
-    function add(Request $request)
+   public function index(Request $request)
     {
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'username' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:userdata,email',
+                'phone' => 'required|string|max:15',
+                'image' => 'nullable|image|max:2048', // Image validation (optional, max 2MB)
+            ]);
 
-        $students = new student();
-        $students->name = $request->input('username');
-        $students->email = $request->input('email');
-        $students->phone = $request->input('phone');
-        $students->save();
+            $student = new Student();
+            $student->name = $request->input('username');
+            $student->email = $request->input('email');
+            $student->phone = $request->input('phone');
 
+            // Image upload logic
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('uploads', 'public'); // Save in storage/app/public/uploads
+                $student->image = $imagePath; // Store path in database
+            }
 
-        if ($students) {
-            return redirect('crudgetdata');
-        } else {
-            return "not added";
+            $student->save();
+
+            return redirect()->route('crud.index')->with('success', 'Data inserted successfully!');
         }
-    }
-    function getdata(Request $request)
-    {
+
         $search = $request->query('search');
         $students = Student::query()
             ->when($search, function ($query, $search) {
@@ -56,19 +64,33 @@ class Usercontroller4
     }
 
     function update(Request $request, $id)
-    {
+   {
+        $request->validate([
+            'username' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:userdata,email,' . $id,
+            'phone' => 'required|string|max:15',
+            'image' => 'nullable|image|max:2048', // Image validation (optional)
+        ]);
 
+        $student = Student::find($id);
+        $student->name = $request->input('username');
+        $student->email = $request->input('email');
+        $student->phone = $request->input('phone');
 
-        $students = Student::find($id);
-        $students->name = $request->input('username');
-        $students->email = $request->input('email');
-        $students->phone = $request->input('phone');
-        // $students->save();
-        if ($students->save()) {
-            return redirect('crudgetdata');
+        // Image update logic
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($student->image) {
+                Storage::disk('public')->delete($student->image);
+            }
+            $imagePath = $request->file('image')->store('uploads', 'public');
+            $student->image = $imagePath;
+        }
+
+        if ($student->save()) {
+            return redirect('crudgetdata')->with('success', 'Data updated successfully!');
         } else {
-
-            return " did not update";
+            return redirect('crudgetdata')->with('error', 'Data update failed!');
         }
     }
 
@@ -76,7 +98,7 @@ function deleteMultiple(Request $request)
 {
     $ids = $request->input('ids', []);
     if (!empty($ids)) {
-        Student::destroy($ids);
+        student::destroy($ids);
     }
     return redirect('crudgetdata');
 }
