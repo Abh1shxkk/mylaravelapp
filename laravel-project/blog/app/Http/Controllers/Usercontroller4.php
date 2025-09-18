@@ -1,106 +1,176 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\student;
 
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-class Usercontroller4
+use Illuminate\Support\Facades\Log;
+
+class UserController4
 {
-   public function index(Request $request)
+    public function index(Request $request)
     {
         if ($request->isMethod('post')) {
-            $request->validate([
-                'username' => 'required|string|max:255',
-                'email' => 'required|email|max:255|unique:userdata,email',
-                'phone' => 'required|string|max:15',
-                'image' => 'nullable|image|max:2048', // Image validation (optional, max 2MB)
-            ]);
+            try {
+                $validatedData = $request->validate([
+                    'username' => 'required|string|max:255',
+                    'email' => 'required|email|max:255|unique:userdata,email',
+                    'phone' => 'required|string|max:15',
+                    'image' => 'nullable|image|max:10000',
+                ], [
+                    'username.required' => 'The name field is required.',
+                    'email.required' => 'The email field is required.',
+                    'email.email' => 'Please enter a valid email address.',
+                    'email.unique' => 'This email is already taken.',
+                    'phone.required' => 'The phone field is required.',
+                    'image.image' => 'The file must be an image.',
+                    'image.max' => 'The image size must not exceed 10MB.',
+                ]);
 
-            $student = new Student();
-            $student->name = $request->input('username');
-            $student->email = $request->input('email');
-            $student->phone = $request->input('phone');
+                $student = new Student();
+                $student->name = $validatedData['username'];
+                $student->email = $validatedData['email'];
+                $student->phone = $validatedData['phone'];
 
-            // Image upload logic
-            if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('uploads', 'public'); // Save in storage/app/public/uploads
-                $student->image = $imagePath; // Store path in database
+                if ($request->hasFile('image')) {
+                    $imagePath = $request->file('image')->store('uploads', 'public');
+                    if ($imagePath) {
+                        $student->image = $imagePath;
+                    } else {
+                        Log::error('Image upload failed in index for new record');
+                        return response()->json(['success' => false, 'message' => 'Image upload failed!'], 400);
+                    }
+                }
+
+                $student->save();
+
+                $imageUrl = $student->image ? asset('storage/' . $student->image) : null;
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Data inserted successfully!',
+                    'data' => [
+                        'id' => $student->id,
+                        'name' => $student->name,
+                        'email' => $student->email,
+                        'phone' => $student->phone,
+                        'image_url' => $imageUrl
+                    ]
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed!',
+                    'errors' => $e->errors()
+                ], 422);
+            } catch (\Exception $e) {
+                Log::error('Unexpected error in index: ' . $e->getMessage());
+                return response()->json(['success' => false, 'message' => 'An unexpected error occurred!'], 500);
             }
-
-            $student->save();
-
-            return redirect()->route('crud.index')->with('success', 'Data inserted successfully!');
         }
 
         $search = $request->query('search');
         $students = Student::query()
             ->when($search, function ($query, $search) {
                 return $query->where('name', 'like', '%' . $search . '%')
-                             ->orWhere('email', 'like', '%' . $search . '%')
-                             ->orWhere('phone', 'like', '%' . $search . '%');
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%');
             })
-            ->paginate(5);
+            ->orderBy('id', 'desc') // Changed to sort by id DESC
+            ->paginate(6); // Updated to match getTableData pagination
 
         return view('crudgetdata', ['studentdata' => $students]);
     }
 
-    function delete($id)
+    public function ajaxUpdate(Request $request, $id)
     {
+        try {
+            $validatedData = $request->validate([
+                'username' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:userdata,email,' . $id,
+                'phone' => 'required|string|max:15',
+                'image' => 'nullable|image|max:10000',
+            ]);
 
-        $deleted = student::destroy($id);
-
-        if ($deleted) {
-            return redirect('crudgetdata');
-        }
-    }
-
-    function edit($id)
-    {
-
-        $student = student::find($id);
-        return view('crudedit', ["user" => $student]);
-
-    }
-
-    function update(Request $request, $id)
-   {
-        $request->validate([
-            'username' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:userdata,email,' . $id,
-            'phone' => 'required|string|max:15',
-            'image' => 'nullable|image|max:2048', // Image validation (optional)
-        ]);
-
-        $student = Student::find($id);
-        $student->name = $request->input('username');
-        $student->email = $request->input('email');
-        $student->phone = $request->input('phone');
-
-        // Image update logic
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($student->image) {
-                Storage::disk('public')->delete($student->image);
+            $student = Student::find($id);
+            if (!$student) {
+                return response()->json(['success' => false, 'message' => 'Record not found!'], 404);
             }
-            $imagePath = $request->file('image')->store('uploads', 'public');
-            $student->image = $imagePath;
-        }
 
-        if ($student->save()) {
-            return redirect('crudgetdata')->with('success', 'Data updated successfully!');
-        } else {
-            return redirect('crudgetdata')->with('error', 'Data update failed!');
+            $student->name = $validatedData['username'];
+            $student->email = $validatedData['email'];
+            $student->phone = $validatedData['phone'];
+
+            if ($request->hasFile('image')) {
+                if ($student->image) {
+                    Storage::disk('public')->delete($student->image);
+                }
+                $imagePath = $request->file('image')->store('uploads', 'public');
+                $student->image = $imagePath;
+            }
+
+            $student->save();
+
+            return response()->json(['success' => true, 'message' => 'Record updated successfully!']);
+        } catch (\Exception $e) {
+            Log::error('AJAX Update Error for ID ' . $id . ': ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Update failed: ' . $e->getMessage()], 500);
         }
     }
 
-function deleteMultiple(Request $request)
+    public function ajaxDelete($id)
+    {
+        try {
+            $student = Student::find($id);
+            if ($student) {
+                if ($student->image) {
+                    Storage::disk('public')->delete($student->image);
+                }
+                $student->delete();
+                return response()->json(['success' => true, 'message' => 'Record deleted successfully!']);
+            }
+            return response()->json(['success' => false, 'message' => 'Record not found!'], 404);
+        } catch (\Exception $e) {
+            Log::error('AJAX Delete Error for ID ' . $id . ': ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Delete failed!'], 500);
+        }
+    }
+
+public function getTableData(Request $request)
 {
-    $ids = $request->input('ids', []);
-    if (!empty($ids)) {
-        student::destroy($ids);
-    }
-    return redirect('crudgetdata');
-}
+    $search = $request->query('search');
+    $students = Student::query()
+        ->when($search, function ($query, $search) {
+            return $query->where('name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%')
+                ->orWhere('phone', 'like', '%' . $search . '%');
+        })
+        ->orderBy('id', 'desc') // Changed to sort by id DESC
+        ->paginate(5);
 
+    $rows = [];
+    foreach ($students as $sd) {
+        $imageHtml = $sd->image ? '<img src="' . asset('storage/' . $sd->image) . '" alt="User Image" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">' : '<span class="text-muted">No Image</span>';
+        $operations = '<a href="#" class="btn btn-sm btn-warning edit-btn" data-id="' . $sd->id . '" data-name="' . htmlspecialchars($sd->name) . '" data-email="' . htmlspecialchars($sd->email) . '" data-phone="' . htmlspecialchars($sd->phone) . '" data-image="' . ($sd->image ? asset('storage/' . $sd->image) : '') . '">Edit</a> <a href="#" class="btn btn-sm btn-danger delete-btn" data-id="' . $sd->id . '">Delete</a>';
+        $rows[] = [
+            'id' => $sd->id,
+            'image' => $imageHtml,
+            'name' => $sd->name,
+            'email' => $sd->email,
+            'phone' => $sd->phone,
+            'operations' => $operations
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'rows' => $rows,
+        'pagination' => [
+            'current_page' => $students->currentPage(),
+            'last_page' => $students->lastPage(),
+            'per_page' => $students->perPage(),
+            'total' => $students->total()
+        ]
+    ]);
+}
 }
