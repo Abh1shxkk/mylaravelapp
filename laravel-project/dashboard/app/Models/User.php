@@ -28,6 +28,7 @@ class User extends Authenticatable
         'failed_attempts',
         'locked_until',
         'last_login_at',
+        'provider', // Add this
     ];
 
     /**

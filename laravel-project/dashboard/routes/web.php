@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Auth\GoogleController;
+
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 // Home redirect
 Route::get('/', function () {
@@ -16,10 +20,14 @@ Route::post('/dashboard/login', [AuthController::class, 'login']);
 Route::get('/dashboard/register', [AuthController::class, 'showRegister'])->name('dashboard.register');
 Route::post('/dashboard/register', [AuthController::class, 'register']);
 
-// Password reset (placeholder to avoid missing route error)
-Route::get('/dashboard/password/reset', function () {
-    return redirect()->route('dashboard.login')->with('status', 'Password reset is not configured.');
-})->name('dashboard.password.request');
+// Password reset routes
+use App\Http\Controllers\PasswordResetController;
+Route::post('/dashboard/password/email', [PasswordResetController::class, 'sendResetLink'])->name('dashboard.password.email');
+Route::get('/dashboard/password/reset', [PasswordResetController::class, 'showResetForm'])->name('dashboard.password.request');
+Route::post('/dashboard/password/reset', [PasswordResetController::class, 'resetPassword'])->name('dashboard.password.update');
+Route::get('/dashboard/password/forgot', function () {
+    return view('auth.forgot-password');
+})->name('dashboard.password.forgot');
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
@@ -64,3 +72,5 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
         return view('reports.index');
     })->name('reports.index');
 });
+
+// Removed duplicate Google OAuth routes that conflicted with Auth\GoogleController

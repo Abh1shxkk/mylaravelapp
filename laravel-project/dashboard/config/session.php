@@ -184,6 +184,9 @@ return [
 
     'http_only' => env('SESSION_HTTP_ONLY', true),
 
+    'same_site' => null,
+
+
     /*
     |--------------------------------------------------------------------------
     | Same-Site Cookies
