@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -11,7 +12,14 @@ class AdminUserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::query();
+        $query = User::query()
+            ->addSelect([
+                'current_plan' => Subscription::select('plan_id')
+                    ->whereColumn('user_id', 'dashboard_users.id')
+                    ->whereIn('status', ['active', 'created', 'paused'])
+                    ->latest('started_at')
+                    ->limit(1)
+            ]);
         if ($search = $request->get('q')) {
             $query->where(function($q) use ($search){
                 $q->where('name','like',"%$search%")

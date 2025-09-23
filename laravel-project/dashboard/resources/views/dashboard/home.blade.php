@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Home</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for AJAX -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
+
 <body class="bg-gray-100 min-h-screen">
     <!-- Header -->
     <div class="bg-white shadow">
@@ -18,39 +22,43 @@
                 <div class="flex items-center space-x-4">
                     <!-- Profile Picture -->
                     @if(Auth::user()->profile_picture)
-                        <img class="h-8 w-8 rounded-full object-cover" 
-                             src="{{ asset('storage/' . Auth::user()->profile_picture) }}" 
-                             alt="Profile">
+                        <img class="h-8 w-8 rounded-full object-cover"
+                            src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile">
                     @else
                         <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                             <i class="fas fa-user text-gray-600 text-sm"></i>
                         </div>
                     @endif
-                    
+
                     <div class="flex flex-col">
                         <span class="text-gray-700">Welcome, {{ Auth::user()->name }}</span>
                         <span class="text-xs text-blue-600">{{ ucfirst(Auth::user()->role ?? 'user') }}</span>
                     </div>
-                    
+
                     <!-- Profile Settings Link -->
-                    <a href="{{ route('profile.settings') }}" 
-                       class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 text-sm">
+                    <a href="{{ route('profile.settings') }}"
+                        class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 text-sm">
                         <i class="fas fa-user-cog mr-1"></i>Profile
                     </a>
 
                     @if(Auth::user() && method_exists(Auth::user(), 'isAdmin') && Auth::user()->isAdmin())
                         <!-- Admin Settings Link (visible only for admins) -->
                         <a href="{{ route('admin.users.index') }}"
-                           class="bg-gray-700 text-white px-3 py-2 rounded hover:bg-gray-800 text-sm"
-                           title="Admin-only: manage users">
+                            class="bg-gray-700 text-white px-3 py-2 rounded hover:bg-gray-800 text-sm"
+                            title="Admin-only: manage users">
                             <i class="fas fa-shield-alt mr-1"></i>Admin Settings
                         </a>
                     @endif
-                    
+
+                    <!-- Subscribe Button -->
+                    <button type="button" onclick="openModal('modal-subscribe')"
+                        class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 text-sm">
+                        <i class="fas fa-crown mr-1"></i>Subscribe
+                    </button>
+
                     <form method="POST" action="{{ route('dashboard.logout') }}" class="inline">
                         @csrf
-                        <button type="submit" 
-                                class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
                             Logout
                         </button>
                     </form>
@@ -65,25 +73,57 @@
             <div class="p-4">
                 <h2 class="text-lg font-semibold text-gray-800 mb-4">Navigation</h2>
                 <div class="space-y-3">
-                    <a href="{{ route('profile.settings') }}" class="block bg-blue-50 p-4 rounded-lg hover:bg-blue-100 transition-colors group">
+                    <a href="{{ route('profile.settings') }}"
+                        class="block bg-blue-50 p-4 rounded-lg hover:bg-blue-100 transition-colors group">
                         <h4 class="font-semibold text-blue-900 flex items-center">
                             <i class="fas fa-user mr-3 text-blue-600"></i>Profile
                         </h4>
                         <p class="text-blue-700 text-sm mt-1">Manage your profile and settings</p>
                     </a>
-                    
-                    <div class="block bg-green-50 p-4 rounded-lg hover:bg-green-100 transition-colors cursor-pointer group">
+
+                    <div
+                        class="block bg-green-50 p-4 rounded-lg hover:bg-green-100 transition-colors cursor-pointer group">
                         <h4 class="font-semibold text-green-900 flex items-center">
                             <i class="fas fa-cog mr-3 text-green-600"></i>Settings
                         </h4>
                         <p class="text-green-700 text-sm mt-1">Configure application settings</p>
                     </div>
-                    
-                    <div class="block bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer group">
+
+                    <div
+                        class="block bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer group">
                         <h4 class="font-semibold text-purple-900 flex items-center">
                             <i class="fas fa-chart-bar mr-3 text-purple-600"></i>Analytics
                         </h4>
                         <p class="text-purple-700 text-sm mt-1">View your statistics and reports</p>
+                    </div>
+
+                    <!-- Basic / Premium entries in navigation -->
+                    @php
+                        $activeSubscription = Auth::user()->subscriptions()->where('status', 'active')->latest('started_at')->first();
+                        $currentPlan = $activeSubscription ? $activeSubscription->plan_id : null; // 'basic' | 'premium' | null
+                    @endphp
+                    <div onclick="handlePlanClick('basic')"
+                        class="block bg-yellow-50 p-4 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer group">
+                        <h4 class="font-semibold text-yellow-900 flex items-center">
+                            <i class="fas fa-star mr-3 text-yellow-600"></i>Basic Content
+                        </h4>
+                        <p class="text-yellow-700 text-sm mt-1">Open basic content</p>
+                    </div>
+                    <div onclick="handlePlanClick('premium')"
+                        class="block bg-rose-50 p-4 rounded-lg hover:bg-rose-100 transition-colors cursor-pointer group">
+                        <h4 class="font-semibold text-rose-900 flex items-center">
+                            <i class="fas fa-gem mr-3 text-rose-600"></i>Premium Content
+                        </h4>
+                        <p class="text-rose-700 text-sm mt-1">Open premium content</p>
+                    </div>
+
+                    <!-- My Plans -->
+                    <div onclick="openModal('modal-my-plans')"
+                        class="block bg-indigo-50 p-4 rounded-lg hover:bg-indigo-100 transition-colors cursor-pointer group">
+                        <h4 class="font-semibold text-indigo-900 flex items-center">
+                            <i class="fas fa-receipt mr-3 text-indigo-600"></i>My Plans
+                        </h4>
+                        <p class="text-indigo-700 text-sm mt-1">View or cancel your current plan</p>
                     </div>
                 </div>
             </div>
@@ -228,5 +268,373 @@
             </div>
         </div>
     </div>
+
+    <!-- Modals -->
+    <!-- Subscribe Modal with plan cards -->
+    <div id="modal-subscribe" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden transform transition-all duration-200 opacity-0 scale-95">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h3 class="text-xl font-semibold">Choose Your Plan</h3>
+                <button onclick="closeModals()" class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+                <!-- Basic Plan Card -->
+                <div class="relative rounded-xl border border-gray-200 p-6 bg-gradient-to-br from-white to-gray-50 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-lg font-bold">Basic</h4>
+                        <span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">Best for starters</span>
+                    </div>
+                    <p class="text-3xl font-extrabold tracking-tight">₹500
+                        <span class="text-sm font-medium text-gray-500">/ 3 months</span>
+                    </p>
+                    <ul class="mt-4 space-y-2 text-sm text-gray-700">
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Access to basic
+                            content</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Weekly updates
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Email support</li>
+                    </ul>
+                    <button type="button" onclick="confirmBuy('basic')"
+                        class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium">
+                        Buy Basic
+                    </button>
+                </div>
+
+                <!-- Premium Plan Card -->
+                <div class="relative rounded-xl border border-gray-200 p-6 bg-gradient-to-br from-white to-gray-50 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-lg font-bold">Premium</h4>
+                        <span class="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700">Most popular</span>
+                    </div>
+                    <p class="text-3xl font-extrabold tracking-tight">₹1000
+                        <span class="text-sm font-medium text-gray-500">/ 1 year</span>
+                    </p>
+                    <ul class="mt-4 space-y-2 text-sm text-gray-700">
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Everything in
+                            Basic</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Premium-only
+                            content</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Priority support
+                        </li>
+                    </ul>
+                    <button type="button" onclick="confirmBuy('premium')"
+                        class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg font-medium">
+                        Buy Premium
+                    </button>
+                </div>
+            </div>
+            <div class="px-6 pb-6 text-right">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+            </div>
+        </div>
+    </div>
+    <div id="modal-basic-only" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center">
+        <div data-modal-panel class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all duration-200 opacity-0 scale-95">
+            <h3 class="text-lg font-semibold mb-2">Basic Content</h3>
+            <p class="text-gray-700 mb-4">You are on the Basic plan. You can access basic content only.</p>
+            <div class="text-right">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-need-premium" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center">
+        <div data-modal-panel class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all duration-200 opacity-0 scale-95">
+            <h3 class="text-lg font-semibold mb-2">Subscription Required</h3>
+            <p class="text-gray-700 mb-4">Please subscribe to a plan to access this content.</p>
+            <div class="text-right">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border mr-2 transition-colors hover:bg-gray-50">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Plans Modal -->
+    <div id="modal-my-plans" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all duration-200 opacity-0 scale-95">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h3 class="text-xl font-semibold">My Current Plan</h3>
+                <button onclick="closeModals()" class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="plan-details-none" class="hidden">
+                    <p class="text-gray-700">You don't have an active subscription. Please subscribe to a plan.</p>
+                </div>
+                <div id="plan-details-basic" class="hidden">
+                    <h4 class="text-lg font-semibold mb-1">Basic Plan</h4>
+                    <p class="text-gray-600 mb-4">₹500 / 3 months</p>
+                    <ul class="text-sm text-gray-700 space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Access to basic
+                            content</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Weekly updates
+                        </li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Email support</li>
+                    </ul>
+                    <button type="button" onclick="cancelPlan()"
+                        class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-medium">Cancel
+                        Basic</button>
+                </div>
+                <div id="plan-details-premium" class="hidden">
+                    <h4 class="text-lg font-semibold mb-1">Premium Plan</h4>
+                    <p class="text-gray-600 mb-4">₹1000 / 1 year</p>
+                    <ul class="text-sm text-gray-700 space-y-2 mb-6">
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Everything in
+                            Basic</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Premium-only
+                            content</li>
+                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Priority support
+                        </li>
+                    </ul>
+                    <button type="button" onclick="cancelPlan()"
+                        class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-medium">Cancel
+                        Premium</button>
+                </div>
+            </div>
+            <div class="px-6 pb-6 text-right">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-access-granted" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center">
+        <div data-modal-panel class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all duration-200 opacity-0 scale-95">
+            <h3 class="text-lg font-semibold mb-2">Access Granted</h3>
+            <p class="text-gray-700 mb-4">You have access. Enjoy the content!</p>
+            <div class="text-right">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+            </div>
+        </div>
+    </div>
+    <div id="modal-basic-content" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center">
+        <div data-modal-panel class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all duration-200 opacity-0 scale-95">
+            <h3 class="text-lg font-semibold mb-2">Basic Content</h3>
+            <p class="text-gray-700 mb-4">Here is your basic content.</p>
+            <div class="text-right">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Success Modal -->
+    <div id="modal-subscribe-success" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center">
+        <div data-modal-panel class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all duration-200 opacity-0 scale-95">
+            <h3 class="text-lg font-semibold mb-2">Subscription Successful</h3>
+            <p class="text-gray-700 mb-4">You have successfully subscribed to the <span id="success-plan-name"></span>
+                plan!</p>
+            <div class="text-right">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Cancel Success Modal -->
+    <div id="modal-cancel-success" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center">
+        <div data-modal-panel class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all duration-200 opacity-0 scale-95">
+            <h3 class="text-lg font-semibold mb-2">Plan Cancelled</h3>
+            <p class="text-gray-700 mb-4">Your plan has been successfully cancelled.</p>
+            <div class="text-right">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 z-[100] bg-black/40 items-center justify-center">
+        <div class="bg-white rounded-lg shadow p-4 flex items-center space-x-3">
+            <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+            <span class="text-sm text-gray-700">Please wait...</span>
+        </div>
+    </div>
+
+    <!-- Confirm Purchase Modal -->
+    <div id="modal-confirm-purchase" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-200 opacity-0 scale-95">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h3 class="text-xl font-semibold">Confirm Purchase</h3>
+                <button onclick="closeModals()" class="text-gray-500 hover:text-gray-700 transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-700">Are you sure you want to buy the <span id="confirm-plan-name" class="font-semibold"></span> plan?</p>
+            </div>
+            <div class="px-6 pb-6 flex justify-end gap-3">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Cancel</button>
+                <button id="confirm-purchase-btn" class="px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700 transition-colors">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pendingPlan = null;
+
+        function confirmBuy(plan) {
+            pendingPlan = plan;
+            document.getElementById('confirm-plan-name').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+            openModal('modal-confirm-purchase');
+            const btn = document.getElementById('confirm-purchase-btn');
+            btn.onclick = function() {
+                closeModals();
+                buyPlan(pendingPlan);
+                pendingPlan = null;
+            };
+        }
+
+        function showLoading() {
+            const el = document.getElementById('loading-overlay');
+            if (el) { el.classList.remove('hidden'); el.classList.add('flex'); }
+        }
+        function hideLoading() {
+            const el = document.getElementById('loading-overlay');
+            if (el) { el.classList.add('hidden'); el.classList.remove('flex'); }
+        }
+        function showError(message) {
+            alert(message || 'Something went wrong.');
+        }
+
+        let currentPlan = @json($currentPlan); // Initial value from server
+
+        function buyPlan(plan) {
+            showLoading();
+            $.ajax({
+                url: '{{ route('subscription.subscribe') }}',
+                type: 'POST',
+                data: { plan_id: plan, _token: '{{ csrf_token() }}' },
+                success: function (response) {
+                    if (response.success) {
+                        // Open Razorpay Checkout
+                        var options = {
+                            "key": response.razorpay_key,
+                            "subscription_id": response.subscription_id,
+                            "name": "Your App Name",
+                            "description": "Subscription for " + plan.charAt(0).toUpperCase() + plan.slice(1) + " Plan",
+                            "handler": function (response) {
+                                // Verify payment signature and activate subscription
+                                $.ajax({
+                                    url: '{{ route('subscription.verify') }}',
+                                    type: 'POST',
+                                    data: {
+                                        _token: '{{ csrf_token() }}',
+                                        razorpay_payment_id: response.razorpay_payment_id,
+                                        razorpay_subscription_id: options.subscription_id,
+                                        razorpay_signature: response.razorpay_signature
+                                    },
+                                    success: function () {
+                                        currentPlan = plan;
+                                        closeModals();
+                                        document.getElementById('success-plan-name').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+                                        openModal('modal-subscribe-success');
+                                        hideLoading();
+                                    },
+                                    error: function () {
+                                        hideLoading();
+                                        alert('Payment verified but activation failed. Please contact support.');
+                                    }
+                                });
+                            },
+                            "modal": {
+                                "ondismiss": function () {
+                                    hideLoading();
+                                    alert('Payment cancelled.');
+                                }
+                            },
+                            "prefill": {
+                                "name": "{{ Auth::user()->name }}",
+                                "email": "{{ Auth::user()->email }}",
+                            },
+                            "theme": {
+                                "color": "#3399cc"
+                            }
+                        };
+                        var rzp = new Razorpay(options);
+                        hideLoading();
+                        rzp.open();
+                    }
+                },
+                error: function (xhr) {
+                    hideLoading();
+                    const errorMsg = xhr.responseJSON?.message || 'Error subscribing. Please try again.';
+                    showError(errorMsg);
+                }
+            });
+        }
+        function handlePlanClick(plan) {
+            // Premium users can access both
+            if (currentPlan === 'premium') {
+                return openModal('modal-access-granted');
+            }
+            // Basic users
+            if (currentPlan === 'basic') {
+                if (plan === 'basic') {
+                    return openModal('modal-basic-content');
+                } else {
+                    return openModal('modal-need-premium');
+                }
+            }
+            // No subscription
+            return openModal('modal-need-premium');
+        }
+
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('hidden');
+                el.classList.add('flex');
+                const panel = el.querySelector('[data-modal-panel]');
+                if (panel) {
+                    requestAnimationFrame(() => {
+                        panel.classList.remove('opacity-0','scale-95');
+                        panel.classList.add('opacity-100','scale-100');
+                    });
+                }
+            }
+            if (id === 'modal-my-plans') {
+                // Toggle plan details inside modal
+                document.getElementById('plan-details-none')?.classList.add('hidden');
+                document.getElementById('plan-details-basic')?.classList.add('hidden');
+                document.getElementById('plan-details-premium')?.classList.add('hidden');
+                if (!currentPlan) {
+                    document.getElementById('plan-details-none')?.classList.remove('hidden');
+                } else if (currentPlan === 'basic') {
+                    document.getElementById('plan-details-basic')?.classList.remove('hidden');
+                } else if (currentPlan === 'premium') {
+                    document.getElementById('plan-details-premium')?.classList.remove('hidden');
+                }
+            }
+        }
+
+        function closeModals() {
+            ['modal-subscribe', 'modal-basic-content', 'modal-need-premium', 'modal-access-granted', 'modal-my-plans', 'modal-subscribe-success', 'modal-cancel-success', 'modal-confirm-purchase'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    const panel = el.querySelector('[data-modal-panel]');
+                    if (panel) {
+                        panel.classList.add('opacity-0','scale-95');
+                        panel.classList.remove('opacity-100','scale-100');
+                    }
+                    setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); }, 150);
+                }
+            });
+            hideLoading();
+        }
+
+        function cancelPlan() {
+            $.ajax({
+                url: '{{ route('subscription.cancel') }}',
+                type: 'POST',
+                data: { _token: '{{ csrf_token() }}' },
+                success: function (response) {
+                    currentPlan = null;
+                    closeModals();
+                    openModal('modal-cancel-success');
+                },
+                error: function (xhr) {
+                    alert('Error cancelling plan. Please try again.');
+                }
+            });
+        }
+    </script>
 </body>
+
 </html>

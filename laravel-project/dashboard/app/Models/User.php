@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Subscription;
 
 class User extends Authenticatable
 {
@@ -97,5 +98,14 @@ class User extends Authenticatable
         }
         
         return substr($initials, 0, 2);
+    }
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function hasActiveSubscription()
+    {
+        return $this->subscriptions()->where('status', 'active')->exists();
     }
 }

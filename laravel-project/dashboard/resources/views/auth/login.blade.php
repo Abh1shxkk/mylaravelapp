@@ -3,46 +3,56 @@
 @section('title', 'Login - Dashboard')
 
 @section('content')
-<div class="bg-white p-8 rounded-lg shadow-md">
+<div class="min-h-[80vh] flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div class="w-full max-w-md mx-auto p-8 bg-white/80 backdrop-blur rounded-2xl shadow-xl ring-1 ring-black/5 transform transition-all duration-300 hover:shadow-2xl">
     <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-gray-900">Sign in to Dashboard</h2>
-        <p class="mt-2 text-sm text-gray-600">Welcome back! Please sign in to your account</p>
+        <div class="mx-auto mb-4 h-14 w-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg">
+            <i class="fas fa-lock text-xl"></i>
+        </div>
+        <h2 class="text-2xl font-extrabold tracking-tight text-gray-900">Welcome back</h2>
+        <p class="mt-1 text-sm text-gray-600">Sign in to your dashboard</p>
     </div>
 
     <form method="POST" action="{{ route('dashboard.login') }}" class="space-y-6">
         @csrf
 
         <!-- Email -->
-        <div>
+        <div class="group">
             <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+            <div class="relative mt-1">
             <input id="email" 
                    name="email" 
                    type="email" 
                    value="{{ old('email') }}" 
                    required
-                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 @enderror">
+                   class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all @error('email') border-red-500 @enderror">
+            <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+            </div>
             @error('email')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>
 
         <!-- Password -->
-        <div>
+        <div class="group">
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-            <div class="relative">
+            <div class="relative mt-1">
                 <input id="password" 
                        name="password" 
                        type="password" 
                        required
-                       class="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                
+                       class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition-all">
+                <i class="fas fa-key absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
+                <button type="button" onclick="togglePw()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <i id="pwEye" class="fas fa-eye"></i>
+                </button>
             </div>
         </div>
 
         <!-- Remember Me -->
         <div class="flex items-center justify-between">
             <div class="flex items-center">
-                <input id="remember" name="remember" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <input id="remember" name="remember" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-all">
                 <label for="remember" class="ml-2 block text-sm text-gray-900">Remember me</label>
             </div>
 
@@ -55,8 +65,9 @@
 
         <!-- Submit Button -->
         <div>
-            <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Sign in
+            <button type="submit" class="group relative w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Sign in</span>
             </button>
         </div>
 
@@ -72,7 +83,7 @@
 
         <!-- Google Sign-In -->
         <div class="mt-6">
-            <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <a href="{{ route('auth.google') }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 border border-gray-200 rounded-lg bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="h-5 w-5"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303C33.602,32.091,29.197,36,24,36c-6.627,0-12-5.373-12-12s5.373-12,12-12 c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20 s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,16.108,18.961,13,24,13c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657 C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/><path fill="#4CAF50" d="M24,44c5.113,0,9.81-1.953,13.362-5.148l-6.164-5.238C29.197,36,24.792,32.091,24,32.091 c-5.176,0-9.567-3.5-11.289-8.366l-6.542,5.036C9.499,39.556,16.227,44,24,44z"/><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-1.024,2.971-3.242,5.431-6.14,6.843l0.004-0.003l6.164,5.238 C33.789,41.046,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/></svg>
                 <span>Sign in with Google</span>
             </a>
@@ -89,6 +100,15 @@
         </div>
     </form>
 
-<script></script>
+<script>
+function togglePw(){
+  const input = document.getElementById('password');
+  const eye = document.getElementById('pwEye');
+  const isPw = input.type === 'password';
+  input.type = isPw ? 'text' : 'password';
+  eye.className = isPw ? 'fas fa-eye-slash' : 'fas fa-eye';
+}
+</script>
+    </div>
 </div>
 @endsection

@@ -167,6 +167,7 @@
             <td class="p-4">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium data-role-badge"></span>
             </td>
+            <td class="p-4 data-plan text-gray-600"></td>
             <td class="p-4">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium data-active-badge"></span>
             </td>
@@ -692,6 +693,7 @@
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Plan</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -718,6 +720,9 @@
                     tr.querySelector('.data-name').textContent = u.name
                     tr.querySelector('.data-email').textContent = u.email || '-'
                     tr.querySelector('.data-email-small').textContent = u.email || ''
+                    // Plan column (uses current_plan from API; show friendly or 'No plan')
+                    tr.querySelector('.data-plan').textContent = (u.current_plan ? (u.current_plan.charAt(0).toUpperCase() + u.current_plan.slice(1)) : 'No plan')
+
                     
                     // Role badge
                     const roleBadge = tr.querySelector('.data-role-badge')

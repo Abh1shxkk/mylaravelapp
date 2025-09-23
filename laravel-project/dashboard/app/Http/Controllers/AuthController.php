@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite; // Add this import
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\WelcomeMail;
 
 class AuthController extends Controller
 {
@@ -63,13 +61,6 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'is_active' => true,
         ]);
-
-        // Send welcome email synchronously
-        try {
-            Mail::to($user->email)->send(new WelcomeMail($user));
-        } catch (\Throwable $e) {
-            // Silently ignore mail failures to not block registration
-        }
 
         Auth::login($user);
         return redirect('/dashboard/home')->with('success', 'Registration successful!');

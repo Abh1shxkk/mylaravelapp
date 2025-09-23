@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\SubscriptionController; // Add this line
 
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
@@ -43,6 +44,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile/remove-picture', [ProfileController::class, 'removePicture'])->name('profile.remove-picture');
     Route::patch('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
 
+
+    // Subscription routes
+    Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscription.subscribe');
+    Route::post('/subscribe/verify', [SubscriptionController::class, 'verify'])->name('subscription.verify');
+    Route::post('/cancel-subscription', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
     // Admin: Users CRUD
     Route::middleware(['role:admin'])->prefix('dashboard/admin')->as('admin.')->group(function () {
         Route::get('/users', [\App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('users.index');
