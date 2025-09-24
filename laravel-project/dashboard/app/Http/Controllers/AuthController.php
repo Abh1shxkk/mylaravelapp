@@ -69,7 +69,13 @@ class AuthController extends Controller
     // Dashboard home
     public function home()
     {
-        return view('dashboard.home');
+        $activeSubscription = Auth::user()->subscriptions()->where('status', 'active')->latest('started_at')->first();
+        $currentPlan = $activeSubscription ? $activeSubscription->plan_id : null; // 'basic' | 'premium' | null
+        
+        // Get all available plans for the subscription modal
+        $plans = \App\Models\Plan::all();
+
+        return view('dashboard.home', compact('currentPlan', 'plans'));
     }
 
     // Handle logout

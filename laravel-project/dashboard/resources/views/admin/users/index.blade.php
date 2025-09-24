@@ -253,6 +253,20 @@
                         <option value="0">Inactive</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Assign Plan (optional)</label>
+                    <select name="assign_plan" id="assign_plan" class="border border-gray-300 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">-- No plan --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Plan Status</label>
+                    <select name="assign_status" class="border border-gray-300 rounded-lg p-3 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="active">Active</option>
+                        <option value="created">Created</option>
+                        <option value="paused">Paused</option>
+                    </select>
+                </div>
                 <div class="md:col-span-2 flex justify-end gap-3 pt-4 border-t">
                     <button type="button" id="cancelBtn" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
                     <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
@@ -885,8 +899,20 @@
             } 
         }
         
+        async function loadPlansIntoForm(){
+            try {
+                const r = await fetch(`{{ route('admin.payment.plans.json') }}`, withCredentials({ headers: { 'Accept':'application/json' } }))
+                if (!r.ok) return
+                const plans = await r.json()
+                const sel = document.getElementById('assign_plan')
+                if (!sel) return
+                sel.innerHTML = '<option value="">-- No plan --</option>' + plans.map(p => `<option value="${p.slug}">${p.name} (${p.billing_period})</option>`).join('')
+            } catch {}
+        }
+
         // Initialize
         load()
+        loadPlansIntoForm()
         enablePwToggles(document)
     </script>
 </body>

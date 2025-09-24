@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Subscription;
+use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -36,7 +37,8 @@ class AdminUserController extends Controller
         if ($request->wantsJson()) {
             return response()->json($users);
         }
-        return view('admin.users.index', compact('users'));
+        $plans = Plan::orderBy('id','asc')->get(['slug','name']);
+        return view('admin.users.index', compact('users','plans'));
     }
 
     public function show(User $user)
@@ -109,6 +111,8 @@ class AdminUserController extends Controller
             'password' => ['nullable','min:8','confirmed'],
             'role' => ['required','in:user,manager,admin'],
             'is_active' => ['required','boolean'],
+            'assign_plan' => ['nullable','string','exists:plans,slug'],
+            'assign_status' => ['nullable','in:active,created,paused'],
         ]);
 
         if (!empty($validated['password'])) {
@@ -123,6 +127,19 @@ class AdminUserController extends Controller
         }
 
         $user->update($validated);
+
+        // Optional: assign a subscription plan immediately
+        if (!empty($validated['assign_plan'])) {
+            Subscription::updateOrCreate(
+                [ 'user_id' => $user->id ],
+                [
+                    'plan_id' => $validated['assign_plan'],
+                    'status' => $validated['assign_status'] ?? 'active',
+                    'started_at' => now(),
+                    'ended_at' => null,
+                ]
+            );
+        }
 
         if ($request->wantsJson()) {
             return response()->json(['message' => 'User updated', 'user' => $user]);

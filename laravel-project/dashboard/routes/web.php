@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\SubscriptionController; // Add this line
+use App\Http\Controllers\StripeController;
 
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
@@ -49,6 +50,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/subscribe', [SubscriptionController::class, 'subscribe'])->name('subscription.subscribe');
     Route::post('/subscribe/verify', [SubscriptionController::class, 'verify'])->name('subscription.verify');
     Route::post('/cancel-subscription', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+
+    // Stripe routes
+    Route::post('/stripe/checkout', [StripeController::class, 'createCheckoutSession'])->name('stripe.checkout');
+    Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
+    Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
     // Admin: Users CRUD
     Route::middleware(['role:admin'])->prefix('dashboard/admin')->as('admin.')->group(function () {
         Route::get('/users', [\App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('users.index');
@@ -58,8 +64,27 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users/{user}/edit', [\App\Http\Controllers\Admin\AdminUserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [\App\Http\Controllers\Admin\AdminUserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [\App\Http\Controllers\Admin\AdminUserController::class, 'destroy'])->name('users.destroy');
+        
+        // Admin: Payment Management
+        Route::prefix('payment')->as('payment.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('index');
+            Route::post('/gateways', [\App\Http\Controllers\Admin\PaymentController::class, 'updateGateways'])->name('gateways.update');
+            Route::get('/plans', [\App\Http\Controllers\Admin\PaymentController::class, 'plans'])->name('plans');
+            Route::get('/plans.json', [\App\Http\Controllers\Admin\PaymentController::class, 'plansJson'])->name('plans.json');
+            Route::get('/plans/create', [\App\Http\Controllers\Admin\PaymentController::class, 'createPlan'])->name('plans.create');
+            Route::post('/plans', [\App\Http\Controllers\Admin\PaymentController::class, 'storePlan'])->name('plans.store');
+            Route::get('/plans/{plan}/edit', [\App\Http\Controllers\Admin\PaymentController::class, 'editPlan'])->name('plans.edit');
+            Route::put('/plans/{plan}', [\App\Http\Controllers\Admin\PaymentController::class, 'updatePlan'])->name('plans.update');
+            Route::delete('/plans/{plan}', [\App\Http\Controllers\Admin\PaymentController::class, 'destroyPlan'])->name('plans.destroy');
+            Route::get('/subscribers', [\App\Http\Controllers\Admin\PaymentController::class, 'subscribers'])->name('subscribers');
+            Route::put('/subscriptions/{subscription}', [\App\Http\Controllers\Admin\PaymentController::class, 'updateSubscription'])->name('subscriptions.update');
+            Route::get('/revenue', [\App\Http\Controllers\Admin\PaymentController::class, 'revenue'])->name('revenue');
+        });
     });
 });
+
+// Stripe webhook (no auth)
+Route::post('/stripe/webhook', [StripeController::class, 'webhook'])->name('stripe.webhook');
 
 // Role-based routes (optional - add these if you want role-based access)
 

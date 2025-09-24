@@ -11,7 +11,9 @@ class SubscriptionController extends Controller
 {
     public function subscribe(Request $request)
     {
-        $request->validate(['plan_id' => 'required|in:basic,premium']);
+        // Get all valid plan slugs from database
+        $validPlans = Plan::pluck('slug')->toArray();
+        $request->validate(['plan_id' => 'required|in:' . implode(',', $validPlans)]);
 
         // Fetch plan from DB by slug and ensure Razorpay plan ID is present
         $plan = Plan::where('slug', $request->plan_id)->first();
@@ -51,13 +53,17 @@ class SubscriptionController extends Controller
             ], 500);
         }
 
-        // Save in database
-        Auth::user()->subscriptions()->create([
-            'plan_id' => $request->plan_id,
-            'razorpay_subscription_id' => $subscription->id,
-            'status' => 'created',
-            'started_at' => now(),
-        ]);
+        // Upsert single row per user (overwrite previous subscription row for the user)
+        Subscription::updateOrCreate(
+            [ 'user_id' => Auth::id() ],
+            [
+                'plan_id' => $request->plan_id,
+                'razorpay_subscription_id' => $subscription->id,
+                'status' => 'created',
+                'started_at' => now(),
+                'ended_at' => null,
+            ]
+        );
 
         return response()->json([
             'success' => true,
@@ -96,11 +102,8 @@ class SubscriptionController extends Controller
             ], 400);
         }
 
-        // Update user's latest created subscription for this subscription_id to active
-        $subscription = Subscription::where('user_id', Auth::id())
-            ->where('razorpay_subscription_id', $request->razorpay_subscription_id)
-            ->latest('created_at')
-            ->first();
+        // Update this user's single subscription row
+        $subscription = Subscription::where('user_id', Auth::id())->first();
 
         if (!$subscription) {
             return response()->json([
@@ -121,37 +124,38 @@ class SubscriptionController extends Controller
     // Cancel method remains the same
     public function cancel(Request $request)
     {
-        // Find the latest non-cancelled subscription (created/active/paused)
+        // Prefer the most recently created ACTIVE subscription, then created/paused
         $subscription = Auth::user()->subscriptions()
             ->whereIn('status', ['created', 'active', 'paused'])
-            ->latest('started_at')
+            ->orderByRaw("CASE WHEN status='active' THEN 0 ELSE 1 END")
+            ->orderByDesc('created_at')
             ->first();
 
         if (!$subscription) {
             return response()->json(['success' => false, 'message' => 'No cancellable subscription found'], 400);
         }
 
-        $keyId = env('RAZORPAY_KEY_ID');
-        $keySecret = env('RAZORPAY_KEY_SECRET');
-        if (empty($keyId) || empty($keySecret)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Razorpay credentials are missing.'
-            ], 500);
-        }
-
-        // Attempt to cancel on Razorpay if we have a remote subscription id
+        // Attempt to cancel on provider(s) if IDs exist
+        // Razorpay
         if (!empty($subscription->razorpay_subscription_id)) {
+            $keyId = env('RAZORPAY_KEY_ID');
+            $keySecret = env('RAZORPAY_KEY_SECRET');
+            if (!empty($keyId) && !empty($keySecret)) {
+                try {
+                    $api = new Api($keyId, $keySecret);
+                    $api->subscription->fetch($subscription->razorpay_subscription_id)->cancel();
+                } catch (\Throwable $e) {
+                    // proceed; we'll still cancel locally
+                }
+            }
+        }
+        // Stripe
+        if (!empty($subscription->stripe_subscription_id) && config('services.stripe.secret')) {
             try {
-                $api = new Api($keyId, $keySecret);
-                $api->subscription->fetch($subscription->razorpay_subscription_id)->cancel();
+                $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
+                $stripe->subscriptions->cancel($subscription->stripe_subscription_id, []);
             } catch (\Throwable $e) {
-                // Continue to mark local as cancelled to unblock user; include message
-                $subscription->update(['status' => 'cancelled', 'ended_at' => now()]);
-                return response()->json([
-                    'success' => true,
-                    'warning' => 'Local subscription cancelled. Razorpay cancel failed: ' . $e->getMessage()
-                ]);
+                // proceed; we'll still cancel locally
             }
         }
 

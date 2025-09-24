@@ -12,8 +12,14 @@ class Plan extends Model
         'name',
         'slug',
         'razorpay_plan_id',
+        'stripe_price_id',
         'price',
         'billing_period',
         'description',
     ];
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class, 'plan_id', 'slug');
+    }
 }

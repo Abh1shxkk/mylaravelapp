@@ -12,6 +12,7 @@ class Subscription extends Model
         'user_id',
         'razorpay_subscription_id',
         'razorpay_payment_id', // Added for Razorpay payment tracking
+        'stripe_subscription_id',
         'plan_id',
         'status',
         'started_at',

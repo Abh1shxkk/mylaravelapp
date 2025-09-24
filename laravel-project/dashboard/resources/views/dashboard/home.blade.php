@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for AJAX -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen">
@@ -47,6 +48,13 @@
                             class="bg-gray-700 text-white px-3 py-2 rounded hover:bg-gray-800 text-sm"
                             title="Admin-only: manage users">
                             <i class="fas fa-shield-alt mr-1"></i>Admin Settings
+                        </a>
+                        
+                        <!-- Payment Settings Link (visible only for admins) -->
+                        <a href="{{ route('admin.payment.index') }}"
+                            class="bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 text-sm"
+                            title="Admin-only: manage payments and subscriptions">
+                            <i class="fas fa-credit-card mr-1"></i>Payment Settings
                         </a>
                     @endif
 
@@ -280,50 +288,47 @@
                 </button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-                <!-- Basic Plan Card -->
+                @foreach($plans as $plan)
                 <div class="relative rounded-xl border border-gray-200 p-6 bg-gradient-to-br from-white to-gray-50 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
                     <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-lg font-bold">Basic</h4>
-                        <span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">Best for starters</span>
+                        <h4 class="text-lg font-bold">{{ $plan->name }}</h4>
+                        @if($plan->slug === 'basic')
+                            <span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700">Best for starters</span>
+                        @elseif($plan->slug === 'premium')
+                            <span class="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700">Most popular</span>
+                        @else
+                            <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-700">Available</span>
+                        @endif
                     </div>
-                    <p class="text-3xl font-extrabold tracking-tight">₹500
-                        <span class="text-sm font-medium text-gray-500">/ 3 months</span>
+                    <p class="text-3xl font-extrabold tracking-tight">₹{{ number_format($plan->price) }}
+                        <span class="text-sm font-medium text-gray-500">/ {{ $plan->billing_period }}</span>
                     </p>
-                    <ul class="mt-4 space-y-2 text-sm text-gray-700">
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Access to basic
-                            content</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Weekly updates
-                        </li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Email support</li>
-                    </ul>
-                    <button type="button" onclick="confirmBuy('basic')"
-                        class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium">
-                        Buy Basic
+                    @if($plan->description)
+                        <div class="mt-4 text-sm text-gray-700">
+                            <p>{{ $plan->description }}</p>
+                        </div>
+                    @else
+                        <ul class="mt-4 space-y-2 text-sm text-gray-700">
+                            @if($plan->slug === 'basic')
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Access to basic content</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Weekly updates</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Email support</li>
+                            @elseif($plan->slug === 'premium')
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Everything in Basic</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Premium-only content</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Priority support</li>
+                            @else
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Full access to all features</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Priority support</li>
+                            @endif
+                        </ul>
+                    @endif
+                    <button type="button" onclick="confirmBuy('{{ $plan->slug }}')"
+                        class="mt-6 w-full {{ $plan->slug === 'basic' ? 'bg-blue-600 hover:bg-blue-700' : ($plan->slug === 'premium' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-green-600 hover:bg-green-700') }} text-white py-2.5 rounded-lg font-medium">
+                        Buy {{ $plan->name }}
                     </button>
                 </div>
-
-                <!-- Premium Plan Card -->
-                <div class="relative rounded-xl border border-gray-200 p-6 bg-gradient-to-br from-white to-gray-50 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-lg font-bold">Premium</h4>
-                        <span class="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700">Most popular</span>
-                    </div>
-                    <p class="text-3xl font-extrabold tracking-tight">₹1000
-                        <span class="text-sm font-medium text-gray-500">/ 1 year</span>
-                    </p>
-                    <ul class="mt-4 space-y-2 text-sm text-gray-700">
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Everything in
-                            Basic</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Premium-only
-                            content</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Priority support
-                        </li>
-                    </ul>
-                    <button type="button" onclick="confirmBuy('premium')"
-                        class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg font-medium">
-                        Buy Premium
-                    </button>
-                </div>
+                @endforeach
             </div>
             <div class="px-6 pb-6 text-right">
                 <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
@@ -363,35 +368,86 @@
                 <div id="plan-details-none" class="hidden">
                     <p class="text-gray-700">You don't have an active subscription. Please subscribe to a plan.</p>
                 </div>
-                <div id="plan-details-basic" class="hidden">
-                    <h4 class="text-lg font-semibold mb-1">Basic Plan</h4>
-                    <p class="text-gray-600 mb-4">₹500 / 3 months</p>
-                    <ul class="text-sm text-gray-700 space-y-2 mb-6">
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Access to basic
-                            content</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Weekly updates
-                        </li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Email support</li>
-                    </ul>
-                    <button type="button" onclick="cancelPlan()"
-                        class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-medium">Cancel
-                        Basic</button>
+                @foreach($plans as $plan)
+                <div id="plan-details-{{ $plan->slug }}" class="hidden">
+                    <h4 class="text-lg font-semibold mb-1">{{ $plan->name }} Plan</h4>
+                    <p class="text-gray-600 mb-4">₹{{ number_format($plan->price) }} / {{ $plan->billing_period }}</p>
+                    @if($plan->description)
+                        <div class="text-sm text-gray-700 mb-6">
+                            <p>{{ $plan->description }}</p>
+                        </div>
+                    @else
+                        <ul class="text-sm text-gray-700 space-y-2 mb-6">
+                            @if($plan->slug === 'basic')
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Access to basic content</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Weekly updates</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Email support</li>
+                            @elseif($plan->slug === 'premium')
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Everything in Basic</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Premium-only content</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Priority support</li>
+                            @else
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Full access to all features</li>
+                                <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Priority support</li>
+                            @endif
+                        </ul>
+                    @endif
+                    
+                    <!-- Action Buttons -->
+                    <div class="space-y-3">
+                        @if(($currentPlan ?? null) !== 'lifetime')
+                            @php
+                                $higherPlans = $plans->filter(function($p) use ($plan) {
+                                    return $p->price > $plan->price;
+                                })->sortBy('price');
+                            @endphp
+                            @if($higherPlans->count())
+                                <div class="border rounded-lg p-4 bg-blue-50">
+                                    <h5 class="text-sm font-semibold text-blue-900 mb-3">Upgrade options</h5>
+                                    <div class="space-y-2">
+                                        @foreach($higherPlans as $higher)
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">{{ $higher->name }}</p>
+                                                    <p class="text-xs text-gray-600">₹{{ number_format($higher->price) }} / {{ $higher->billing_period }}</p>
+                                                </div>
+                                                <button type="button" onclick="confirmBuy('{{ $higher->slug }}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md">Upgrade</button>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+
+                        @if(($currentPlan ?? null) !== 'basic' && ($currentPlan ?? null) !== 'lifetime')
+                            @php
+                                $lowerPlans = $plans->filter(function($p) use ($plan) {
+                                    return $p->price < $plan->price;
+                                })->sortByDesc('price');
+                            @endphp
+                            @if($lowerPlans->count())
+                                <div class="border rounded-lg p-4 bg-gray-50">
+                                    <h5 class="text-sm font-semibold text-gray-800 mb-3">Downgrade options</h5>
+                                    <div class="space-y-2">
+                                        @foreach($lowerPlans as $lower)
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">{{ $lower->name }}</p>
+                                                    <p class="text-xs text-gray-600">₹{{ number_format($lower->price) }} / {{ $lower->billing_period }}</p>
+                                                </div>
+                                                <button type="button" onclick="confirmBuy('{{ $lower->slug }}')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-md">Switch</button>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        @endif
+                        
+                        <button type="button" onclick="openModal('modal-confirm-cancel')"
+                            class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-medium">Cancel {{ $plan->name }}</button>
+                    </div>
                 </div>
-                <div id="plan-details-premium" class="hidden">
-                    <h4 class="text-lg font-semibold mb-1">Premium Plan</h4>
-                    <p class="text-gray-600 mb-4">₹1000 / 1 year</p>
-                    <ul class="text-sm text-gray-700 space-y-2 mb-6">
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Everything in
-                            Basic</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Premium-only
-                            content</li>
-                        <li class="flex items-center"><i class="fas fa-check text-green-600 mr-2"></i>Priority support
-                        </li>
-                    </ul>
-                    <button type="button" onclick="cancelPlan()"
-                        class="w-full bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-lg font-medium">Cancel
-                        Premium</button>
-                </div>
+                @endforeach
             </div>
             <div class="px-6 pb-6 text-right">
                 <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
@@ -441,6 +497,31 @@
         </div>
     </div>
 
+    <!-- Confirm Cancel Modal -->
+    <div id="modal-confirm-cancel" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-200 opacity-0 scale-95">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h3 class="text-xl font-semibold">Cancel Subscription</h3>
+                <button onclick="closeModals()" class="text-gray-500 hover:text-gray-700 transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-800 font-medium">Are you sure you want to cancel your current plan?</p>
+                        <p class="text-sm text-gray-500 mt-1">This will stop future renewals. You may lose access to premium content.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 pb-6 flex justify-end gap-3">
+                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Keep Plan</button>
+                <button id="confirm-cancel-plan-btn" class="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors">Cancel Plan</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div id="loading-overlay" class="hidden fixed inset-0 z-[100] bg-black/40 items-center justify-center">
         <div class="bg-white rounded-lg shadow p-4 flex items-center space-x-3">
@@ -466,8 +547,56 @@
         </div>
     </div>
 
+    <!-- Payment Gateway Selection Modal -->
+    <div id="modal-payment-gateways" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all duration-200 opacity-0 scale-95">
+            <div class="flex items-center justify-between px-6 py-4 border-b">
+                <h3 class="text-xl font-semibold">Choose Payment Method</h3>
+                <button onclick="closeModals()" class="text-gray-500 hover:text-gray-700 transition-colors"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-600 mb-6">Select your preferred payment gateway for the <span id="gateway-plan-name" class="font-semibold"></span> plan:</p>
+                
+                <!-- Payment Gateway Options -->
+                <div class="space-y-3">
+                    @if(config('payment.gateways.razorpay'))
+                    <button onclick="selectPaymentGateway('razorpay')" class="w-full p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 flex items-center justify-between group">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-credit-card text-blue-600"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-medium text-gray-900">Razorpay</h4>
+                                <p class="text-sm text-gray-500">Cards, UPI, Net Banking, Wallets</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-500 transition-colors"></i>
+                    </button>
+                    @endif
+                    
+                    <!-- Stripe gateway -->
+                    @if(config('payment.gateways.stripe'))
+                    <button onclick="selectPaymentGateway('stripe')" class="w-full p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all duration-200 flex items-center justify-between group">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-credit-card text-purple-600"></i>
+                            </div>
+                            <div class="text-left">
+                                <h4 class="font-medium text-gray-900">Stripe</h4>
+                                <p class="text-sm text-gray-500">Cards</p>
+                            </div>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-purple-500 transition-colors"></i>
+                    </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let pendingPlan = null;
+        let selectedGateway = null;
 
         function confirmBuy(plan) {
             pendingPlan = plan;
@@ -476,9 +605,28 @@
             const btn = document.getElementById('confirm-purchase-btn');
             btn.onclick = function() {
                 closeModals();
-                buyPlan(pendingPlan);
-                pendingPlan = null;
+                // Add small delay to ensure modal closes before opening next one
+                setTimeout(() => {
+                    showPaymentGateways(plan);
+                }, 200);
             };
+        }
+
+        function showPaymentGateways(plan) {
+            document.getElementById('gateway-plan-name').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
+            openModal('modal-payment-gateways');
+        }
+
+        function selectPaymentGateway(gateway) {
+            selectedGateway = gateway;
+            closeModals();
+            if (gateway === 'razorpay') {
+                buyPlan(pendingPlan);
+            } else if (gateway === 'stripe') {
+                buyPlanStripe(pendingPlan);
+            }
+            // Future gateways can be handled here
+            pendingPlan = null; // Reset after processing
         }
 
         function showLoading() {
@@ -559,6 +707,31 @@
                 }
             });
         }
+
+        async function buyPlanStripe(plan) {
+            showLoading();
+            try {
+                const res = await $.ajax({
+                    url: '{{ route('stripe.checkout') }}',
+                    type: 'POST',
+                    data: { plan_id: plan, _token: '{{ csrf_token() }}' }
+                });
+                if (res.success && res.url) {
+                    hideLoading();
+                    window.location.href = res.url; // Redirect to hosted Checkout
+                    return;
+                }
+                if (res.success && res.public_key && res.id) {
+                    // Fallback: redirectToCheckout with sessionId
+                    const stripe = Stripe(res.public_key);
+                    await stripe.redirectToCheckout({ sessionId: res.id });
+                }
+            } catch (e) {
+                hideLoading();
+                const msg = e?.responseJSON?.message || e?.message || 'Stripe checkout failed.';
+                showError(msg);
+            }
+        }
         function handlePlanClick(plan) {
             // Premium users can access both
             if (currentPlan === 'premium') {
@@ -592,20 +765,25 @@
             if (id === 'modal-my-plans') {
                 // Toggle plan details inside modal
                 document.getElementById('plan-details-none')?.classList.add('hidden');
-                document.getElementById('plan-details-basic')?.classList.add('hidden');
-                document.getElementById('plan-details-premium')?.classList.add('hidden');
+                // Hide all plan details first
+                @foreach($plans as $plan)
+                document.getElementById('plan-details-{{ $plan->slug }}')?.classList.add('hidden');
+                @endforeach
+                
                 if (!currentPlan) {
                     document.getElementById('plan-details-none')?.classList.remove('hidden');
-                } else if (currentPlan === 'basic') {
-                    document.getElementById('plan-details-basic')?.classList.remove('hidden');
-                } else if (currentPlan === 'premium') {
-                    document.getElementById('plan-details-premium')?.classList.remove('hidden');
+                } else {
+                    // Show the current plan details
+                    const currentPlanElement = document.getElementById('plan-details-' + currentPlan);
+                    if (currentPlanElement) {
+                        currentPlanElement.classList.remove('hidden');
+                    }
                 }
             }
         }
 
         function closeModals() {
-            ['modal-subscribe', 'modal-basic-content', 'modal-need-premium', 'modal-access-granted', 'modal-my-plans', 'modal-subscribe-success', 'modal-cancel-success', 'modal-confirm-purchase'].forEach(id => {
+            ['modal-subscribe', 'modal-basic-content', 'modal-need-premium', 'modal-access-granted', 'modal-my-plans', 'modal-subscribe-success', 'modal-cancel-success', 'modal-confirm-purchase', 'modal-payment-gateways', 'modal-confirm-cancel'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     const panel = el.querySelector('[data-modal-panel]');
@@ -619,20 +797,42 @@
             hideLoading();
         }
 
-        function cancelPlan() {
+        // Wire confirm cancel button
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('confirm-cancel-plan-btn');
+            if (btn) {
+                btn.addEventListener('click', performCancelPlan);
+            }
+        });
+
+        function performCancelPlan() {
+            showLoading();
             $.ajax({
                 url: '{{ route('subscription.cancel') }}',
                 type: 'POST',
                 data: { _token: '{{ csrf_token() }}' },
-                success: function (response) {
+                success: function () {
                     currentPlan = null;
                     closeModals();
+                    hideLoading();
                     openModal('modal-cancel-success');
                 },
                 error: function (xhr) {
-                    alert('Error cancelling plan. Please try again.');
+                    hideLoading();
+                    const msg = xhr.responseJSON?.message || 'Error cancelling plan. Please try again.';
+                    alert(msg);
                 }
             });
+        }
+
+        function handleUpgradePlan() {
+            // Close the current My Plans modal
+            closeModals();
+            
+            // Add a small delay to ensure modal closes smoothly before opening the subscription modal
+            setTimeout(() => {
+                openModal('modal-subscribe');
+            }, 300);
         }
     </script>
 </body>
