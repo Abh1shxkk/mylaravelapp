@@ -88,7 +88,10 @@ class StripeController extends Controller
             ]
         );
 
-        return redirect()->route('dashboard.home')->with('success', 'Subscription activated.');
+        return redirect()->route('dashboard.home')->with([
+            'success' => 'Subscription activated.',
+            'plan' => $planSlug,
+        ]);
     }
 
     public function cancel()

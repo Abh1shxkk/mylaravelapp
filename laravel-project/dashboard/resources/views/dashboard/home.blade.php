@@ -13,6 +13,11 @@
 </head>
 
 <body class="bg-gray-100 min-h-screen">
+    @php
+        // Compute active subscription early for header rendering
+        $activeSubscriptionHeader = Auth::user()->subscriptions()->where('status', 'active')->latest('started_at')->first();
+        $currentPlanHeader = $activeSubscriptionHeader ? $activeSubscriptionHeader->plan_id : null;
+    @endphp
     <!-- Header -->
     <div class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,9 +63,9 @@
                         </a>
                     @endif
 
-                    <!-- Subscribe Button -->
-                    <button type="button" onclick="openModal('modal-subscribe')"
-                        class="bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 text-sm">
+                    <!-- Subscribe Button (always rendered; hidden when user has an active plan) -->
+                    <button id="btn-subscribe" type="button" onclick="openModal('modal-subscribe')"
+                        class="@if($currentPlanHeader) hidden @endif bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 text-sm">
                         <i class="fas fa-crown mr-1"></i>Subscribe
                     </button>
 
@@ -481,7 +486,7 @@
             <p class="text-gray-700 mb-4">You have successfully subscribed to the <span id="success-plan-name"></span>
                 plan!</p>
             <div class="text-right">
-                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+                <button onclick="closeModal('modal-subscribe-success')" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
             </div>
         </div>
     </div>
@@ -492,7 +497,7 @@
             <h3 class="text-lg font-semibold mb-2">Plan Cancelled</h3>
             <p class="text-gray-700 mb-4">Your plan has been successfully cancelled.</p>
             <div class="text-right">
-                <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+                <button onclick="closeModal('modal-cancel-success')" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
             </div>
         </div>
     </div>
@@ -643,6 +648,19 @@
 
         let currentPlan = @json($currentPlan); // Initial value from server
 
+        // Toggle subscribe button based on currentPlan presence
+        function updateSubscribeVisibility() {
+            try {
+                const btn = document.getElementById('btn-subscribe');
+                if (!btn) return; // Not rendered when already had plan
+                if (currentPlan) {
+                    btn.classList.add('hidden');
+                } else {
+                    btn.classList.remove('hidden');
+                }
+            } catch (e) { /* ignore */ }
+        }
+
         function buyPlan(plan) {
             showLoading();
             $.ajax({
@@ -674,6 +692,7 @@
                                         document.getElementById('success-plan-name').textContent = plan.charAt(0).toUpperCase() + plan.slice(1);
                                         openModal('modal-subscribe-success');
                                         hideLoading();
+                                        updateSubscribeVisibility();
                                     },
                                     error: function () {
                                         hideLoading();
@@ -684,7 +703,7 @@
                             "modal": {
                                 "ondismiss": function () {
                                     hideLoading();
-                                    alert('Payment cancelled.');
+                                    openModal('modal-cancel-success');
                                 }
                             },
                             "prefill": {
@@ -783,7 +802,8 @@
         }
 
         function closeModals() {
-            ['modal-subscribe', 'modal-basic-content', 'modal-need-premium', 'modal-access-granted', 'modal-my-plans', 'modal-subscribe-success', 'modal-cancel-success', 'modal-confirm-purchase', 'modal-payment-gateways', 'modal-confirm-cancel'].forEach(id => {
+            // Do NOT include success/cancel popups here so stray calls don't instantly hide them
+            ['modal-subscribe', 'modal-basic-content', 'modal-need-premium', 'modal-access-granted', 'modal-my-plans', 'modal-confirm-purchase', 'modal-payment-gateways', 'modal-confirm-cancel'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     const panel = el.querySelector('[data-modal-panel]');
@@ -797,12 +817,49 @@
             hideLoading();
         }
 
+        // Close a specific modal by id (used by success/cancel popups)
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const panel = el.querySelector('[data-modal-panel]');
+            if (panel) {
+                panel.classList.add('opacity-0','scale-95');
+                panel.classList.remove('opacity-100','scale-100');
+            }
+            setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); }, 150);
+        }
+
         // Wire confirm cancel button
         document.addEventListener('DOMContentLoaded', function() {
             const btn = document.getElementById('confirm-cancel-plan-btn');
             if (btn) {
                 btn.addEventListener('click', performCancelPlan);
             }
+
+            // Handle flash messages from server (e.g., after Stripe success/cancel)
+            try {
+                const flashSuccess = @json(session('success'));
+                const flashError = @json(session('error'));
+                const flashPlan = @json(session('plan'));
+
+                if (flashSuccess && String(flashSuccess).toLowerCase().includes('subscription')) {
+                    if (flashPlan) {
+                        const name = String(flashPlan);
+                        const pretty = name.charAt(0).toUpperCase() + name.slice(1);
+                        const el = document.getElementById('success-plan-name');
+                        if (el) el.textContent = pretty;
+                        // Update runtime state so Subscribe button hides if it exists
+                        currentPlan = flashPlan;
+                        updateSubscribeVisibility();
+                    }
+                    // Delay a bit to avoid any race with pending close animations
+                    setTimeout(() => openModal('modal-subscribe-success'), 200);
+                }
+
+                if (flashError && String(flashError).toLowerCase().includes('cancel')) {
+                    setTimeout(() => openModal('modal-cancel-success'), 200);
+                }
+            } catch (e) { /* ignore */ }
         });
 
         function performCancelPlan() {
@@ -816,6 +873,7 @@
                     closeModals();
                     hideLoading();
                     openModal('modal-cancel-success');
+                    updateSubscribeVisibility();
                 },
                 error: function (xhr) {
                     hideLoading();
