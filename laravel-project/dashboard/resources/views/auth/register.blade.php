@@ -88,6 +88,22 @@
 
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-phone mr-2 text-gray-400"></i>Phone (India)
+                            </label>
+                            <input type="text"
+                                   name="phone"
+                                   value="{{ old('phone') }}"
+                                   required
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                                   placeholder="+91 98765 43210">
+                            @error('phone')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-1 text-xs text-gray-500">Use your 10-digit Indian mobile number. Country code +91 will be applied automatically.</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
                                 <i class="fas fa-lock mr-2 text-gray-400"></i>Password
                             </label>
                             <div class="relative">

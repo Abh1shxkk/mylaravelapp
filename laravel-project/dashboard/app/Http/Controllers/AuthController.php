@@ -23,18 +23,39 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email', 'exists:dashboard_users,email'],
+            'identifier' => ['required', 'string'], // email or phone
             'password' => ['required', 'string', 'min:6'],
-        ], [
-            'email.exists' => 'These credentials do not match our records.',
         ]);
 
-        if (Auth::attempt($request->only('email', 'password'), $request->has('remember'))) {
+        $identifier = $request->input('identifier');
+        $remember = $request->boolean('remember');
+
+        // Determine if identifier is an email or a phone number
+        $credentials = [];
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            $credentials = ['email' => $identifier, 'password' => $request->password];
+        } else {
+            // Normalize Indian phone: keep digits, ensure 10 digits, then prefix +91
+            $digits = preg_replace('/\D+/', '', $identifier);
+            if (strlen($digits) === 12 && str_starts_with($digits, '91')) {
+                $digits = substr($digits, 2);
+            }
+            if (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+                $digits = substr($digits, 1);
+            }
+            if (strlen($digits) !== 10) {
+                return back()->withErrors(['identifier' => 'Please enter a valid 10-digit Indian phone number or a valid email.'])->withInput();
+            }
+            $normalizedPhone = '+91' . $digits;
+            $credentials = ['phone' => $normalizedPhone, 'password' => $request->password];
+        }
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
             return redirect('/dashboard/home')->with('success', 'Welcome back!');
         }
 
-        return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+        return back()->withErrors(['identifier' => 'Invalid credentials'])->withInput();
     }
 
     // Show register form
@@ -52,12 +73,29 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:dashboard_users,email',
+            'phone' => ['required','string','regex:/^[0-9+\-\s()]{7,20}$/','unique:dashboard_users,phone'],
             'password' => 'required|min:8|confirmed',
+        ], [
+            'phone.regex' => 'Please enter a valid phone number.',
         ]);
+
+        // Normalize Indian phone to E.164 (+91XXXXXXXXXX)
+        $digits = preg_replace('/\D+/', '', $request->phone);
+        if (strlen($digits) === 12 && str_starts_with($digits, '91')) {
+            $digits = substr($digits, 2);
+        }
+        if (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+            $digits = substr($digits, 1);
+        }
+        if (strlen($digits) !== 10) {
+            return back()->withErrors(['phone' => 'Phone must be a valid 10-digit Indian mobile number.'])->withInput();
+        }
+        $normalizedPhone = '+91' . $digits;
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $normalizedPhone,
             'password' => Hash::make($request->password),
             'is_active' => true,
         ]);
@@ -131,5 +169,44 @@ class AuthController extends Controller
         request()->session()->regenerate();
 
         return redirect('/dashboard/home')->with('success', 'Welcome back via Google!');
+    }
+
+    // Lookup email by phone for users who forgot their email
+    public function forgotEmail(Request $request)
+    {
+        $request->validate([
+            'phone' => ['required','string','regex:/^[0-9+\-\s()]{7,20}$/'],
+        ], [
+            'phone.regex' => 'Please enter a valid phone number.',
+        ]);
+
+        // Normalize Indian phone to E.164 (+91XXXXXXXXXX)
+        $digits = preg_replace('/\D+/', '', $request->phone);
+        if (strlen($digits) === 12 && str_starts_with($digits, '91')) {
+            $digits = substr($digits, 2);
+        }
+        if (strlen($digits) === 11 && str_starts_with($digits, '0')) {
+            $digits = substr($digits, 1);
+        }
+        if (strlen($digits) !== 10) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Phone must be a valid 10-digit Indian mobile number.'
+            ], 422);
+        }
+        $normalizedPhone = '+91' . $digits;
+
+        $user = User::where('phone', $normalizedPhone)->first();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No account found with that phone number.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'email' => $user->email,
+        ]);
     }
 }

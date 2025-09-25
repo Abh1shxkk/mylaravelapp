@@ -14,6 +14,7 @@ return new class extends Migration {
             $table->decimal('price', 8, 2); // E.g., 500.00 (INR)
             $table->string('billing_period'); // E.g., 'monthly', 'yearly'
             $table->text('description')->nullable();
+           
             $table->timestamps();
         });
     }

@@ -18,6 +18,7 @@ Route::get('/', function () {
 // Simple auth routes
 Route::get('/dashboard/login', [AuthController::class, 'showLogin'])->name('dashboard.login');
 Route::post('/dashboard/login', [AuthController::class, 'login']);
+Route::post('/dashboard/forgot-email', [AuthController::class, 'forgotEmail'])->name('dashboard.forgot-email');
 
 Route::get('/dashboard/register', [AuthController::class, 'showRegister'])->name('dashboard.register');
 Route::post('/dashboard/register', [AuthController::class, 'register']);
