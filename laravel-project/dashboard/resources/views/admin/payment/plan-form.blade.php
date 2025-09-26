@@ -107,7 +107,36 @@
                             <option value="">Select billing period</option>
                             <option value="monthly" {{ old('billing_period', $plan->billing_period ?? '') === 'monthly' ? 'selected' : '' }}>Monthly</option>
                             <option value="yearly" {{ old('billing_period', $plan->billing_period ?? '') === 'yearly' ? 'selected' : '' }}>Yearly</option>
+                            <option value="custom" {{ old('billing_period', $plan->billing_period ?? '') === 'custom' ? 'selected' : '' }}>Custom</option>
                         </select>
+                    </div>
+
+                    <!-- Custom Duration Fields -->
+                    <div id="custom_duration_group" class="hidden md:col-span-2">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="duration_value" class="block text-sm font-medium text-gray-700 mb-2">Duration Value</label>
+                                <input type="number" id="duration_value" name="duration_value" min="1" step="1"
+                                       value="{{ old('duration_value', $plan->duration_value ?? '') }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                       placeholder="e.g., 1">
+                                <p class="text-xs text-gray-500 mt-1">Set this to 1 for your 1-minute test.</p>
+                            </div>
+                            <div>
+                                <label for="duration_unit" class="block text-sm font-medium text-gray-700 mb-2">Duration Unit</label>
+                                <select id="duration_unit" name="duration_unit"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                                    <option value="">Select unit</option>
+                                    @php $unitOld = old('duration_unit', $plan->duration_unit ?? ''); @endphp
+                                    <option value="minutes" {{ $unitOld === 'minutes' ? 'selected' : '' }}>Minutes</option>
+                                    <option value="hours" {{ $unitOld === 'hours' ? 'selected' : '' }}>Hours</option>
+                                    <option value="days" {{ $unitOld === 'days' ? 'selected' : '' }}>Days</option>
+                                    <option value="weeks" {{ $unitOld === 'weeks' ? 'selected' : '' }}>Weeks</option>
+                                    <option value="months" {{ $unitOld === 'months' ? 'selected' : '' }}>Months</option>
+                                    <option value="years" {{ $unitOld === 'years' ? 'selected' : '' }}>Years</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Razorpay Plan ID -->
@@ -172,6 +201,22 @@
                 .trim('-');
             document.getElementById('slug').value = slug;
         });
+
+        // Toggle custom duration fields
+        (function(){
+            const select = document.getElementById('billing_period');
+            const group = document.getElementById('custom_duration_group');
+            function toggle(){
+                if(select && group){
+                    const show = select.value === 'custom';
+                    group.classList.toggle('hidden', !show);
+                }
+            }
+            if(select){
+                select.addEventListener('change', toggle);
+                toggle();
+            }
+        })();
     </script>
 </body>
 </html>

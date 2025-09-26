@@ -15,6 +15,8 @@ class Plan extends Model
         'stripe_price_id',
         'price',
         'billing_period',
+        'duration_value',
+        'duration_unit',
         'description',
     ];
 

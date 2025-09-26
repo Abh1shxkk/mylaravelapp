@@ -98,13 +98,21 @@ class PaymentController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:plans,slug',
             'price' => 'required|numeric|min:0',
-            'billing_period' => 'required|string|in:monthly,yearly',
+            'billing_period' => 'required|string|in:monthly,yearly,custom',
+            'duration_value' => 'nullable|required_if:billing_period,custom|integer|min:1',
+            'duration_unit' => 'nullable|required_if:billing_period,custom|string|in:minutes,hours,days,weeks,months,years',
             'description' => 'nullable|string',
             'razorpay_plan_id' => 'nullable|string|max:255',
             'stripe_price_id' => 'nullable|string|max:255',
         ]);
 
-        Plan::create($request->all());
+        $data = $request->only(['name','slug','price','billing_period','description','razorpay_plan_id','stripe_price_id','duration_value','duration_unit']);
+        if ($data['billing_period'] !== 'custom') {
+            $data['duration_value'] = null;
+            $data['duration_unit'] = null;
+        }
+
+        Plan::create($data);
 
         return redirect()->route('admin.payment.plans')
             ->with('success', 'Plan created successfully!');
@@ -121,13 +129,21 @@ class PaymentController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'required|string|max:255|unique:plans,slug,' . $plan->id,
             'price' => 'required|numeric|min:0',
-            'billing_period' => 'required|string|in:monthly,yearly',
+            'billing_period' => 'required|string|in:monthly,yearly,custom',
+            'duration_value' => 'nullable|required_if:billing_period,custom|integer|min:1',
+            'duration_unit' => 'nullable|required_if:billing_period,custom|string|in:minutes,hours,days,weeks,months,years',
             'description' => 'nullable|string',
             'razorpay_plan_id' => 'nullable|string|max:255',
             'stripe_price_id' => 'nullable|string|max:255',
         ]);
 
-        $plan->update($request->all());
+        $data = $request->only(['name','slug','price','billing_period','description','razorpay_plan_id','stripe_price_id','duration_value','duration_unit']);
+        if ($data['billing_period'] !== 'custom') {
+            $data['duration_value'] = null;
+            $data['duration_unit'] = null;
+        }
+
+        $plan->update($data);
 
         return redirect()->route('admin.payment.plans')
             ->with('success', 'Plan updated successfully!');

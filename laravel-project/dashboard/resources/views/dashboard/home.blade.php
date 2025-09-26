@@ -94,13 +94,13 @@
                         <p class="text-blue-700 text-sm mt-1">Manage your profile and settings</p>
                     </a>
 
-                    <div
-                        class="block bg-green-50 p-4 rounded-lg hover:bg-green-100 transition-colors cursor-pointer group">
+                    <a href="{{ route('profile.settings') }}#change-password"
+                        class="block bg-green-50 p-4 rounded-lg hover:bg-green-100 transition-colors group">
                         <h4 class="font-semibold text-green-900 flex items-center">
                             <i class="fas fa-cog mr-3 text-green-600"></i>Settings
                         </h4>
-                        <p class="text-green-700 text-sm mt-1">Configure application settings</p>
-                    </div>
+                        <p class="text-green-700 text-sm mt-1">Change your password & manage settings</p>
+                    </a>
 
                     <div
                         class="block bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer group">
@@ -214,38 +214,9 @@
                     <p class="text-xs opacity-80 mt-1">+8% from last month</p>
                 </div>
 
-                <!-- Medium Card - Quick Actions -->
-                <div class="bg-white rounded-lg shadow-md p-6 col-span-1 lg:col-span-2">
-                    <h4 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h4>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button class="bg-blue-50 hover:bg-blue-100 p-3 rounded-lg text-left transition-colors">
-                            <i class="fas fa-plus text-blue-600 mb-2"></i>
-                            <p class="text-sm font-medium text-blue-900">Create New</p>
-                        </button>
-                        <button class="bg-green-50 hover:bg-green-100 p-3 rounded-lg text-left transition-colors">
-                            <i class="fas fa-upload text-green-600 mb-2"></i>
-                            <p class="text-sm font-medium text-green-900">Upload File</p>
-                        </button>
-                        <button class="bg-purple-50 hover:bg-purple-100 p-3 rounded-lg text-left transition-colors">
-                            <i class="fas fa-download text-purple-600 mb-2"></i>
-                            <p class="text-sm font-medium text-purple-900">Export Data</p>
-                        </button>
-                        <button class="bg-orange-50 hover:bg-orange-100 p-3 rounded-lg text-left transition-colors">
-                            <i class="fas fa-share text-orange-600 mb-2"></i>
-                            <p class="text-sm font-medium text-orange-900">Share</p>
-                        </button>
-                    </div>
-                </div>
-
+              
                 <!-- Small Cards -->
-                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-md p-6 text-white">
-                    <div class="flex items-center justify-between mb-2">
-                        <h4 class="text-sm font-medium opacity-80">Tasks</h4>
-                        <i class="fas fa-tasks"></i>
-                    </div>
-                    <p class="text-2xl font-bold">24</p>
-                    <p class="text-xs opacity-80 mt-1">5 pending</p>
-                </div>
+               
 
                 <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg shadow-md p-6 text-white">
                     <div class="flex items-center justify-between mb-2">
@@ -285,16 +256,16 @@
     <!-- Modals -->
     <!-- Subscribe Modal with plan cards -->
     <div id="modal-subscribe" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
-        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden transform transition-all duration-200 opacity-0 scale-95">
-            <div class="flex items-center justify-between px-6 py-4 border-b">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden transform transition-all duration-200 opacity-0 scale-95 max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between px-5 py-3 border-b sticky top-0 bg-white/95 backdrop-blur">
                 <h3 class="text-xl font-semibold">Choose Your Plan</h3>
                 <button onclick="closeModals()" class="text-gray-500 hover:text-gray-700 transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-y-auto">
                 @foreach($plans as $plan)
-                <div class="relative rounded-xl border border-gray-200 p-6 bg-gradient-to-br from-white to-gray-50 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
+                <div class="relative rounded-xl border border-gray-200 p-4 bg-gradient-to-br from-white to-gray-50 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5">
                     <div class="flex items-center justify-between mb-2">
                         <h4 class="text-lg font-bold">{{ $plan->name }}</h4>
                         @if($plan->slug === 'basic')
@@ -305,8 +276,13 @@
                             <span class="text-xs px-2 py-1 rounded bg-green-100 text-green-700">Available</span>
                         @endif
                     </div>
+                    @php
+                        $displayPeriod = $plan->billing_period === 'custom'
+                            ? trim(($plan->duration_value ?? '') . ' ' . ($plan->duration_unit ?? ''))
+                            : $plan->billing_period;
+                    @endphp
                     <p class="text-3xl font-extrabold tracking-tight">₹{{ number_format($plan->price) }}
-                        <span class="text-sm font-medium text-gray-500">/ {{ $plan->billing_period }}</span>
+                        <span class="text-sm font-medium text-gray-500">/ {{ $displayPeriod }}</span>
                     </p>
                     @if($plan->description)
                         <div class="mt-4 text-sm text-gray-700">
@@ -335,7 +311,7 @@
                 </div>
                 @endforeach
             </div>
-            <div class="px-6 pb-6 text-right">
+            <div class="px-5 pb-5 text-right border-t">
                 <button onclick="closeModals()" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
             </div>
         </div>
@@ -376,7 +352,12 @@
                 @foreach($plans as $plan)
                 <div id="plan-details-{{ $plan->slug }}" class="hidden">
                     <h4 class="text-lg font-semibold mb-1">{{ $plan->name }} Plan</h4>
-                    <p class="text-gray-600 mb-4">₹{{ number_format($plan->price) }} / {{ $plan->billing_period }}</p>
+                    @php
+                        $displayPeriodDetails = $plan->billing_period === 'custom'
+                            ? trim(($plan->duration_value ?? '') . ' ' . ($plan->duration_unit ?? ''))
+                            : $plan->billing_period;
+                    @endphp
+                    <p class="text-gray-600 mb-4">₹{{ number_format($plan->price) }} / {{ $displayPeriodDetails }}</p>
                     @if($plan->description)
                         <div class="text-sm text-gray-700 mb-6">
                             <p>{{ $plan->description }}</p>
@@ -402,9 +383,16 @@
                     <div class="space-y-3">
                         @if(($currentPlan ?? null) !== 'lifetime')
                             @php
-                                $higherPlans = $plans->filter(function($p) use ($plan) {
-                                    return $p->price > $plan->price;
-                                })->sortBy('price');
+                                $gateways = config('payment.gateways');
+                                $isPurchasable = function($p) use ($gateways) {
+                                    $stripeOk = !empty($gateways['stripe']) && !empty($p->stripe_price_id);
+                                    $razorOk  = !empty($gateways['razorpay']) && !empty($p->razorpay_plan_id);
+                                    return $stripeOk || $razorOk;
+                                };
+                                $higherPlans = $plans
+                                    ->filter(function($p) use ($plan) { return $p->price > $plan->price; })
+                                    ->filter(function($p) use ($isPurchasable) { return $isPurchasable($p); })
+                                    ->sortBy('price');
                             @endphp
                             @if($higherPlans->count())
                                 <div class="border rounded-lg p-4 bg-blue-50">
@@ -414,7 +402,12 @@
                                             <div class="flex items-center justify-between">
                                                 <div>
                                                     <p class="text-sm font-medium text-gray-900">{{ $higher->name }}</p>
-                                                    <p class="text-xs text-gray-600">₹{{ number_format($higher->price) }} / {{ $higher->billing_period }}</p>
+                                                    @php
+                                                        $higherPeriod = $higher->billing_period === 'custom'
+                                                            ? trim(($higher->duration_value ?? '') . ' ' . ($higher->duration_unit ?? ''))
+                                                            : $higher->billing_period;
+                                                    @endphp
+                                                    <p class="text-xs text-gray-600">₹{{ number_format($higher->price) }} / {{ $higherPeriod }}</p>
                                                 </div>
                                                 <button type="button" onclick="confirmBuy('{{ $higher->slug }}')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md">Upgrade</button>
                                             </div>
@@ -424,11 +417,18 @@
                             @endif
                         @endif
 
-                        @if(($currentPlan ?? null) !== 'basic' && ($currentPlan ?? null) !== 'lifetime')
+                        @if(($currentPlan ?? null) !== 'lifetime')
                             @php
-                                $lowerPlans = $plans->filter(function($p) use ($plan) {
-                                    return $p->price < $plan->price;
-                                })->sortByDesc('price');
+                                $gateways = $gateways ?? config('payment.gateways');
+                                $isPurchasable = $isPurchasable ?? function($p) use ($gateways) {
+                                    $stripeOk = !empty($gateways['stripe']) && !empty($p->stripe_price_id);
+                                    $razorOk  = !empty($gateways['razorpay']) && !empty($p->razorpay_plan_id);
+                                    return $stripeOk || $razorOk;
+                                };
+                                $lowerPlans = $plans
+                                    ->filter(function($p) use ($plan) { return $p->price < $plan->price; })
+                                    ->filter(function($p) use ($isPurchasable) { return $isPurchasable($p); })
+                                    ->sortByDesc('price');
                             @endphp
                             @if($lowerPlans->count())
                                 <div class="border rounded-lg p-4 bg-gray-50">
@@ -438,7 +438,12 @@
                                             <div class="flex items-center justify-between">
                                                 <div>
                                                     <p class="text-sm font-medium text-gray-900">{{ $lower->name }}</p>
-                                                    <p class="text-xs text-gray-600">₹{{ number_format($lower->price) }} / {{ $lower->billing_period }}</p>
+                                                    @php
+                                                        $lowerPeriod = $lower->billing_period === 'custom'
+                                                            ? trim(($lower->duration_value ?? '') . ' ' . ($lower->duration_unit ?? ''))
+                                                            : $lower->billing_period;
+                                                    @endphp
+                                                    <p class="text-xs text-gray-600">₹{{ number_format($lower->price) }} / {{ $lowerPeriod }}</p>
                                                 </div>
                                                 <button type="button" onclick="confirmBuy('{{ $lower->slug }}')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-md">Switch</button>
                                             </div>
@@ -480,24 +485,40 @@
     </div>
 
     <!-- New Success Modal -->
-    <div id="modal-subscribe-success" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center">
-        <div data-modal-panel class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all duration-200 opacity-0 scale-95">
-            <h3 class="text-lg font-semibold mb-2">Subscription Successful</h3>
-            <p class="text-gray-700 mb-4">You have successfully subscribed to the <span id="success-plan-name"></span>
-                plan!</p>
-            <div class="text-right">
-                <button onclick="closeModal('modal-subscribe-success')" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+    <div id="modal-subscribe-success" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-8 transform transition-all duration-200 opacity-0 scale-95">
+            <div class="flex flex-col items-center text-center">
+                <div class="relative mb-4">
+                    <div class="absolute -inset-1 rounded-full bg-green-500/20 animate-ping"></div>
+                    <div class="relative w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                        <i class="fas fa-check text-2xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Subscription Successful</h3>
+                <p class="text-gray-700 mb-6">You have successfully subscribed to the <span id="success-plan-name" class="font-semibold"></span> plan.</p>
+                <div class="flex items-center gap-3">
+                    <button onclick="closeModal('modal-subscribe-success')" class="px-5 py-2.5 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- New Cancel Success Modal -->
-    <div id="modal-cancel-success" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center">
-        <div data-modal-panel class="bg-white rounded-lg shadow-xl w-full max-w-md p-6 transform transition-all duration-200 opacity-0 scale-95">
-            <h3 class="text-lg font-semibold mb-2">Plan Cancelled</h3>
-            <p class="text-gray-700 mb-4">Your plan has been successfully cancelled.</p>
-            <div class="text-right">
-                <button onclick="closeModal('modal-cancel-success')" class="px-4 py-2 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+    <div id="modal-cancel-success" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-8 transform transition-all duration-200 opacity-0 scale-95">
+            <div class="flex flex-col items-center text-center">
+                <div class="relative mb-4">
+                    <div class="absolute -inset-1 rounded-full bg-red-500/20 animate-ping"></div>
+                    <div class="relative w-16 h-16 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                        <i class="fas fa-times text-2xl"></i>
+                    </div>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2">Plan Cancelled</h3>
+                <p class="text-gray-700 mb-6">Your plan has been successfully cancelled.</p>
+                <div class="flex items-center gap-3">
+                    <button onclick="closeModal('modal-cancel-success')" class="px-5 py-2.5 rounded-md border transition-colors hover:bg-gray-50">Close</button>
+                    <button onclick="openModal('modal-subscribe'); closeModal('modal-cancel-success');" class="px-5 py-2.5 rounded-md bg-blue-600 text-white hover:bg-blue-700">Choose Another Plan</button>
+                </div>
             </div>
         </div>
     </div>

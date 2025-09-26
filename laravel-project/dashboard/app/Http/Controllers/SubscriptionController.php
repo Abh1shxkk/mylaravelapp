@@ -5,6 +5,9 @@ use App\Models\Subscription;
 use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SubscriptionPurchased;
+use Carbon\Carbon;
 use Razorpay\Api\Api;
 
 class SubscriptionController extends Controller
@@ -37,6 +40,28 @@ class SubscriptionController extends Controller
         }
 
         $api = new Api($keyId, $keySecret);
+
+        // Capture carryover seconds from current active custom plan (if any)
+        try {
+            $currentActive = Auth::user()->subscriptions()
+                ->where('status', 'active')
+                ->latest('started_at')
+                ->first();
+            $carryoverSeconds = 0;
+            if ($currentActive && $currentActive->ended_at && now()->lt($currentActive->ended_at)) {
+                $currentPlan = Plan::where('slug', $currentActive->plan_id)->first();
+                if ($currentPlan && $currentPlan->billing_period === 'custom') {
+                    $carryoverSeconds = max(0, $currentActive->ended_at->diffInSeconds(now()));
+                }
+            }
+            if ($carryoverSeconds > 0) {
+                session(['subscription_carryover' => $carryoverSeconds]);
+            } else {
+                session()->forget('subscription_carryover');
+            }
+        } catch (\Throwable $e) {
+            // ignore carryover if any error occurs
+        }
 
         try {
             // Create subscription on Razorpay
@@ -112,11 +137,58 @@ class SubscriptionController extends Controller
             ], 404);
         }
 
+        // Determine started_at and possible ended_at based on plan duration
+        $plan = Plan::where('slug', $subscription->plan_id)->first();
+        $startedAt = $subscription->started_at ?: now();
+        $endedAt = null;
+        if ($plan && ($plan->billing_period === 'custom') && $plan->duration_value && $plan->duration_unit) {
+            $calc = Carbon::parse($startedAt)->copy();
+            switch ($plan->duration_unit) {
+                case 'minutes':
+                    $calc->addMinutes($plan->duration_value); break;
+                case 'hours':
+                    $calc->addHours($plan->duration_value); break;
+                case 'days':
+                    $calc->addDays($plan->duration_value); break;
+                case 'weeks':
+                    $calc->addWeeks($plan->duration_value); break;
+                case 'months':
+                    $calc->addMonths($plan->duration_value); break;
+                case 'years':
+                    $calc->addYears($plan->duration_value); break;
+            }
+            $endedAt = $calc;
+        }
+
+        // Apply carryover seconds if present and target plan is custom
+        try {
+            $carry = (int) session('subscription_carryover', 0);
+            if ($carry > 0 && $plan && $plan->billing_period === 'custom') {
+                $endedAt = ($endedAt ?: Carbon::parse($startedAt)->copy())->addSeconds($carry);
+            }
+            // Clear carryover after use
+            session()->forget('subscription_carryover');
+        } catch (\Throwable $e) {
+            // ignore carryover errors
+        }
+
         $subscription->update([
             'status' => 'active',
             'razorpay_payment_id' => $request->razorpay_payment_id,
-            'started_at' => $subscription->started_at ?: now(),
+            'started_at' => $startedAt,
+            'ended_at' => $endedAt,
         ]);
+
+        // Send confirmation email to the user
+        try {
+            $user = Auth::user();
+            $plan = $plan ?: Plan::where('slug', $subscription->plan_id)->first();
+            if ($user && $user->email && $plan) {
+                Mail::to($user->email)->send(new SubscriptionPurchased($user, $plan, $subscription));
+            }
+        } catch (\Throwable $e) {
+            // Silently fail email sending to avoid breaking the payment flow
+        }
 
         return response()->json(['success' => true]);
     }

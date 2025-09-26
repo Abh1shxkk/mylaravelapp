@@ -7,6 +7,9 @@ use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SubscriptionPurchased;
+use Carbon\Carbon;
 use Stripe\StripeClient;
 
 class StripeController extends Controller
@@ -27,6 +30,28 @@ class StripeController extends Controller
         }
 
         try {
+            // Capture carryover seconds from current active custom plan (if any)
+            try {
+                $currentActive = Auth::user()->subscriptions()
+                    ->where('status', 'active')
+                    ->latest('started_at')
+                    ->first();
+                $carryoverSeconds = 0;
+                if ($currentActive && $currentActive->ended_at && now()->lt($currentActive->ended_at)) {
+                    $currentPlan = Plan::where('slug', $currentActive->plan_id)->first();
+                    if ($currentPlan && $currentPlan->billing_period === 'custom') {
+                        $carryoverSeconds = max(0, $currentActive->ended_at->diffInSeconds(now()));
+                    }
+                }
+                if ($carryoverSeconds > 0) {
+                    session(['subscription_carryover' => $carryoverSeconds]);
+                } else {
+                    session()->forget('subscription_carryover');
+                }
+            } catch (\Throwable $e) {
+                // ignore carryover errors
+            }
+
             $stripe = new StripeClient(config('services.stripe.secret'));
 
             // Create a Checkout Session for subscription
@@ -77,16 +102,55 @@ class StripeController extends Controller
         }
 
         // Single-row model: upsert by user_id only
+        // Determine ended_at for custom-duration plans
+        $plan = Plan::where('slug', $planSlug)->first();
+        $startedAt = now();
+        $endedAt = null;
+        if ($plan && ($plan->billing_period === 'custom') && $plan->duration_value && $plan->duration_unit) {
+            $calc = Carbon::parse($startedAt)->copy();
+            switch ($plan->duration_unit) {
+                case 'minutes': $calc->addMinutes($plan->duration_value); break;
+                case 'hours': $calc->addHours($plan->duration_value); break;
+                case 'days': $calc->addDays($plan->duration_value); break;
+                case 'weeks': $calc->addWeeks($plan->duration_value); break;
+                case 'months': $calc->addMonths($plan->duration_value); break;
+                case 'years': $calc->addYears($plan->duration_value); break;
+            }
+            $endedAt = $calc;
+        }
+
+        // Apply carryover seconds if present and target plan is custom
+        try {
+            $carry = (int) session('subscription_carryover', 0);
+            if ($carry > 0 && $plan && $plan->billing_period === 'custom') {
+                $endedAt = ($endedAt ?: Carbon::parse($startedAt)->copy())->addSeconds($carry);
+            }
+            session()->forget('subscription_carryover');
+        } catch (\Throwable $e) {
+            // ignore carryover
+        }
+
         $subscription = Subscription::updateOrCreate(
             [ 'user_id' => Auth::id() ],
             [
                 'plan_id' => $planSlug,
                 'stripe_subscription_id' => is_object($session->subscription) ? $session->subscription->id : $session->subscription,
                 'status' => 'active',
-                'started_at' => now(),
-                'ended_at' => null,
+                'started_at' => $startedAt,
+                'ended_at' => $endedAt,
             ]
         );
+
+        // Send confirmation email to the user
+        try {
+            $user = Auth::user();
+            $plan = $plan ?: Plan::where('slug', $planSlug)->first();
+            if ($user && $user->email && $plan) {
+                Mail::to($user->email)->send(new SubscriptionPurchased($user, $plan, $subscription));
+            }
+        } catch (\Throwable $e) {
+            // Avoid breaking UX if email fails
+        }
 
         return redirect()->route('dashboard.home')->with([
             'success' => 'Subscription activated.',

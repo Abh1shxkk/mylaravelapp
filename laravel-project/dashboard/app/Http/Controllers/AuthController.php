@@ -107,6 +107,19 @@ class AuthController extends Controller
     // Dashboard home
     public function home()
     {
+        // Lazy expiration: cancel any active subs that have passed their ended_at
+        $user = Auth::user();
+        if ($user) {
+            $expired = $user->subscriptions()
+                ->where('status', 'active')
+                ->whereNotNull('ended_at')
+                ->where('ended_at', '<', now())
+                ->get();
+            foreach ($expired as $sub) {
+                $sub->update(['status' => 'cancelled']);
+            }
+        }
+
         $activeSubscription = Auth::user()->subscriptions()->where('status', 'active')->latest('started_at')->first();
         $currentPlan = $activeSubscription ? $activeSubscription->plan_id : null; // 'basic' | 'premium' | null
         
