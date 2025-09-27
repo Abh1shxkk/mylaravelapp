@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
@@ -20,15 +21,42 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
+        // Normalize inputs to reduce false-positive uniqueness (e.g., trailing spaces)
+        $normalizedPhone = trim((string) $request->input('phone'));
+        if ($normalizedPhone === '') {
+            $normalizedPhone = null;
+        }
+        $request->merge([
+            'name' => trim((string) $request->input('name')),
+            'email' => trim((string) $request->input('email')),
+            'phone' => $normalizedPhone,
+        ]);
         
         // Validate all fields including the new ones
-        $validated = $request->validate([
+        $userModel = new \App\Models\User();
+        $table = $userModel->getTable();
+        $keyName = $userModel->getKeyName();
+
+        $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:dashboard_users,email,' . $user->id],
-            'phone' => ['nullable', 'string', 'max:15', 'unique:dashboard_users,phone,' . $user->id],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:15'],
             'bio' => ['nullable', 'string', 'max:1000'],
             'role' => ['sometimes', 'string', 'in:user,manager,admin'],
-        ]);
+        ];
+
+        // Apply unique only if value actually changes (post-normalization)
+        if ($request->input('email') !== $user->email) {
+            $rules['email'][] = Rule::unique($table, 'email')->ignore($user->{$keyName}, $keyName);
+        } else {
+            // keep format checks but skip unique
+        }
+
+        if ($request->input('phone') !== $user->phone) {
+            $rules['phone'][] = Rule::unique($table, 'phone')->ignore($user->{$keyName}, $keyName);
+        }
+
+        $validated = $request->validate($rules);
 
         // Only admins can change roles
         if (isset($validated['role']) && $user->role !== 'admin') {
@@ -40,6 +68,20 @@ class ProfileController extends Controller
 
         // Refresh CSRF token to avoid 419 on subsequent POSTs
         $request->session()->regenerateToken();
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully!',
+                'csrf' => csrf_token(),
+                'user' => [
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'bio' => $user->bio,
+                    'role' => $user->role,
+                ],
+            ]);
+        }
 
         return redirect()->route('profile.settings')->with('success', 'Profile updated successfully!');
     }
@@ -67,6 +109,14 @@ class ProfileController extends Controller
 
         // Refresh CSRF token to avoid 419 on subsequent POSTs
         $request->session()->regenerateToken();
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile picture updated successfully!',
+                'csrf' => csrf_token(),
+                'profile_picture_url' => asset('storage/' . $path),
+            ]);
+        }
 
         return redirect()->route('profile.settings')->with('success', 'Profile picture updated successfully!');
     }
@@ -89,6 +139,14 @@ class ProfileController extends Controller
 
         // Refresh CSRF token to avoid 419 on subsequent POSTs
         $request->session()->regenerateToken();
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile picture removed successfully!',
+                'csrf' => csrf_token(),
+                'profile_picture_url' => null,
+            ]);
+        }
 
         return redirect()->route('profile.settings')->with('success', 'Profile picture removed successfully!');
     }
@@ -104,6 +162,13 @@ class ProfileController extends Controller
 
         // Check if current password is correct
         if (!Hash::check($validated['current_password'], $user->password)) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'The current password is incorrect.',
+                    'errors' => ['current_password' => ['The current password is incorrect.']],
+                ], 422);
+            }
             return back()->withErrors(['current_password' => 'The current password is incorrect.']);
         }
 
@@ -118,6 +183,13 @@ class ProfileController extends Controller
         // Refresh current session/CSRF to avoid 419 after password change
         $request->session()->regenerate();
         $request->session()->regenerateToken();
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password changed successfully!',
+                'csrf' => csrf_token(),
+            ]);
+        }
 
         return redirect()->route('profile.settings')->with('success', 'Password changed successfully!');
     }

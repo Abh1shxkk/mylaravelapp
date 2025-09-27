@@ -349,6 +349,23 @@
                 if(btn){ btn.disabled = false; btn.classList.remove('opacity-70','cursor-not-allowed'); }
             }
         }
+
+        // Close modals when clicking on overlay background for this layout
+        (function(){
+            const tryBindOverlay = (id) => {
+                const overlay = document.getElementById(id);
+                if (!overlay || overlay.__overlayBound) return;
+                overlay.__overlayBound = true;
+                overlay.addEventListener('mousedown', function(e){
+                    if (e.target === overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.classList.remove('flex');
+                    }
+                });
+            };
+            // Currently used on this layout
+            tryBindOverlay('forgot-email-modal');
+        })();
     </script>
 </body>
 </html>

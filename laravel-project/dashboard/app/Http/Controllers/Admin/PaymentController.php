@@ -81,7 +81,8 @@ class PaymentController extends Controller
 
     public function plansJson()
     {
-        $plans = Plan::select('id','name','slug','price','billing_period','description','razorpay_plan_id','stripe_price_id')
+        $plans = Plan::withCount('subscriptions')
+            ->select('id','name','slug','price','billing_period','description','razorpay_plan_id','stripe_price_id','created_at')
             ->orderBy('id','asc')
             ->get();
         return response()->json($plans);
@@ -89,6 +90,9 @@ class PaymentController extends Controller
 
     public function createPlan()
     {
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->view('admin.payment.partials.plan-form-content');
+        }
         return view('admin.payment.plan-form');
     }
 
@@ -114,12 +118,23 @@ class PaymentController extends Controller
 
         Plan::create($data);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Plan created successfully!',
+                'redirect' => route('admin.payment.plans'),
+            ]);
+        }
+
         return redirect()->route('admin.payment.plans')
             ->with('success', 'Plan created successfully!');
     }
 
     public function editPlan(Plan $plan)
     {
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->view('admin.payment.partials.plan-form-content', compact('plan'));
+        }
         return view('admin.payment.plan-form', compact('plan'));
     }
 
@@ -145,6 +160,14 @@ class PaymentController extends Controller
 
         $plan->update($data);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Plan updated successfully!',
+                'redirect' => route('admin.payment.plans'),
+            ]);
+        }
+
         return redirect()->route('admin.payment.plans')
             ->with('success', 'Plan updated successfully!');
     }
@@ -153,11 +176,24 @@ class PaymentController extends Controller
     {
         // Check if plan has active subscriptions
         if ($plan->subscriptions()->whereIn('status', ['active', 'created', 'paused'])->exists()) {
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cannot delete plan with active subscriptions!'
+                ], 422);
+            }
             return redirect()->route('admin.payment.plans')
                 ->with('error', 'Cannot delete plan with active subscriptions!');
         }
 
         $plan->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Plan deleted successfully!'
+            ]);
+        }
 
         return redirect()->route('admin.payment.plans')
             ->with('success', 'Plan deleted successfully!');

@@ -2,11 +2,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subscription;
+use App\Models\SubscriptionHistory;
 use App\Models\Plan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SubscriptionPurchased;
+use App\Models\Payment;
 use Carbon\Carbon;
 use Razorpay\Api\Api;
 
@@ -41,18 +43,77 @@ class SubscriptionController extends Controller
 
         $api = new Api($keyId, $keySecret);
 
-        // Capture carryover seconds from current active custom plan (if any)
+        // Capture carryover seconds from current active plan (if any)
         try {
             $currentActive = Auth::user()->subscriptions()
                 ->where('status', 'active')
                 ->latest('started_at')
                 ->first();
             $carryoverSeconds = 0;
-            if ($currentActive && $currentActive->ended_at && now()->lt($currentActive->ended_at)) {
-                $currentPlan = Plan::where('slug', $currentActive->plan_id)->first();
-                if ($currentPlan && $currentPlan->billing_period === 'custom') {
-                    $carryoverSeconds = max(0, $currentActive->ended_at->diffInSeconds(now()));
+            if ($currentActive) {
+                $now = Carbon::now();
+                $currentEnd = null;
+                if ($currentActive->ended_at) {
+                    $currentEnd = Carbon::parse($currentActive->ended_at);
+                } else {
+                    // Derive theoretical end from started_at + plan duration
+                    $currentPlan = Plan::where('slug', $currentActive->plan_id)->first();
+                    if ($currentPlan) {
+                        $calc = Carbon::parse($currentActive->started_at ?: $now)->copy();
+                        if ($currentPlan->billing_period === 'custom' && $currentPlan->duration_value && $currentPlan->duration_unit) {
+                            switch ($currentPlan->duration_unit) {
+                                case 'minutes': $calc->addMinutes($currentPlan->duration_value); break;
+                                case 'hours': $calc->addHours($currentPlan->duration_value); break;
+                                case 'days': $calc->addDays($currentPlan->duration_value); break;
+                                case 'weeks': $calc->addWeeks($currentPlan->duration_value); break;
+                                case 'months': $calc->addMonths($currentPlan->duration_value); break;
+                                case 'years': $calc->addYears($currentPlan->duration_value); break;
+                                default: $calc->addMonth(); break;
+                            }
+                        } else {
+                            switch ($currentPlan->billing_period) {
+                                case 'monthly': $calc->addMonth(); break;
+                                case 'yearly': $calc->addYear(); break;
+                                case 'weekly': $calc->addWeek(); break;
+                                case 'daily': $calc->addDay(); break;
+                                default:
+                                    if ($currentPlan->duration_value && $currentPlan->duration_unit) {
+                                        switch ($currentPlan->duration_unit) {
+                                            case 'minutes': $calc->addMinutes($currentPlan->duration_value); break;
+                                            case 'hours': $calc->addHours($currentPlan->duration_value); break;
+                                            case 'days': $calc->addDays($currentPlan->duration_value); break;
+                                            case 'weeks': $calc->addWeeks($currentPlan->duration_value); break;
+                                            case 'months': $calc->addMonths($currentPlan->duration_value); break;
+                                            case 'years': $calc->addYears($currentPlan->duration_value); break;
+                                            default: $calc->addMonth(); break;
+                                        }
+                                    } else {
+                                        $calc->addMonth();
+                                    }
+                                    break;
+                            }
+                        }
+                        $currentEnd = $calc;
+                    }
                 }
+                if ($currentEnd && $now->lt($currentEnd)) {
+                    $carryoverSeconds = max(0, $currentEnd->diffInSeconds($now));
+                }
+
+                // Archive current active subscription into history as 'switched'
+                try {
+                    SubscriptionHistory::create([
+                        'user_id' => Auth::id(),
+                        'plan_id' => $currentActive->plan_id,
+                        'status' => 'switched',
+                        'started_at' => $currentActive->started_at,
+                        'ended_at' => $currentActive->ended_at ?: $currentEnd,
+                        'cancelled_at' => Carbon::now(),
+                        'provider' => 'razorpay',
+                        'payment_id' => null,
+                        'notes' => 'Archived on plan switch before subscribe()'
+                    ]);
+                } catch (\Throwable $e) { /* ignore history errors */ }
             }
             if ($carryoverSeconds > 0) {
                 session(['subscription_carryover' => $carryoverSeconds]);
@@ -60,7 +121,7 @@ class SubscriptionController extends Controller
                 session()->forget('subscription_carryover');
             }
         } catch (\Throwable $e) {
-            // ignore carryover if any error occurs
+            // Ignore carryover if any error occurs
         }
 
         try {
@@ -80,7 +141,7 @@ class SubscriptionController extends Controller
 
         // Upsert single row per user (overwrite previous subscription row for the user)
         Subscription::updateOrCreate(
-            [ 'user_id' => Auth::id() ],
+            ['user_id' => Auth::id()],
             [
                 'plan_id' => $request->plan_id,
                 'razorpay_subscription_id' => $subscription->id,
@@ -95,6 +156,7 @@ class SubscriptionController extends Controller
             'razorpay_key' => $keyId,
             'subscription_id' => $subscription->id,
             'plan' => $request->plan_id,
+            'carryover_seconds' => (int) session('subscription_carryover', 0),
         ]);
     }
 
@@ -141,35 +203,161 @@ class SubscriptionController extends Controller
         $plan = Plan::where('slug', $subscription->plan_id)->first();
         $startedAt = $subscription->started_at ?: now();
         $endedAt = null;
-        if ($plan && ($plan->billing_period === 'custom') && $plan->duration_value && $plan->duration_unit) {
+        if ($plan && $plan->billing_period === 'custom' && $plan->duration_value && $plan->duration_unit) {
             $calc = Carbon::parse($startedAt)->copy();
             switch ($plan->duration_unit) {
                 case 'minutes':
-                    $calc->addMinutes($plan->duration_value); break;
+                    $calc->addMinutes($plan->duration_value);
+                    break;
                 case 'hours':
-                    $calc->addHours($plan->duration_value); break;
+                    $calc->addHours($plan->duration_value);
+                    break;
                 case 'days':
-                    $calc->addDays($plan->duration_value); break;
+                    $calc->addDays($plan->duration_value);
+                    break;
                 case 'weeks':
-                    $calc->addWeeks($plan->duration_value); break;
+                    $calc->addWeeks($plan->duration_value);
+                    break;
                 case 'months':
-                    $calc->addMonths($plan->duration_value); break;
+                    $calc->addMonths($plan->duration_value);
+                    break;
                 case 'years':
-                    $calc->addYears($plan->duration_value); break;
+                    $calc->addYears($plan->duration_value);
+                    break;
             }
             $endedAt = $calc;
+        } elseif ($plan) {
+            // Default expiration for non-custom plans
+            $calc = Carbon::parse($startedAt)->copy();
+            $endedAt = match ($plan->billing_period) {
+                'monthly' => $calc->addMonth(),
+                'yearly' => $calc->addYear(),
+                default => $calc->addMonth(), // Default to monthly if unknown
+            };
         }
 
-        // Apply carryover seconds if present and target plan is custom
+        // Apply carryover seconds if present (merge overlapping validity) - recompute fresh for second precision
         try {
-            $carry = (int) session('subscription_carryover', 0);
-            if ($carry > 0 && $plan && $plan->billing_period === 'custom') {
+            $carry = 0;
+            $now = Carbon::now();
+            // Prefer history records first (latest)
+            $histories = SubscriptionHistory::where('user_id', Auth::id())
+                ->orderByDesc('cancelled_at')
+                ->orderByDesc('ended_at')
+                ->orderByDesc('started_at')
+                ->get();
+            foreach ($histories as $prior) {
+                $end = $prior->ended_at ? Carbon::parse($prior->ended_at) : null;
+                if (!$end) {
+                    $p = Plan::where('slug', $prior->plan_id)->first();
+                    if ($p) {
+                        $calc = Carbon::parse($prior->started_at ?: $now)->copy();
+                        if ($p->billing_period === 'custom' && $p->duration_value && $p->duration_unit) {
+                            switch ($p->duration_unit) {
+                                case 'minutes': $calc->addMinutes($p->duration_value); break;
+                                case 'hours': $calc->addHours($p->duration_value); break;
+                                case 'days': $calc->addDays($p->duration_value); break;
+                                case 'weeks': $calc->addWeeks($p->duration_value); break;
+                                case 'months': $calc->addMonths($p->duration_value); break;
+                                case 'years': $calc->addYears($p->duration_value); break;
+                                default: $calc->addMonth(); break;
+                            }
+                        } else {
+                            switch ($p->billing_period) {
+                                case 'monthly': $calc->addMonth(); break;
+                                case 'yearly': $calc->addYear(); break;
+                                case 'weekly': $calc->addWeek(); break;
+                                case 'daily': $calc->addDay(); break;
+                                default:
+                                    if ($p->duration_value && $p->duration_unit) {
+                                        switch ($p->duration_unit) {
+                                            case 'minutes': $calc->addMinutes($p->duration_value); break;
+                                            case 'hours': $calc->addHours($p->duration_value); break;
+                                            case 'days': $calc->addDays($p->duration_value); break;
+                                            case 'weeks': $calc->addWeeks($p->duration_value); break;
+                                            case 'months': $calc->addMonths($p->duration_value); break;
+                                            case 'years': $calc->addYears($p->duration_value); break;
+                                            default: $calc->addMonth(); break;
+                                        }
+                                    } else { $calc->addMonth(); }
+                                    break;
+                            }
+                        }
+                        $end = $calc;
+                    }
+                }
+                if ($end && $now->lt($end)) {
+                    $carry = max(0, $end->diffInSeconds($now));
+                    break;
+                }
+            }
+
+            // Fallback: scan any prior Subscription rows if present
+            if ($carry <= 0) {
+                $priorSubs = Subscription::where('user_id', Auth::id())
+                ->where('status', '!=', 'created')
+                ->orderByDesc('started_at')
+                ->get();
+                foreach ($priorSubs as $prior) {
+                // Compute end from ended_at or theoretical end
+                $end = $prior->ended_at ? Carbon::parse($prior->ended_at) : null;
+                if (!$end) {
+                    $p = Plan::where('slug', $prior->plan_id)->first();
+                    if ($p) {
+                        $calc = Carbon::parse($prior->started_at ?: $now)->copy();
+                        if ($p->billing_period === 'custom' && $p->duration_value && $p->duration_unit) {
+                            switch ($p->duration_unit) {
+                                case 'minutes': $calc->addMinutes($p->duration_value); break;
+                                case 'hours': $calc->addHours($p->duration_value); break;
+                                case 'days': $calc->addDays($p->duration_value); break;
+                                case 'weeks': $calc->addWeeks($p->duration_value); break;
+                                case 'months': $calc->addMonths($p->duration_value); break;
+                                case 'years': $calc->addYears($p->duration_value); break;
+                                default: $calc->addMonth(); break;
+                            }
+                        } else {
+                            switch ($p->billing_period) {
+                                case 'monthly': $calc->addMonth(); break;
+                                case 'yearly': $calc->addYear(); break;
+                                case 'weekly': $calc->addWeek(); break;
+                                case 'daily': $calc->addDay(); break;
+                                default:
+                                    if ($p->duration_value && $p->duration_unit) {
+                                        switch ($p->duration_unit) {
+                                            case 'minutes': $calc->addMinutes($p->duration_value); break;
+                                            case 'hours': $calc->addHours($p->duration_value); break;
+                                            case 'days': $calc->addDays($p->duration_value); break;
+                                            case 'weeks': $calc->addWeeks($p->duration_value); break;
+                                            case 'months': $calc->addMonths($p->duration_value); break;
+                                            case 'years': $calc->addYears($p->duration_value); break;
+                                            default: $calc->addMonth(); break;
+                                        }
+                                    } else { $calc->addMonth(); }
+                                    break;
+                            }
+                        }
+                        $end = $calc;
+                    }
+                }
+                if ($end && $now->lt($end)) {
+                    $carry = max(0, $end->diffInSeconds($now));
+                    break; // take the most recent valid one
+                }
+                }
+            }
+            // Also accept carryover from client (passed back from subscribe response)
+            $carryFromClient = (int) $request->input('carryover_seconds', 0);
+            // Fallback to session-based carryover if recomputation fails
+            if ($carry <= 0) {
+                $carry = (int) session('subscription_carryover', 0);
+            }
+            $carry = max($carry, $carryFromClient);
+            if ($carry > 0) {
                 $endedAt = ($endedAt ?: Carbon::parse($startedAt)->copy())->addSeconds($carry);
             }
-            // Clear carryover after use
             session()->forget('subscription_carryover');
         } catch (\Throwable $e) {
-            // ignore carryover errors
+            // Ignore carryover errors
         }
 
         $subscription->update([
@@ -179,10 +367,38 @@ class SubscriptionController extends Controller
             'ended_at' => $endedAt,
         ]);
 
+        try {
+            \Log::info('Razorpay verify carryover applied', [
+                'user_id' => Auth::id(),
+                'plan' => $subscription->plan_id,
+                'started_at' => (string) $startedAt,
+                'ended_at' => (string) $endedAt,
+            ]);
+        } catch (\Throwable $e) {}
+
+        // Record payment for transaction history (Razorpay)
+        try {
+            Payment::create([
+                'user_id' => Auth::id(),
+                'plan_id' => $subscription->plan_id,
+                'provider' => 'razorpay',
+                'payment_id' => $request->razorpay_payment_id,
+                'subscription_id' => $request->razorpay_subscription_id,
+                'amount' => (int) (($plan->price ?? 0)),
+                'currency' => 'INR',
+                'status' => 'paid',
+                'paid_at' => now(),
+                'meta' => [
+                    'signature' => $request->razorpay_signature,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            // Ignore logging errors
+        }
+
         // Send confirmation email to the user
         try {
             $user = Auth::user();
-            $plan = $plan ?: Plan::where('slug', $subscription->plan_id)->first();
             if ($user && $user->email && $plan) {
                 Mail::to($user->email)->send(new SubscriptionPurchased($user, $plan, $subscription));
             }
@@ -193,10 +409,8 @@ class SubscriptionController extends Controller
         return response()->json(['success' => true]);
     }
 
-    // Cancel method remains the same
     public function cancel(Request $request)
     {
-        // Prefer the most recently created ACTIVE subscription, then created/paused
         $subscription = Auth::user()->subscriptions()
             ->whereIn('status', ['created', 'active', 'paused'])
             ->orderByRaw("CASE WHEN status='active' THEN 0 ELSE 1 END")
@@ -217,7 +431,7 @@ class SubscriptionController extends Controller
                     $api = new Api($keyId, $keySecret);
                     $api->subscription->fetch($subscription->razorpay_subscription_id)->cancel();
                 } catch (\Throwable $e) {
-                    // proceed; we'll still cancel locally
+                    // Proceed; we'll still cancel locally
                 }
             }
         }
@@ -227,11 +441,15 @@ class SubscriptionController extends Controller
                 $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
                 $stripe->subscriptions->cancel($subscription->stripe_subscription_id, []);
             } catch (\Throwable $e) {
-                // proceed; we'll still cancel locally
+                // Proceed; we'll still cancel locally
             }
         }
 
         $subscription->update(['status' => 'cancelled', 'ended_at' => now()]);
-        return response()->json(['success' => true]);
+        // If request is AJAX/JSON, return JSON; otherwise redirect to cancelled view page
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true]);
+        }
+        return redirect()->route('subscription.cancelled.view');
     }
 }

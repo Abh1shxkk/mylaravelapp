@@ -36,7 +36,7 @@
                 </p>
             </div>
 
-            <form method="POST" action="{{ isset($plan) ? route('admin.payment.plans.update', $plan) : route('admin.payment.plans.store') }}" class="p-6">
+            <form id="planForm" method="POST" action="{{ isset($plan) ? route('admin.payment.plans.update', $plan) : route('admin.payment.plans.store') }}" class="p-6">
                 @csrf
                 @if(isset($plan))
                     @method('PUT')
@@ -175,13 +175,15 @@
                 </div>
 
                 <!-- Form Actions -->
+                <div id="formMessages" class="hidden mt-6"></div>
+
                 <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
                     <a href="{{ route('admin.payment.plans') }}" 
                        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
                         Cancel
                     </a>
-                    <button type="submit" 
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <button id="submitBtn" type="submit" 
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
                         <i class="fas fa-save mr-2"></i>
                         {{ isset($plan) ? 'Update Plan' : 'Create Plan' }}
                     </button>
@@ -215,6 +217,98 @@
             if(select){
                 select.addEventListener('change', toggle);
                 toggle();
+            }
+        })();
+
+        // AJAX submit to avoid page refresh
+        (function(){
+            const form = document.getElementById('planForm');
+            const messages = document.getElementById('formMessages');
+            const submitBtn = document.getElementById('submitBtn');
+
+            function showMessage(type, html){
+                if(!messages) return;
+                messages.className = '';
+                const base = 'rounded-lg px-4 py-3 mb-4';
+                if(type === 'success'){
+                    messages.className = base + ' bg-green-100 border border-green-300 text-green-800';
+                } else if(type === 'error'){
+                    messages.className = base + ' bg-red-100 border border-red-300 text-red-800';
+                } else {
+                    messages.className = base + ' bg-gray-100 border border-gray-300 text-gray-800';
+                }
+                messages.innerHTML = html;
+                messages.classList.remove('hidden');
+            }
+
+            function clearFieldErrors(){
+                document.querySelectorAll('[data-field-error]').forEach(el => el.remove());
+            }
+
+            function addFieldError(field, message){
+                const input = document.querySelector('[name="' + field + '"]');
+                if(!input) return;
+                const small = document.createElement('div');
+                small.setAttribute('data-field-error', '');
+                small.className = 'text-red-600 text-xs mt-1';
+                small.textContent = message;
+                input.closest('div')?.appendChild(small);
+            }
+
+            async function handleSubmit(e){
+                if(!form) return;
+                e.preventDefault();
+                clearFieldErrors();
+                if(messages){ messages.classList.add('hidden'); messages.innerHTML=''; }
+
+                const formData = new FormData(form);
+                const action = form.getAttribute('action');
+
+                try {
+                    submitBtn && (submitBtn.disabled = true);
+
+                    const res = await fetch(action, {
+                        method: 'POST', // Laravel will use _method when present
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData,
+                        credentials: 'same-origin'
+                    });
+
+                    const isJson = (res.headers.get('content-type') || '').includes('application/json');
+                    const data = isJson ? await res.json() : {};
+
+                    if(res.ok && data && data.success){
+                        showMessage('success', data.message || 'Saved successfully. Redirecting...');
+                        if(data.redirect){
+                            setTimeout(() => { window.location.href = data.redirect; }, 700);
+                        }
+                        return;
+                    }
+
+                    if(res.status === 422 && data && data.errors){
+                        // Validation errors
+                        const list = Object.values(data.errors).flat();
+                        showMessage('error', '<strong>Please fix the following errors:</strong><ul class="list-disc list-inside mt-2">' + list.map(e => '<li>' + e + '</li>').join('') + '</ul>');
+                        for(const [field, msgs] of Object.entries(data.errors)){
+                            addFieldError(field, Array.isArray(msgs) ? msgs[0] : String(msgs));
+                        }
+                        return;
+                    }
+
+                    // Other errors
+                    showMessage('error', (data && data.message) ? data.message : 'Something went wrong. Please try again.');
+                } catch(err){
+                    showMessage('error', 'Network error. Please check your connection and try again.');
+                } finally {
+                    submitBtn && (submitBtn.disabled = false);
+                }
+            }
+
+            if(form){
+                form.addEventListener('submit', handleSubmit);
             }
         })();
     </script>

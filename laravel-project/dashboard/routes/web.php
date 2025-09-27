@@ -6,6 +6,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\SubscriptionController; // Add this line
 use App\Http\Controllers\StripeController;
+use App\Http\Controllers\TransactionsController;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Subscription as SubscriptionModel;
 
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
@@ -52,6 +55,32 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/subscribe/verify', [SubscriptionController::class, 'verify'])->name('subscription.verify');
     Route::post('/cancel-subscription', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
 
+    // Subscription result pages
+    Route::get('/subscription/success', function() { return view('subscription.success'); })->name('subscription.success.view');
+    Route::get('/subscription/cancelled', function() { return view('subscription.cancelled'); })->name('subscription.cancelled.view');
+
+    // Live subscription status endpoint
+    Route::get('/subscription/status', function() {
+        $user = Auth::user();
+        $sub = $user ? $user->subscriptions()->where('status','active')->latest('started_at')->first() : null;
+        return response()->json([
+            'active' => (bool) $sub,
+            'plan_id' => $sub->plan_id ?? null,
+            'started_at' => optional($sub->started_at)->toIso8601String(),
+            'ended_at' => optional($sub->ended_at)->toIso8601String(),
+            'status' => $sub->status ?? null,
+        ]);
+    })->name('subscription.status');
+
+    // Weather API proxy
+    Route::get('/weather/current', [WeatherController::class, 'current'])->name('weather.current');
+
+    // Transactions
+    Route::get('/transactions', [TransactionsController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{payment}/invoice', [TransactionsController::class, 'invoice'])->name('transactions.invoice');
+    Route::get('/transactions/{payment}/invoice/partial', [TransactionsController::class, 'invoicePartial'])->name('transactions.invoice.partial');
+    Route::delete('/transactions/{payment}', [TransactionsController::class, 'destroy'])->name('transactions.destroy');
+
     // Stripe routes
     Route::post('/stripe/checkout', [StripeController::class, 'createCheckoutSession'])->name('stripe.checkout');
     Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
@@ -81,6 +110,9 @@ Route::middleware(['auth'])->group(function () {
             Route::put('/subscriptions/{subscription}', [\App\Http\Controllers\Admin\PaymentController::class, 'updateSubscription'])->name('subscriptions.update');
             Route::get('/revenue', [\App\Http\Controllers\Admin\PaymentController::class, 'revenue'])->name('revenue');
         });
+
+        // Admin: Subscription reconcile (carryover fix)
+        Route::post('/subscriptions/reconcile', [\App\Http\Controllers\Admin\SubscriptionAdminController::class, 'reconcile'])->name('subscriptions.reconcile');
     });
 });
 

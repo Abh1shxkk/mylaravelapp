@@ -13,74 +13,10 @@
 </head>
 
 <body class="bg-gray-100 min-h-screen">
-    @php
-        // Compute active subscription early for header rendering
-        $activeSubscriptionHeader = Auth::user()->subscriptions()->where('status', 'active')->latest('started_at')->first();
-        $currentPlanHeader = $activeSubscriptionHeader ? $activeSubscriptionHeader->plan_id : null;
-    @endphp
     <!-- Header -->
-    <div class="bg-white shadow">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <h1 class="text-xl font-semibold">Dashboard</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Profile Picture -->
-                    @if(Auth::user()->profile_picture)
-                        <img class="h-8 w-8 rounded-full object-cover"
-                            src="{{ asset('storage/' . Auth::user()->profile_picture) }}" alt="Profile">
-                    @else
-                        <div class="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
-                            <i class="fas fa-user text-gray-600 text-sm"></i>
-                        </div>
-                    @endif
+    @include('partials.header')
 
-                    <div class="flex flex-col">
-                        <span class="text-gray-700">Welcome, {{ Auth::user()->name }}</span>
-                        <span class="text-xs text-blue-600">{{ ucfirst(Auth::user()->role ?? 'user') }}</span>
-                    </div>
-
-                    <!-- Profile Settings Link -->
-                    <a href="{{ route('profile.settings') }}"
-                        class="bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 text-sm">
-                        <i class="fas fa-user-cog mr-1"></i>Profile
-                    </a>
-
-                    @if(Auth::user() && method_exists(Auth::user(), 'isAdmin') && Auth::user()->isAdmin())
-                        <!-- Admin Settings Link (visible only for admins) -->
-                        <a href="{{ route('admin.users.index') }}"
-                            class="bg-gray-700 text-white px-3 py-2 rounded hover:bg-gray-800 text-sm"
-                            title="Admin-only: manage users">
-                            <i class="fas fa-shield-alt mr-1"></i>Admin Settings
-                        </a>
-                        
-                        <!-- Payment Settings Link (visible only for admins) -->
-                        <a href="{{ route('admin.payment.index') }}"
-                            class="bg-purple-600 text-white px-3 py-2 rounded hover:bg-purple-700 text-sm"
-                            title="Admin-only: manage payments and subscriptions">
-                            <i class="fas fa-credit-card mr-1"></i>Payment Settings
-                        </a>
-                    @endif
-
-                    <!-- Subscribe Button (always rendered; hidden when user has an active plan) -->
-                    <button id="btn-subscribe" type="button" onclick="openModal('modal-subscribe')"
-                        class="@if($currentPlanHeader) hidden @endif bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 text-sm">
-                        <i class="fas fa-crown mr-1"></i>Subscribe
-                    </button>
-
-                    <form method="POST" action="{{ route('dashboard.logout') }}" class="inline">
-                        @csrf
-                        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
-                            Logout
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="flex h-screen ">
+    <div class="flex min-h-screen ">
         <!-- Sidebar -->
         <div class="w-64 bg-white shadow-lg">
             <div class="p-4">
@@ -102,33 +38,33 @@
                         <p class="text-green-700 text-sm mt-1">Change your password & manage settings</p>
                     </a>
 
-                    <div
+                    <!-- <div
                         class="block bg-purple-50 p-4 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer group">
                         <h4 class="font-semibold text-purple-900 flex items-center">
                             <i class="fas fa-chart-bar mr-3 text-purple-600"></i>Analytics
                         </h4>
                         <p class="text-purple-700 text-sm mt-1">View your statistics and reports</p>
-                    </div>
+                    </div> -->
 
                     <!-- Basic / Premium entries in navigation -->
                     @php
                         $activeSubscription = Auth::user()->subscriptions()->where('status', 'active')->latest('started_at')->first();
                         $currentPlan = $activeSubscription ? $activeSubscription->plan_id : null; // 'basic' | 'premium' | null
                     @endphp
-                    <div onclick="handlePlanClick('basic')"
+                    <!-- <div onclick="handlePlanClick('basic')"
                         class="block bg-yellow-50 p-4 rounded-lg hover:bg-yellow-100 transition-colors cursor-pointer group">
                         <h4 class="font-semibold text-yellow-900 flex items-center">
                             <i class="fas fa-star mr-3 text-yellow-600"></i>Basic Content
                         </h4>
                         <p class="text-yellow-700 text-sm mt-1">Open basic content</p>
-                    </div>
-                    <div onclick="handlePlanClick('premium')"
+                    </div> -->
+                    <!-- <div onclick="handlePlanClick('premium')"
                         class="block bg-rose-50 p-4 rounded-lg hover:bg-rose-100 transition-colors cursor-pointer group">
                         <h4 class="font-semibold text-rose-900 flex items-center">
                             <i class="fas fa-gem mr-3 text-rose-600"></i>Premium Content
                         </h4>
                         <p class="text-rose-700 text-sm mt-1">Open premium content</p>
-                    </div>
+                    </div> -->
 
                     <!-- My Plans -->
                     <div onclick="openModal('modal-my-plans')"
@@ -138,12 +74,19 @@
                         </h4>
                         <p class="text-indigo-700 text-sm mt-1">View or cancel your current plan</p>
                     </div>
+                    <a href="{{ route('transactions.index') }}"
+                        class="block bg-teal-50 p-4 rounded-lg hover:bg-teal-100 transition-colors group">
+                        <h4 class="font-semibold text-teal-900 flex items-center">
+                            <i class="fas fa-file-invoice mr-3 text-teal-600"></i>Transactions
+                        </h4>
+                        <p class="text-teal-700 text-sm mt-1">View history and download invoices</p>
+                    </a>
                 </div>
             </div>
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex-1 p-6 overflow-auto">
+        <div id="main-content" class="flex-1 p-6">
             @if(session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
                     {{ session('success') }}
@@ -338,14 +281,14 @@
 
     <!-- My Plans Modal -->
     <div id="modal-my-plans" class="hidden fixed inset-0 z-50 bg-black/40 items-center justify-center p-4">
-        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all duration-200 opacity-0 scale-95">
+        <div data-modal-panel class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all duration-200 opacity-0 scale-95 max-h-[85vh] flex flex-col">
             <div class="flex items-center justify-between px-6 py-4 border-b">
                 <h3 class="text-xl font-semibold">My Current Plan</h3>
                 <button onclick="closeModals()" class="text-gray-500 hover:text-gray-700 transition-colors">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="p-6">
+            <div class="p-6 overflow-y-auto">
                 <div id="plan-details-none" class="hidden">
                     <p class="text-gray-700">You don't have an active subscription. Please subscribe to a plan.</p>
                 </div>
@@ -379,6 +322,69 @@
                         </ul>
                     @endif
                     
+                    @php
+                        // Compute active subscription for this modal section
+                        $activeSubModal = Auth::user()->subscriptions()->where('status', 'active')->latest('started_at')->first();
+                        $currentPlanModal = $activeSubModal ? $activeSubModal->plan_id : null;
+                        $tz = 'Asia/Kolkata'; // Show times in IST
+                    @endphp
+                    @if($currentPlanModal === $plan->slug && $activeSubModal)
+                        @php
+                            $started = $activeSubModal->started_at ? \Carbon\Carbon::parse($activeSubModal->started_at)->timezone($tz) : null;
+                            $expires = null;
+                            $isLifetime = (strtolower($plan->billing_period ?? '') === 'lifetime') || (strtolower($plan->slug ?? '') === 'lifetime');
+                            if (!empty($activeSubModal->ended_at)) {
+                                $expires = \Carbon\Carbon::parse($activeSubModal->ended_at)->timezone($tz);
+                            } elseif (!$isLifetime) {
+                                $calc = $started ? $started->copy() : null;
+                                if ($calc) {
+                                    // Compute next renewal based on plan period if available
+                                    $unit = strtolower($plan->duration_unit ?? $plan->billing_period ?? '');
+                                    $value = (int) ($plan->duration_value ?? 1);
+                                    switch ($unit) {
+                                        case 'minute': case 'minutes': $calc->addMinutes(max(1,$value)); break;
+                                        case 'hour': case 'hours': $calc->addHours(max(1,$value)); break;
+                                        case 'day': case 'days': $calc->addDays(max(1,$value)); break;
+                                        case 'week': case 'weeks': $calc->addWeeks(max(1,$value)); break;
+                                        case 'month': case 'months': case 'monthly': $calc->addMonths(max(1,$value)); break;
+                                        case 'year': case 'years': case 'yearly': $calc->addYears(max(1,$value)); break;
+                                        default:
+                                            // Fallback: if custom with missing units, assume 1 month
+                                            $calc->addMonth();
+                                            break;
+                                    }
+                                    $expires = $calc;
+                                }
+                            }
+                        @endphp
+                        <div class="mt-2 mb-4 rounded-md bg-gray-50 border border-gray-200 p-4">
+                            <h5 class="text-sm font-semibold text-gray-800 mb-2">Subscription details</h5>
+                            @if($started)
+                                <p class="text-sm text-gray-700">
+                                    <span class="font-medium">Started:</span>
+                                    {{ $started->format('M d, Y h:i:s A') }} IST
+                                </p>
+                            @endif
+                            @if($isLifetime)
+                                <p class="text-sm text-gray-700 mt-1">
+                                    <span class="font-medium">Expiry:</span>
+                                    No expiry (lifetime access)
+                                </p>
+                            @elseif($expires)
+                                <p class="text-sm text-gray-700 mt-1">
+                                    <span class="font-medium">{{ !empty($activeSubModal->ended_at) ? 'Expires on:' : 'Renews on:' }}</span>
+                                    {{ $expires->format('M d, Y h:i:s A') }} IST
+                                    <span class="text-xs text-gray-500">(in {{ $expires->diffForHumans() }})</span>
+                                </p>
+                            @else
+                                <p class="text-sm text-gray-700 mt-1">
+                                    <span class="font-medium">Status:</span>
+                                    Active — renews automatically
+                                </p>
+                            @endif
+                        </div>
+                    @endif
+
                     <!-- Action Buttons -->
                     <div class="space-y-3">
                         @if(($currentPlan ?? null) !== 'lifetime')
@@ -669,6 +675,39 @@
 
         let currentPlan = @json($currentPlan); // Initial value from server
 
+        // Drawer controls (right-side navigation)
+        const drawer = document.getElementById('drawer-nav');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+        const mainContent = document.getElementById('main-content');
+        function openDrawer(){
+            if(!drawer) return;
+            drawer.classList.remove('translate-x-full');
+            if(drawerOverlay){ drawerOverlay.classList.remove('hidden'); }
+            if(mainContent){ mainContent.classList.add('md:pr-72'); }
+            try { document.body.classList.add('overflow-hidden'); } catch(e) {}
+        }
+        function closeDrawer(){
+            if(!drawer) return;
+            drawer.classList.add('translate-x-full');
+            if(drawerOverlay){ drawerOverlay.classList.add('hidden'); }
+            if(mainContent){ mainContent.classList.remove('md:pr-72'); }
+            try { document.body.classList.remove('overflow-hidden'); } catch(e) {}
+        }
+        function toggleDrawer(){
+            if(!drawer) return;
+            if(drawer.classList.contains('translate-x-full')){ openDrawer(); } else { closeDrawer(); }
+        }
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDrawer(); });
+        // Expose globally for inline onclick support
+        window.openDrawer = openDrawer;
+        window.closeDrawer = closeDrawer;
+        window.toggleDrawer = toggleDrawer;
+        // Also bind click just in case
+        try {
+            const btnHome = document.getElementById('btn-home');
+            if (btnHome && !btnHome.__bound) { btnHome.__bound = true; btnHome.addEventListener('click', toggleDrawer); }
+        } catch(e) {}
+
         // Toggle subscribe button based on currentPlan presence
         function updateSubscribeVisibility() {
             try {
@@ -696,6 +735,8 @@
                             "subscription_id": response.subscription_id,
                             "name": "Your App Name",
                             "description": "Subscription for " + plan.charAt(0).toUpperCase() + plan.slice(1) + " Plan",
+                            // Persist carryover seconds so we can send them to verify endpoint
+                            "carryover_seconds": (response.carryover_seconds || 0),
                             "handler": function (response) {
                                 // Verify payment signature and activate subscription
                                 $.ajax({
@@ -705,7 +746,8 @@
                                         _token: '{{ csrf_token() }}',
                                         razorpay_payment_id: response.razorpay_payment_id,
                                         razorpay_subscription_id: options.subscription_id,
-                                        razorpay_signature: response.razorpay_signature
+                                        razorpay_signature: response.razorpay_signature,
+                                        carryover_seconds: options.carryover_seconds
                                     },
                                     success: function () {
                                         currentPlan = plan;
@@ -724,7 +766,7 @@
                             "modal": {
                                 "ondismiss": function () {
                                     hideLoading();
-                                    openModal('modal-cancel-success');
+                                    window.location.href = '{{ route('subscription.cancelled.view') }}';
                                 }
                             },
                             "prefill": {
@@ -794,6 +836,8 @@
             if (el) {
                 el.classList.remove('hidden');
                 el.classList.add('flex');
+                // Add a slight background blur behind the overlay for better focus
+                el.classList.add('backdrop-blur-sm');
                 const panel = el.querySelector('[data-modal-panel]');
                 if (panel) {
                     requestAnimationFrame(() => {
@@ -832,7 +876,7 @@
                         panel.classList.add('opacity-0','scale-95');
                         panel.classList.remove('opacity-100','scale-100');
                     }
-                    setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); }, 150);
+                    setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); el.classList.remove('backdrop-blur-sm'); }, 150);
                 }
             });
             hideLoading();
@@ -847,7 +891,7 @@
                 panel.classList.add('opacity-0','scale-95');
                 panel.classList.remove('opacity-100','scale-100');
             }
-            setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); }, 150);
+            setTimeout(() => { el.classList.add('hidden'); el.classList.remove('flex'); el.classList.remove('backdrop-blur-sm'); }, 150);
         }
 
         // Wire confirm cancel button
@@ -858,29 +902,48 @@
             }
 
             // Handle flash messages from server (e.g., after Stripe success/cancel)
-            try {
-                const flashSuccess = @json(session('success'));
-                const flashError = @json(session('error'));
-                const flashPlan = @json(session('plan'));
-
-                if (flashSuccess && String(flashSuccess).toLowerCase().includes('subscription')) {
-                    if (flashPlan) {
-                        const name = String(flashPlan);
-                        const pretty = name.charAt(0).toUpperCase() + name.slice(1);
-                        const el = document.getElementById('success-plan-name');
-                        if (el) el.textContent = pretty;
-                        // Update runtime state so Subscribe button hides if it exists
-                        currentPlan = flashPlan;
+            // Poll subscription status every 20 seconds to reflect changes without a full refresh
+            async function pollSubscription() {
+                try {
+                    const res = await fetch('{{ route('subscription.status') }}', { headers: { 'Accept': 'application/json' }});
+                    if (!res.ok) return;
+                    const d = await res.json();
+                    const newPlan = d && d.active ? d.plan_id : null;
+                    if (newPlan !== currentPlan) {
+                        currentPlan = newPlan;
                         updateSubscribeVisibility();
                     }
-                    // Delay a bit to avoid any race with pending close animations
-                    setTimeout(() => openModal('modal-subscribe-success'), 200);
-                }
+                } catch(e) { /* ignore */ }
+            }
+            pollSubscription();
+            setInterval(pollSubscription, 20000);
 
-                if (flashError && String(flashError).toLowerCase().includes('cancel')) {
-                    setTimeout(() => openModal('modal-cancel-success'), 200);
-                }
-            } catch (e) { /* ignore */ }
+            // Click outside modal (overlay) to close - apply to all modals on this page
+            const modalIds = [
+                'modal-subscribe',
+                'modal-basic-content',
+                'modal-need-premium',
+                'modal-access-granted',
+                'modal-my-plans',
+                'modal-confirm-purchase',
+                'modal-payment-gateways',
+                'modal-confirm-cancel',
+                'modal-subscribe-success',
+                'modal-cancel-success'
+            ];
+            modalIds.forEach(id => {
+                const overlay = document.getElementById(id);
+                if (!overlay) return;
+                // Prevent multiple bindings
+                if (overlay.__overlayBound) return;
+                overlay.__overlayBound = true;
+                overlay.addEventListener('mousedown', function (e) {
+                    if (e.target === overlay) {
+                        // Close only the clicked modal
+                        closeModal(id);
+                    }
+                });
+            });
         });
 
         function performCancelPlan() {
@@ -891,10 +954,8 @@
                 data: { _token: '{{ csrf_token() }}' },
                 success: function () {
                     currentPlan = null;
-                    closeModals();
-                    hideLoading();
-                    openModal('modal-cancel-success');
-                    updateSubscribeVisibility();
+                    // Redirect to the cancelled view page to avoid showing old modal UI
+                    window.location.href = '{{ route('subscription.cancelled.view') }}';
                 },
                 error: function (xhr) {
                     hideLoading();

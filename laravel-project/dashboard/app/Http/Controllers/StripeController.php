@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Plan;
 use App\Models\Subscription;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -141,6 +142,27 @@ class StripeController extends Controller
             ]
         );
 
+        // Record payment for transaction history
+        try {
+            Payment::create([
+                'user_id' => Auth::id(),
+                'plan_id' => $planSlug,
+                'provider' => 'stripe',
+                'payment_id' => $session->payment_intent ?? ($session->id ?? null),
+                'subscription_id' => is_object($session->subscription) ? $session->subscription->id : $session->subscription,
+                'amount' => (int) ($plan->price ?? 0),
+                'currency' => 'INR',
+                'status' => 'paid',
+                'paid_at' => now(),
+                'meta' => [
+                    'checkout_session_id' => $session->id ?? null,
+                    'customer_email' => Auth::user()->email ?? null,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            // do not block UX on logging error
+        }
+
         // Send confirmation email to the user
         try {
             $user = Auth::user();
@@ -150,24 +172,25 @@ class StripeController extends Controller
             }
         } catch (\Throwable $e) {
             // Avoid breaking UX if email fails
+            Log::error('Email sending failed in Stripe success: ' . $e->getMessage());
         }
 
-        return redirect()->route('dashboard.home')->with([
-            'success' => 'Subscription activated.',
-            'plan' => $planSlug,
-        ]);
+        // Redirect to success page with lightweight session info
+        return redirect()->route('subscription.success.view')
+            ->with('plan', $planSlug)
+            ->with('amount', (int) ($plan->price ?? 0));
     }
 
-    public function cancel()
+    public function cancel(Request $request)
     {
-        return redirect()->route('dashboard.home')->with('error', 'Payment cancelled.');
+        return redirect()->route('subscription.cancelled.view');
     }
 
     public function webhook(Request $request)
     {
         $signature = $request->header('Stripe-Signature');
-        $payload = $request->getContent();
         $secret = config('services.stripe.webhook_secret');
+        $payload = $request->getContent();
 
         try {
             $event = \Stripe\Webhook::constructEvent($payload, $signature, $secret);
@@ -204,5 +227,3 @@ class StripeController extends Controller
         return response()->json(['received' => true]);
     }
 }
-
-
