@@ -30,6 +30,7 @@ class User extends Authenticatable
         'locked_until',
         'last_login_at',
         'provider', // Add this
+        'stripe_customer_id', // ✅ For autopay
     ];
 
     /**

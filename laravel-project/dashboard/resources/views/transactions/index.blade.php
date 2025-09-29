@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transactions</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100 min-h-screen">
     <!-- Header -->
@@ -42,7 +43,6 @@
         <div class="flex-1 p-6">
             <div class="flex items-center justify-between mb-6">
                 <h1 class="text-2xl font-bold text-gray-900">Transaction History</h1>
-                <!-- <a href="{{ route('dashboard.home') }}" class="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700">Back to Dashboard</a> -->
             </div>
 
             @if($payments->count() === 0)
@@ -54,28 +54,13 @@
                         <tr>
                             <th class="px-4 py-3 text-left">Date</th>
                             <th class="px-4 py-3 text-left">Plan</th>
-                            <th class="px-4 py-3 text-left">Provider</th>
                             <th class="px-4 py-3 text-left">Status</th>
                             <th class="px-4 py-3 text-right">Amount</th>
                             <th class="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @foreach($payments as $p)
-                        <tr class="text-sm">
-                            <td class="px-4 py-3 text-gray-800">{{ optional($p->paid_at ?? $p->created_at)->timezone('Asia/Kolkata')->format('M d, Y h:i A') }} IST</td>
-                            <td class="px-4 py-3">{{ optional($p->plan)->name ?? strtoupper($p->plan_id) }}</td>
-                            <td class="px-4 py-3 capitalize">{{ $p->provider }}</td>
-                            <td class="px-4 py-3">
-                                <span class="px-2 py-1 rounded text-xs {{ $p->status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-800' }}">{{ ucfirst($p->status) }}</span>
-                            </td>
-                            <td class="px-4 py-3 text-right">₹{{ number_format((int)($p->amount ?? 0)) }} {{ $p->currency ?? 'INR' }}</td>
-                            <td class="px-4 py-3 text-right space-x-3">
-                                <button data-view-invoice="{{ route('transactions.invoice.partial', $p) }}" class="text-blue-600 hover:underline">View</button>
-                                <button data-delete="{{ route('transactions.destroy', $p) }}" class="text-red-600 hover:underline">Delete</button>
-                            </td>
-                        </tr>
-                        @endforeach
+                    <tbody class="divide-y divide-gray-100" id="tx-tbody">
+                        @include('transactions._rows', ['payments' => $payments])
                     </tbody>
                 </table>
                 </div>
@@ -90,9 +75,13 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold">Invoice</h3>
                 <div class="flex items-center gap-2">
-                    <button id="invoice-print" class="px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700">Print / Save PDF</button>
-                    <button id="invoice-download" class="px-3 py-1.5 text-sm rounded border hover:bg-gray-50">Download</button>
-                    <button id="invoice-close" class="ml-1 text-gray-500 hover:text-gray-700">✕</button>
+                    <button id="invoice-print" class="px-3 py-1.5 text-sm rounded bg-blue-600 text-white hover:bg-blue-700">
+                        <i class="fas fa-print mr-1"></i>Print / Save PDF
+                    </button>
+                    <button id="invoice-download" class="px-3 py-1.5 text-sm rounded border hover:bg-gray-50">
+                        <i class="fas fa-download mr-1"></i>Download
+                    </button>
+                    <button id="invoice-close" class="ml-1 text-gray-500 hover:text-gray-700 text-xl">✕</button>
                 </div>
             </div>
             <div id="invoice-body"></div>
@@ -118,7 +107,12 @@
         function closeModal(){
             if(!modal || !panel) return;
             panel.classList.add('opacity-0','scale-95'); panel.classList.remove('opacity-100','scale-100');
-            setTimeout(()=>{ modal.classList.add('hidden'); modal.classList.remove('flex'); document.body.classList.remove('overflow-hidden'); body.innerHTML=''; }, 150);
+            setTimeout(()=>{ 
+                modal.classList.add('hidden'); 
+                modal.classList.remove('flex'); 
+                document.body.classList.remove('overflow-hidden'); 
+                body.innerHTML=''; 
+            }, 150);
         }
         if(closeBtn){ closeBtn.addEventListener('click', closeModal); }
         if(modal){ modal.addEventListener('mousedown', e=>{ if(e.target===modal) closeModal(); }); }
@@ -129,19 +123,29 @@
                 e.preventDefault();
                 try{
                     const url = v.getAttribute('data-view-invoice');
-                    // extract payment id from URL
-                    try { const m = url.match(/\/transactions\/(\d+)\/invoice/); currentInvoiceId = m ? m[1] : null; } catch(e) { currentInvoiceId = null; }
-                    const res = await fetch(url, { headers: { 'Accept': 'text/html' }, credentials: 'same-origin' });
+                    try { 
+                        const m = url.match(/\/transactions\/(\d+)\/invoice/); 
+                        currentInvoiceId = m ? m[1] : null; 
+                    } catch(e) { 
+                        currentInvoiceId = null; 
+                    }
+                    const res = await fetch(url, { 
+                        headers: { 'Accept': 'text/html' }, 
+                        credentials: 'same-origin' 
+                    });
                     const html = await res.text();
                     body.innerHTML = html;
                     openModal();
-                }catch(err){ alert('Failed to load invoice.'); }
+                }catch(err){ 
+                    alert('Failed to load invoice.'); 
+                }
                 return;
             }
+            
             const d = e.target.closest('[data-delete]');
             if(d){
                 e.preventDefault();
-                if(!confirm('Delete this transaction?')) return;
+                if(!confirm('Are you sure you want to delete this transaction?')) return;
                 try{
                     const url = d.getAttribute('data-delete');
                     const res = await fetch(url, {
@@ -157,10 +161,14 @@
                         const txt = await res.text();
                         throw new Error(`Request failed (${res.status}) ${txt?.slice(0,200)}`);
                     }
-                    // Remove row from table
                     const row = d.closest('tr');
-                    if(row) row.remove();
-                }catch(err){ alert('Failed to delete. '+ (err?.message||'')); }
+                    if(row) {
+                        row.style.backgroundColor = '#fee';
+                        setTimeout(() => row.remove(), 300);
+                    }
+                }catch(err){ 
+                    alert('Failed to delete. '+ (err?.message||'')); 
+                }
                 return;
             }
         });
@@ -178,6 +186,7 @@
             w.focus();
             setTimeout(()=>{ w.print(); }, 150);
         }
+        
         function downloadInvoice(){
             if(!body) return;
             const html = '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">'+
@@ -193,6 +202,55 @@
         }
         if(printBtn){ printBtn.addEventListener('click', printInvoice); }
         if(downloadBtn){ downloadBtn.addEventListener('click', downloadInvoice); }
+
+        // Real-time countdown for pending payment expiry
+        function updateExpiryCountdown(){
+            const notes = document.querySelectorAll('[data-expiry-note]');
+            const now = new Date();
+            notes.forEach(note => {
+                if (note.dataset.expiredHandled === 'true') return;
+                const expiresAtStr = note.getAttribute('data-expires-at');
+                if (!expiresAtStr) return;
+                const expiresAt = new Date(expiresAtStr);
+                const remainSec = Math.floor((expiresAt - now) / 1000);
+                if (remainSec > 0) {
+                    const m = Math.floor(remainSec / 60);
+                    const s = remainSec % 60;
+                    note.innerHTML = '<i class="fas fa-clock"></i> ' +
+                        'Payment link expires in ' + m + ' minute' + (m === 1 ? '' : 's') + ' ' + s + 's';
+                } else {
+                    // Expired: remove checkout link, switch badge to Failed, remove note
+                    const cell = note.closest('td');
+                    if (cell) {
+                        const link = cell.querySelector('[data-checkout-link]');
+                        if (link) link.remove();
+                        const badge = cell.querySelector('[data-status-badge]');
+                        if (badge) {
+                            badge.textContent = 'Failed';
+                            badge.classList.add('bg-red-100','text-red-700','border','border-red-200');
+                            badge.classList.remove('bg-amber-100','text-amber-700','border-amber-200');
+                        }
+                    }
+                    note.dataset.expiredHandled = 'true';
+                    note.remove();
+                }
+            });
+        }
+        setInterval(updateExpiryCountdown, 1000);
+        updateExpiryCountdown();
+
+        // Poll server to refresh rows without full reload
+        async function refreshRows(){
+            try{
+                const res = await fetch(`{{ route('transactions.index') }}?partial=rows`, { headers: { 'Accept': 'text/html' }, credentials: 'same-origin' });
+                if(!res.ok) return;
+                const html = await res.text();
+                const tbody = document.getElementById('tx-tbody');
+                if(!tbody) return;
+                tbody.innerHTML = html;
+            }catch(e){ /* ignore network errors for polling */ }
+        }
+        setInterval(refreshRows, 10000); // every 10s
     })();
     </script>
 </body>

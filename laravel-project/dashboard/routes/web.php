@@ -7,8 +7,10 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\SubscriptionController; // Add this line
 use App\Http\Controllers\StripeController;
 use App\Http\Controllers\TransactionsController;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth;use App\Http\Controllers\StripeWebhookController;
+
 use App\Models\Subscription as SubscriptionModel;
+use App\Http\Controllers\NotificationsController;
 
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
@@ -85,6 +87,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/stripe/checkout', [StripeController::class, 'createCheckoutSession'])->name('stripe.checkout');
     Route::get('/stripe/success', [StripeController::class, 'success'])->name('stripe.success');
     Route::get('/stripe/cancel', [StripeController::class, 'cancel'])->name('stripe.cancel');
+
+    // Notifications
+    Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread-count', [NotificationsController::class, 'unreadCount'])->name('notifications.unread');
+    Route::post('/notifications/read-all', [NotificationsController::class, 'markAllRead'])->name('notifications.read_all');
+    Route::post('/notifications/{notification}/read', [NotificationsController::class, 'markRead'])->name('notifications.read');
     // Admin: Users CRUD
     Route::middleware(['role:admin'])->prefix('dashboard/admin')->as('admin.')->group(function () {
         Route::get('/users', [\App\Http\Controllers\Admin\AdminUserController::class, 'index'])->name('users.index');
@@ -136,5 +144,8 @@ Route::middleware(['auth', 'role:admin,manager'])->group(function () {
         return view('reports.index');
     })->name('reports.index');
 });
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle']);
+
 
 // Removed duplicate Google OAuth routes that conflicted with Auth\GoogleController

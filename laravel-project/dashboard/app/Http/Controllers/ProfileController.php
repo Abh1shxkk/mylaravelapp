@@ -65,6 +65,15 @@ class ProfileController extends Controller
 
         // Update user with all validated data
         $user->update($validated);
+        try {
+            \App\Models\ActivityNotification::create([
+                'user_id' => $user->id,
+                'type' => 'profile_updated',
+                'title' => 'Profile updated',
+                'body' => 'Your profile details were updated.',
+                'data' => [ 'fields' => array_keys($validated) ],
+            ]);
+        } catch (\Throwable $e) {}
 
         // Refresh CSRF token to avoid 419 on subsequent POSTs
         $request->session()->regenerateToken();
@@ -106,6 +115,14 @@ class ProfileController extends Controller
         $user->update([
             'profile_picture' => $path
         ]);
+        try {
+            \App\Models\ActivityNotification::create([
+                'user_id' => $user->id,
+                'type' => 'profile_updated',
+                'title' => 'Profile picture updated',
+                'body' => 'Your profile picture was changed.',
+            ]);
+        } catch (\Throwable $e) {}
 
         // Refresh CSRF token to avoid 419 on subsequent POSTs
         $request->session()->regenerateToken();
@@ -135,6 +152,14 @@ class ProfileController extends Controller
             $user->update([
                 'profile_picture' => null
             ]);
+            try {
+                \App\Models\ActivityNotification::create([
+                    'user_id' => $user->id,
+                    'type' => 'profile_updated',
+                    'title' => 'Profile picture removed',
+                    'body' => 'Your profile picture was removed.',
+                ]);
+            } catch (\Throwable $e) {}
         }
 
         // Refresh CSRF token to avoid 419 on subsequent POSTs
@@ -179,6 +204,14 @@ class ProfileController extends Controller
         $user->update([
             'password' => Hash::make($validated['password'])
         ]);
+        try {
+            \App\Models\ActivityNotification::create([
+                'user_id' => $user->id,
+                'type' => 'profile_updated',
+                'title' => 'Password changed',
+                'body' => 'Your account password was changed.',
+            ]);
+        } catch (\Throwable $e) {}
 
         // Refresh current session/CSRF to avoid 419 after password change
         $request->session()->regenerate();

@@ -14,6 +14,10 @@ class TransactionsController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10);
 
+        if ($request->query('partial') === 'rows') {
+            return view('transactions._rows', compact('payments'));
+        }
+
         return view('transactions.index', compact('payments'));
     }
 
