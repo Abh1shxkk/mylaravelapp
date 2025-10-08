@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zama FHE Quiz - Test Your Knowledge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #FFF4D6 0%, #FFF9E5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+            animation: fadeIn 0.6s ease-out;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Homepage */
+        .home-screen {
+            text-align: center;
+        }
+
+        .logo-box {
+            display: inline-block;
+            background: #FFD93D;
+            padding: 20px 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 50px rgba(255, 217, 61, 0.3);
+            margin-bottom: 20px;
+            animation: scaleIn 0.5s ease-out 0.2s both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .logo-box h1 {
+            font-size: 2.8rem;
+            color: #1F1F1F;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .home-screen h2 {
+            font-size: 2.2rem;
+            color: #1F1F1F;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .home-screen .subtitle {
+            font-size: 1.15rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 25px;
+            padding: 35px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 100px rgba(0, 0, 0, 0.15);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            color: #1F1F1F;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #FFF4D6;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: #444;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-item span:first-child {
+            font-size: 1.5rem;
+        }
+
+        .btn {
+            background: #FFD93D;
+            color: #1F1F1F;
+            border: none;
+            padding: 16px 50px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 217, 61, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: #FFC700;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 217, 61, 0.5);
+        }
+
+        .btn:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+
+        /* Quiz Screen */
+        .quiz-screen {
+            display: none;
+        }
+
+        .progress-bar-container {
+            margin-bottom: 40px;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #E5E5E5;
+            border-radius: 50px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FFD93D 0%, #FFC700 100%);
+            border-radius: 50px;
+            transition: width 0.5s ease;
+            width: 10%;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 25px;
+            padding: 40px 35px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            color: #1F1F1F;
+            margin-bottom: 30px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            background: #F9F9F9;
+            border: 2px solid #E5E5E5;
+            padding: 18px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option:hover:not(.correct):not(.wrong):not(.disabled) {
+            border-color: #FFD93D;
+            background: #FFF4D6;
+            transform: translateX(5px);
+        }
+
+        .option-label {
+            width: 38px;
+            height: 38px;
+            background: #E5E5E5;
+            color: #666;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .option-text {
+            font-size: 1rem;
+            color: #333;
+            flex: 1;
+        }
+
+        .option.selected {
+            border-color: #FFD93D;
+            background: #FFF4D6;
+        }
+
+        .option.selected .option-label {
+            background: #FFD93D;
+            color: #1F1F1F;
+        }
+
+        .option.correct {
+            border-color: #10B981;
+            background: #D1FAE5;
+            animation: correctPulse 0.5s ease;
+        }
+
+        .option.correct .option-label {
+            background: #10B981;
+            color: white;
+        }
+
+        .option.wrong {
+            border-color: #EF4444;
+            background: #FEE2E2;
+            animation: wrongShake 0.5s ease;
+        }
+
+        .option.wrong .option-label {
+            background: #EF4444;
+            color: white;
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        @keyframes correctPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        @keyframes wrongShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .quiz-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-next {
+            background: #FFD93D;
+            color: #1F1F1F;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: auto;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: #FFC700;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 217, 61, 0.4);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .completion-message {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .completion-message h3 {
+            font-size: 2rem;
+            color: #1F1F1F;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .completion-message .final-score {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .completion-message .score-highlight {
+            display: inline-block;
+            background: #FFF4D6;
+            color: #1F1F1F;
+            font-weight: 700;
+            padding: 8px 20px;
+            border-radius: 12px;
+            margin: 0 5px;
+        }
+
+        .completion-message .learn-more {
+            display: inline-block;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #1F1F1F;
+            text-decoration: none;
+            background: #FFD93D;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .completion-message .learn-more:hover {
+            background: #FFC700;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 217, 61, 0.4);
+        }
+
+        /* Results Screen */
+        .results-screen {
+            display: none;
+            text-align: center;
+        }
+
+        .results-card {
+            background: white;
+            border-radius: 25px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+        }
+
+        .result-emoji {
+            font-size: 4.5rem;
+            margin-bottom: 20px;
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .results-card h2 {
+            font-size: 2.2rem;
+            color: #1F1F1F;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .score-display {
+            font-size: 1.6rem;
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .score-box {
+            display: inline-block;
+            background: #FFF4D6;
+            color: #1F1F1F;
+            font-weight: 700;
+            padding: 10px 25px;
+            border-radius: 12px;
+            margin: 0 8px;
+        }
+
+        .result-message {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .btn-restart {
+            background: #FFD93D;
+            color: #1F1F1F;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(255, 217, 61, 0.4);
+            transition: all 0.3s ease;
+            margin: 0 8px 10px 8px;
+            display: inline-block;
+        }
+
+        .btn-restart:hover {
+            background: #FFC700;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 217, 61, 0.5);
+        }
+
+        .btn-x-link {
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 14px 40px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin: 0 8px 10px 8px;
+            display: inline-block;
+        }
+
+        .btn-x-link:hover {
+            background: #1a1a1a;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .social-section {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #FFF4D6;
+        }
+
+        .social-section p {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                max-height: 98vh;
+            }
+
+            .logo-box {
+                padding: 15px 30px;
+                border-radius: 20px;
+                margin-bottom: 15px;
+            }
+
+            .logo-box h1 {
+                font-size: 2rem;
+            }
+
+            .home-screen h2 {
+                font-size: 1.75rem;
+                margin-bottom: 8px;
+            }
+
+            .home-screen .subtitle {
+                font-size: 1rem;
+                margin-bottom: 20px;
+            }
+
+            .card {
+                padding: 25px 20px;
+                border-radius: 20px;
+            }
+
+            .card h3 {
+                font-size: 1.3rem;
+                margin-bottom: 12px;
+            }
+
+            .card p {
+                font-size: 0.95rem;
+                margin-bottom: 20px;
+            }
+
+            .info-box {
+                padding: 15px;
+                border-radius: 12px;
+                margin-bottom: 20px;
+            }
+
+            .info-item {
+                gap: 10px;
+                margin-bottom: 10px;
+                font-size: 0.9rem;
+            }
+
+            .info-item span:first-child {
+                font-size: 1.3rem;
+            }
+
+            .btn {
+                padding: 14px 40px;
+                font-size: 1rem;
+            }
+
+            .question-card {
+                padding: 25px 20px;
+                border-radius: 20px;
+            }
+
+            .question-text {
+                font-size: 1.2rem;
+                margin-bottom: 20px;
+            }
+
+            .option {
+                padding: 14px 16px;
+            }
+
+            .option-label {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .option-text {
+                font-size: 0.95rem;
+            }
+
+            .results-card {
+                padding: 30px 20px;
+                border-radius: 20px;
+            }
+
+            .result-emoji {
+                font-size: 3.5rem;
+                margin-bottom: 15px;
+            }
+
+            .results-card h2 {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+
+            .score-display {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+            }
+
+            .score-box {
+                padding: 8px 20px;
+                font-size: 0.95rem;
+            }
+
+            .result-message {
+                font-size: 1rem;
+                margin-bottom: 25px;
+            }
+
+            .btn-restart,
+            .btn-x-link {
+                padding: 12px 30px;
+                font-size: 0.95rem;
+                margin: 0 5px 8px 5px;
+            }
+
+            .social-section {
+                margin-top: 20px;
+                padding-top: 20px;
+            }
+
+            .social-section p {
+                font-size: 0.9rem;
+                margin-bottom: 12px;
+            }
+
+            .progress-bar-container {
+                margin-bottom: 25px;
+            }
+
+            .btn-next {
+                padding: 12px 35px;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-box h1 {
+                font-size: 1.75rem;
+                letter-spacing: 1px;
+            }
+
+            .home-screen h2 {
+                font-size: 1.5rem;
+            }
+
+            .btn-restart,
+            .btn-x-link {
+                display: block;
+                width: 100%;
+                margin: 0 0 10px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Home Screen -->
+        <div class="home-screen" id="homeScreen">
+            <div class="logo-box">
+                <h1>ZAMA</h1>
+            </div>
+            <h2>FHE Quiz</h2>
+            <p class="subtitle">Test Your FHE Knowledge</p>
+
+            <div class="card">
+                <h3>Ready to test your knowledge?</h3>
+                <p>Answer 10 questions about Zama's Confidential Blockchain Protocol and FHE technology</p>
+
+                <div class="info-box">
+                    <div class="info-item">
+                        <span>📝</span>
+                        <span>10 multiple choice questions</span>
+                    </div>
+                    <div class="info-item">
+                        <span>⏱️</span>
+                        <span>No time limit</span>
+                    </div>
+                    <div class="info-item">
+                        <span>🎯</span>
+                        <span>One question at a time</span>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="startQuiz()">Start Quiz</button>
+            </div>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div class="quiz-screen" id="quizScreen">
+            <div class="progress-bar-container">
+                <div class="progress-info">
+                    <span id="questionCounter">Question 1 of 10</span>
+                    <span id="percentComplete">10% Complete</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <div class="question-card">
+                <h3 class="question-text" id="questionText"></h3>
+
+                <div class="options-container" id="optionsContainer">
+                    <!-- Options will be inserted here -->
+                </div>
+
+                <div id="completionMessage" class="completion-message" style="display: none;">
+            <h3>🎉 Quiz Completed!</h3>
+            <p class="final-score">Your Score: <span class="score-highlight" id="displayScore">0/10</span></p>
+            <div style="margin-top: 20px;">
+                <a href="https://www.zama.ai/" target="_blank" class="learn-more" style="margin: 0 8px 10px 8px;">Learn
+                    more about Zama →</a>
+                <a href="https://x.com/abh1shxkk" target="_blank" rel="noopener noreferrer" class="learn-more"
+                    style="margin: 0 8px 10px 8px; background: #000000; color: #ffffff;">Follow me on 𝕏 →</a>
+                <button onclick="shareOnX()" class="learn-more"
+                    style="margin: 0 8px 10px 8px; background: #1DA1F2; color: #ffffff; cursor: pointer; border: none;">Share
+                    Score on 𝕏 🚀</button>
+            </div>
+        </div>
+
+                <div class="quiz-navigation" id="quizNavigation">
+                    <button class="btn-next" id="nextBtn" onclick="nextQuestion()" disabled>Next Question</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+       
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "What's one way Zama addresses FHE's performance limits?",
+                options: [
+                    "Compressing ciphertexts randomly",
+                    "Offloading to miners",
+                    "Using optimized parameter sets",
+                    "Reducing key sizes to 32 bits"
+                ],
+                correct: 2
+            },
+            {
+                question: "What does FHE stand for in Zama's protocol?",
+                options: [
+                    "Fast Hash Encryption",
+                    "Fully Homomorphic Encryption",
+                    "Federated Hybrid Engine",
+                    "Forward Hash Execution"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which feature does Zama Protocol provide for smart contracts?",
+                options: [
+                    "Only on-chain encryption",
+                    "End-to-end encryption with composability",
+                    "Partial encryption for speed",
+                    "Encryption only for storage"
+                ],
+                correct: 1
+            },
+            {
+                question: "What is the primary advantage of using symbolic execution in Zama Protocol?",
+                options: [
+                    "It eliminates the need for coprocessors",
+                    "FHE operations can be parallelized instead of sequential",
+                    "It makes the protocol centralized",
+                    "It reduces the need for encryption"
+                ],
+                correct: 1
+            },
+            {
+                question: "How many KMS nodes does Zama Protocol use with what majority rule?",
+                options: [
+                    "5 nodes with 1/2 majority",
+                    "7 nodes with 1/3 majority",
+                    "13 nodes with 2/3 majority",
+                    "21 nodes with 3/4 majority"
+                ],
+                correct: 2
+            },
+            {
+                question: "What is the $ZAMA token primarily used for?",
+                options: [
+                    "Only for staking rewards",
+                    "Protocol fees, staking, and governance",
+                    "Paying developers only",
+                    "NFT purchases"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which programming language can developers use to create confidential dapps on Zama?",
+                options: [
+                    "Only Rust",
+                    "Only Python",
+                    "Solidity and Python",
+                    "Only assembly language"
+                ],
+                correct: 2
+            },
+            {
+                question: "What is the planned Ethereum mainnet launch timeline for Zama Protocol?",
+                options: [
+                    "Q1 2025",
+                    "Q2 2025",
+                    "Q4 2025",
+                    "2026"
+                ],
+                correct: 2
+            },
+            {
+                question: "Which of these is NOT a use case mentioned for Zama Protocol?",
+                options: [
+                    "Confidential DeFi",
+                    "Sealed-bid auctions",
+                    "Public voting systems",
+                    "Tokenization & RWAs"
+                ],
+                correct: 2
+            },
+            {
+                question: "What security level does Zama Protocol use for FHE operations?",
+                options: [
+                    "64 bits",
+                    "96 bits",
+                    "128 bits",
+                    "256 bits"
+                ],
+                correct: 2
+            }
+        ];
+
+        let currentQuestion = 0;
+        let selectedOption = null;
+        let score = 0;
+        let answered = false;
+
+        function startQuiz() {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= quizData.length) {
+                showCompletion();
+                return;
+            }
+
+            answered = false;
+            const question = quizData[currentQuestion];
+            document.getElementById('questionText').textContent = question.question;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            const labels = ['A', 'B', 'C', 'D'];
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.onclick = () => selectOption(index);
+                optionDiv.innerHTML = `
+                    <div class="option-label">${labels[index]}</div>
+                    <div class="option-text">${option}</div>
+                `;
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            selectedOption = null;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('nextBtn').textContent = currentQuestion === quizData.length - 1 ? 'Finish Quiz' : 'Next Question';
+        }
+
+        function selectOption(index) {
+            if (answered) return;
+
+            answered = true;
+            selectedOption = index;
+
+            const options = document.querySelectorAll('.option');
+            const correctIndex = quizData[currentQuestion].correct;
+
+            // Disable all options
+            options.forEach(opt => opt.classList.add('disabled'));
+
+            // Show correct/wrong
+            if (index === correctIndex) {
+                options[index].classList.add('correct');
+                score++;
+            } else {
+                options[index].classList.add('wrong');
+                options[correctIndex].classList.add('correct');
+            }
+
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        function nextQuestion() {
+            if (selectedOption === null) return;
+
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function showCompletion() {
+            document.getElementById('optionsContainer').style.display = 'none';
+            document.getElementById('quizNavigation').style.display = 'none';
+            document.getElementById('completionMessage').style.display = 'block';
+            document.getElementById('displayScore').textContent = `${score}/${quizData.length}`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / quizData.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('questionCounter').textContent = `Question ${currentQuestion + 1} of ${quizData.length}`;
+            document.getElementById('percentComplete').textContent = Math.round(progress) + '% Complete';
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+
+            document.getElementById('finalScore').textContent = `${score} / ${quizData.length}`;
+
+            let emoji, message;
+            if (score >= 8) {
+                emoji = '🎉';
+                message = 'Excellent! You know your FHE!';
+            } else if (score >= 5) {
+                emoji = '👍';
+                message = 'Good job! Keep learning about FHE!';
+            } else {
+                emoji = '📚';
+                message = 'Keep studying! Check out Zama docs for more info.';
+            }
+
+            document.getElementById('resultEmoji').textContent = emoji;
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            selectedOption = null;
+            score = 0;
+            answered = false;
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'block';
+        }
+
+        function shareOnX() {
+    const quizUrl = window.location.href;
+    const tweetText = `I just scored ${score}/${quizData.length} on @abh1shxkk Zama-FHE Quiz app! 🔐
+
+You can also test your knowledge about @zama_fhe tech with this simple and fun quiz app here: ${quizUrl}
+
+Don't forget to boost your score on 𝕏 😎`;
+    
+    const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+    window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+}
+    </script>
+</body>
+
+</html>
