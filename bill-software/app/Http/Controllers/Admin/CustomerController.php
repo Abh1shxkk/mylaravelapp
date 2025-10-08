@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+
+
 
 class CustomerController extends Controller
 {
@@ -42,13 +45,38 @@ class CustomerController extends Controller
 
     public function create()
     {
-        return view('admin.customers.create');
+        // Fetch countries from API
+        try {
+            $apiKey = env('COUNTRY_STATE_CITY_API_KEY');
+            $response = Http::withHeaders([
+                'X-CSCAPI-KEY' => $apiKey
+            ])->get('https://api.countrystatecity.in/v1/countries');
+
+            $countries = $response->successful() ? $response->json() : [];
+        } catch (\Exception $e) {
+            $countries = [];
+        }
+
+        return view('admin.customers.create', compact('countries'));
     }
 
     public function store(Request $request)
     {
-        // For debugging: accept all input as nullable
-        $data = $request->all();
+        // Validate required and unique fields
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:customers,email',
+            'address' => 'required|string',
+            'mobile' => 'required|string|max:255|unique:customers,mobile',
+            // Optional phones should also be unique if provided
+            'telephone_office' => 'nullable|string|max:255|unique:customers,telephone_office',
+            'telephone_residence' => 'nullable|string|max:255|unique:customers,telephone_residence',
+            'pan_number' => 'required|string|max:255|unique:customers,pan_number',
+            'gst_name' => 'required|string|max:255|unique:customers,gst_name',
+        ]);
+
+        // Get all data and merge validated fields
+        $data = array_merge($request->all(), $validated);
         $data['status'] = $request->boolean('status');
         $data['invoice_export'] = $request->boolean('invoice_export');
         $data['order_required'] = $request->boolean('order_required');
@@ -66,7 +94,19 @@ class CustomerController extends Controller
 
     public function edit(Customer $customer)
     {
-        return view('admin.customers.edit', compact('customer'));
+        // Fetch countries from API
+        try {
+            $apiKey = env('COUNTRY_STATE_CITY_API_KEY');
+            $response = Http::withHeaders([
+                'X-CSCAPI-KEY' => $apiKey
+            ])->get('https://api.countrystatecity.in/v1/countries');
+
+            $countries = $response->successful() ? $response->json() : [];
+        } catch (\Exception $e) {
+            $countries = [];
+        }
+
+        return view('admin.customers.edit', compact('customer', 'countries'));
     }
 
     public function update(Request $request, Customer $customer)
@@ -137,6 +177,58 @@ class CustomerController extends Controller
             'state_code_gst' => 'nullable|string|max:255',
             'registration_status' => 'nullable|string|max:255',
         ];
+    }
+
+    // API methods for country, state, city dropdowns
+    public function getCountries()
+    {
+        try {
+            $apiKey = env('COUNTRY_STATE_CITY_API_KEY');
+            $response = Http::withHeaders([
+                'X-CSCAPI-KEY' => $apiKey
+            ])->get('https://api.countrystatecity.in/v1/countries');
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            return response()->json(['error' => 'Failed to fetch countries'], 500);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getStates($countryCode)
+    {
+        try {
+            $apiKey = env('COUNTRY_STATE_CITY_API_KEY');
+            $response = Http::withHeaders([
+                'X-CSCAPI-KEY' => $apiKey
+            ])->get("https://api.countrystatecity.in/v1/countries/{$countryCode}/states");
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            return response()->json(['error' => 'Failed to fetch states'], 500);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getCities($countryCode, $stateCode)
+    {
+        try {
+            $apiKey = env('COUNTRY_STATE_CITY_API_KEY');
+            $response = Http::withHeaders([
+                'X-CSCAPI-KEY' => $apiKey
+            ])->get("https://api.countrystatecity.in/v1/countries/{$countryCode}/states/{$stateCode}/cities");
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+            return response()->json(['error' => 'Failed to fetch cities'], 500);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
 

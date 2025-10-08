@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'location' => [
+    'api_key' => env('LOCATION_API_KEY', ''),
+],
+
 ];

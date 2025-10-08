@@ -24,7 +24,7 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                       name="name" value="{{ old('name') }}" required>
+                                       name="name" value="{{ old('name') }}">
                                 @error('name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -44,8 +44,11 @@
                                 <input type="text" class="form-control" name="Compcode" value="{{ old('Compcode') }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Company Name</label>
-                                <input type="text" class="form-control" name="Compname" value="{{ old('Compname') }}">
+                                <label class="form-label">Company Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('Compname') is-invalid @enderror" name="Compname" value="{{ old('Compname') }}">
+                                @error('Compname')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Pack</label>

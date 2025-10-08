@@ -12,6 +12,7 @@ class ProfileController extends Controller
         $user = $request->user();
         $data = $request->validate([
             'full_name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,'.$user->user_id.',user_id',
             'email' => 'required|email|max:255|unique:users,email,'.$user->user_id.',user_id',
             'profile_picture' => 'nullable|image|max:2048',
         ]);

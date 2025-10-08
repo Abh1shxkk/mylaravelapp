@@ -23,16 +23,23 @@ Route::get('/', function () {
 // Admin
 Route::middleware(['admin'])->group(function () {
     Route::view('/admin/dashboard', 'admin.dashboard');
-    Route::prefix('admin')->name('admin.')->group(function(){
+    Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('companies', CompanyController::class);
         Route::resource('customers', CustomerController::class);
         Route::resource('items', ItemController::class);
         Route::resource('suppliers', SupplierController::class);
         Route::resource('invoices', InvoiceController::class);
+        Route::get('/api/countries', [CustomerController::class, 'getCountries'])->name('api.countries');
+        Route::get('/api/states/{country}', [CustomerController::class, 'getStates'])->name('api.states');
+        Route::get('/api/cities/{country}/{state}', [CustomerController::class, 'getCities'])->name('api.cities');
     });
-    Route::post('/profile/update', [ProfileController::class,'update'])->name('profile.update');
-    Route::get('/password/change', [ProfileController::class,'showChangePassword'])->name('password.change.form');
-    Route::post('/password/change', [ProfileController::class,'changePassword'])->name('password.change');
+    // Profile settings page
+    Route::get('/profile', function () {
+        return view('admin.settings.profile');
+    })->name('profile.settings');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/password/change', [ProfileController::class, 'showChangePassword'])->name('password.change.form');
+    Route::post('/password/change', [ProfileController::class, 'changePassword'])->name('password.change');
 });
 
 // User

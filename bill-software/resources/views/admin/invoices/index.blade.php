@@ -69,7 +69,7 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="invoice-table-body">
                                     @foreach($invoices as $invoice)
                                         <tr>
                                             <td>
@@ -135,12 +135,19 @@
                             </table>
                         </div>
 
-                        <!-- Pagination -->
-                        @if($invoices->hasPages())
-                            <div class="d-flex justify-content-center mt-4">
-                                {{ $invoices->appends(request()->query())->links() }}
-                            </div>
-                        @endif
+                        <!-- Load More -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="small text-muted">Showing {{ $invoices->firstItem() ?? 0 }}-{{ $invoices->lastItem() ?? 0 }} of {{ $invoices->total() }}</div>
+                            @if($invoices->hasMorePages())
+                                <div class="d-flex align-items-center gap-2">
+                                    <div id="invoice-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <span id="invoice-load-text" class="small text-muted">Scroll for more</span>
+                                </div>
+                                <div id="invoice-sentinel" data-next-url="{{ $invoices->appends(request()->query())->nextPageUrl() }}" style="height: 1px;"></div>
+                            @endif
+                        </div>
                     @else
                         <div class="text-center py-5">
                             <i class="bi bi-receipt display-1 text-muted"></i>
@@ -161,15 +168,68 @@
 
 @push('scripts')
 <script>
-// Auto-submit form on filter change
 document.addEventListener('DOMContentLoaded', function() {
     const filterInputs = document.querySelectorAll('select[name="status"], input[name="date_from"], input[name="date_to"]');
-    
     filterInputs.forEach(input => {
         input.addEventListener('change', function() {
             this.form.submit();
         });
     });
+
+    const sentinel = document.getElementById('invoice-sentinel');
+    const spinner = document.getElementById('invoice-spinner');
+    const loadText = document.getElementById('invoice-load-text');
+    const tbody = document.getElementById('invoice-table-body');
+    
+    if(!sentinel || !tbody) return;
+    
+    let isLoading = false;
+    
+    async function loadMore(){
+        if(isLoading) return;
+        const nextUrl = sentinel.getAttribute('data-next-url');
+        if(!nextUrl) return;
+        
+        isLoading = true;
+        spinner && spinner.classList.remove('d-none');
+        loadText && (loadText.textContent = 'Loading...');
+        
+        try{
+            const res = await fetch(nextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const html = await res.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newRows = doc.querySelectorAll('#invoice-table-body tr');
+            newRows.forEach(tr => tbody.appendChild(tr));
+            
+            const newSentinel = doc.querySelector('#invoice-sentinel');
+            if(newSentinel){
+                sentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
+                spinner && spinner.classList.add('d-none');
+                loadText && (loadText.textContent = 'Scroll for more');
+                isLoading = false;
+            } else {
+                observer.disconnect();
+                sentinel.remove();
+                spinner && spinner.remove();
+                loadText && loadText.remove();
+            }
+        }catch(e){
+            spinner && spinner.classList.add('d-none');
+            loadText && (loadText.textContent = 'Error loading');
+            isLoading = false;
+        }
+    }
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting && !isLoading){
+                loadMore();
+            }
+        });
+    }, { rootMargin: '100px' });
+    
+    observer.observe(sentinel);
 });
 </script>
 @endpush

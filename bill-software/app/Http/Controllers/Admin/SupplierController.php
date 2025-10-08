@@ -10,7 +10,25 @@ class SupplierController extends Controller
 {
     public function index(){ $search = request('search'); $status = request('status'); $dateFrom = request('date_from'); $dateTo = request('date_to'); $suppliers = Supplier::query()->when($search, function($query) use ($search){ $query->where(function($q) use ($search){ $q->where('name','like',"%{$search}%")->orWhere('code','like',"%{$search}%")->orWhere('mobile','like',"%{$search}%")->orWhere('email','like',"%{$search}%"); }); })->when($status!==null && $status!=='', function($query) use ($status){ $query->where('status', $status==='active'?1:0); })->when($dateFrom, function($query) use ($dateFrom){ $query->whereDate('created_at','>=',$dateFrom); })->when($dateTo, function($query) use ($dateTo){ $query->whereDate('created_at','<=',$dateTo); })->orderByDesc('created_at')->paginate(20)->withQueryString(); return view('admin.suppliers.index', compact('suppliers','search','status','dateFrom','dateTo')); }
     public function create(){ return view('admin.suppliers.create'); }
-    public function store(Request $request){ $data = $request->all(); $data = $this->bools($request,$data); Supplier::create($data); return redirect()->route('admin.suppliers.index')->with('success','Supplier created'); }
+    public function store(Request $request)
+    {
+        // Validate required fields
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'address' => 'required|string',
+            'email' => 'required|email|max:255|unique:suppliers,email',
+            'telephone' => 'required|string|max:255|unique:suppliers,telephone',
+            // Optional mobiles unique if provided
+            'mobile' => 'nullable|string|max:255|unique:suppliers,mobile',
+            'mobile_additional' => 'nullable|string|max:255|unique:suppliers,mobile_additional',
+        ]);
+
+        // Get all data and merge validated fields
+        $data = array_merge($request->all(), $validated);
+        $data = $this->bools($request, $data);
+        Supplier::create($data);
+        return redirect()->route('admin.suppliers.index')->with('success','Supplier created');
+    }
     public function show(Supplier $supplier){ return view('admin.suppliers.show', compact('supplier')); }
     public function edit(Supplier $supplier){ return view('admin.suppliers.edit', compact('supplier')); }
     public function update(Request $request, Supplier $supplier){ $data = $request->all(); $data = $this->bools($request,$data); $supplier->update($data); return redirect()->route('admin.suppliers.index')->with('success','Supplier updated'); }

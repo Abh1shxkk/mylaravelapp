@@ -55,6 +55,18 @@
             </div>
             <div class="col-md-6">
               <div class="detail-item">
+                <label class="text-muted small mb-1">Country:</label>
+                <div class="fw-semibold">{{ $customer->country_name ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">State:</label>
+                <div class="fw-semibold">{{ $customer->state_name ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
                 <label class="text-muted small mb-1">City:</label>
                 <div class="fw-semibold">{{ $customer->city ?? '-' }}</div>
               </div>

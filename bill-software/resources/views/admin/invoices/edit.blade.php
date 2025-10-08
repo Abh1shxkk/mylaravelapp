@@ -1,24 +1,18 @@
-.3000000000000000000000000000000000@extends('layouts.admin')
-@section('title','Edit Invoice')
+@extends('layouts.admin')
+@section('title','Create New Invoice')
 @section('content')
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">Edit Invoice</h2>
-                <div>
-                    <a href="{{ route('admin.invoices.show', $invoice->invoice_id) }}" class="btn btn-outline-info me-2">
-                        <i class="bi bi-eye me-2"></i>View Invoice
-                    </a>
-                    <a href="{{ route('admin.invoices.index') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-2"></i>Back to Invoices
-                    </a>
-                </div>
+                <h2 class="mb-0">Create New Invoice</h2>
+                <a href="{{ route('admin.invoices.index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Invoices
+                </a>
             </div>
 
-            <form action="{{ route('admin.invoices.update', $invoice->invoice_id) }}" method="POST" id="invoiceForm">
+            <form action="{{ route('admin.invoices.store') }}" method="POST" id="invoiceForm">
                 @csrf
-                @method('PUT')
                 
                 <!-- Company Information -->
                 <div class="card mb-4">
@@ -32,7 +26,7 @@
                                 <select class="form-select @error('company_id') is-invalid @enderror" id="company_id" name="company_id" required>
                                     <option value="">Select Company</option>
                                     @foreach($companies as $company)
-                                        <option value="{{ $company->id }}" {{ old('company_id', $invoice->company_id) == $company->id ? 'selected' : '' }}>
+                                        <option value="{{ $company->id }}" {{ old('company_id') == $company->id ? 'selected' : '' }}>
                                             {{ $company->name }}
                                         </option>
                                     @endforeach
@@ -44,7 +38,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="company_name" class="form-label">Company Name *</label>
                                 <input type="text" class="form-control @error('company_name') is-invalid @enderror" 
-                                       id="company_name" name="company_name" value="{{ old('company_name', $invoice->company_name) }}" readonly>
+                                       id="company_name" name="company_name" value="{{ old('company_name') }}" readonly>
                                 @error('company_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -53,24 +47,21 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label for="company_email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="company_email" name="company_email" 
-                                       value="{{ old('company_email', $invoice->company_email) }}" readonly>
+                                <input type="email" class="form-control" id="company_email" name="company_email" readonly>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="company_address" class="form-label">Address</label>
-                                <textarea class="form-control" id="company_address" name="company_address" rows="2" readonly>{{ old('company_address', $invoice->company_address) }}</textarea>
+                                <textarea class="form-control" id="company_address" name="company_address" rows="2" readonly></textarea>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="company_phone" class="form-label">Phone</label>
-                                <input type="text" class="form-control" id="company_phone" name="company_phone" 
-                                       value="{{ old('company_phone', $invoice->company_phone) }}" readonly>
+                                <input type="text" class="form-control" id="company_phone" name="company_phone" readonly>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="company_gst" class="form-label">GST Number</label>
-                                <input type="text" class="form-control" id="company_gst" name="company_gst" 
-                                       value="{{ old('company_gst', $invoice->company_gst) }}" readonly>
+                                <input type="text" class="form-control" id="company_gst" name="company_gst" readonly>
                             </div>
                         </div>
                     </div>
@@ -88,7 +79,7 @@
                                 <select class="form-select @error('customer_id') is-invalid @enderror" id="customer_id" name="customer_id">
                                     <option value="">Select Customer</option>
                                     @foreach($customers as $customer)
-                                        <option value="{{ $customer->id }}" {{ old('customer_id', $invoice->customer_id) == $customer->id ? 'selected' : '' }}>
+                                        <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
                                             {{ $customer->name }}
                                         </option>
                                     @endforeach
@@ -100,7 +91,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="customer_name" class="form-label">Customer Name *</label>
                                 <input type="text" class="form-control @error('customer_name') is-invalid @enderror" 
-                                       id="customer_name" name="customer_name" value="{{ old('customer_name', $invoice->customer_name) }}" required>
+                                       id="customer_name" name="customer_name" value="{{ old('customer_name') }}" required>
                                 @error('customer_name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -109,34 +100,29 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <label for="customer_email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="customer_email" name="customer_email" 
-                                       value="{{ old('customer_email', $invoice->customer_email) }}">
+                                <input type="email" class="form-control" id="customer_email" name="customer_email">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="customer_phone" class="form-label">Phone</label>
-                                <input type="text" class="form-control" id="customer_phone" name="customer_phone" 
-                                       value="{{ old('customer_phone', $invoice->customer_phone) }}">
+                                <input type="text" class="form-control" id="customer_phone" name="customer_phone">
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="customer_gst" class="form-label">GST Number</label>
-                                <input type="text" class="form-control" id="customer_gst" name="customer_gst" 
-                                       value="{{ old('customer_gst', $invoice->customer_gst) }}">
+                                <input type="text" class="form-control" id="customer_gst" name="customer_gst">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="customer_address" class="form-label">Address</label>
-                                <textarea class="form-control" id="customer_address" name="customer_address" rows="2">{{ old('customer_address', $invoice->customer_address) }}</textarea>
+                                <textarea class="form-control" id="customer_address" name="customer_address" rows="2"></textarea>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="customer_state" class="form-label">State</label>
-                                <input type="text" class="form-control" id="customer_state" name="customer_state" 
-                                       value="{{ old('customer_state', $invoice->customer_state) }}">
+                                <input type="text" class="form-control" id="customer_state" name="customer_state">
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label for="customer_state_code" class="form-label">State Code</label>
-                                <input type="text" class="form-control" id="customer_state_code" name="customer_state_code" 
-                                       value="{{ old('customer_state_code', $invoice->customer_state_code) }}">
+                                <input type="text" class="form-control" id="customer_state_code" name="customer_state_code">
                             </div>
                         </div>
                     </div>
@@ -152,7 +138,7 @@
                             <div class="col-md-4 mb-3">
                                 <label for="invoice_number" class="form-label">Invoice Number *</label>
                                 <input type="text" class="form-control @error('invoice_number') is-invalid @enderror" 
-                                       id="invoice_number" name="invoice_number" value="{{ old('invoice_number', $invoice->invoice_number) }}" required>
+                                       id="invoice_number" name="invoice_number" value="{{ old('invoice_number', 'INV-2025-1001') }}" required>
                                 <small class="form-text text-muted">Invoice number is automatically generated</small>
                                 @error('invoice_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -161,15 +147,14 @@
                             <div class="col-md-4 mb-3">
                                 <label for="invoice_date" class="form-label">Invoice Date *</label>
                                 <input type="date" class="form-control @error('invoice_date') is-invalid @enderror" 
-                                       id="invoice_date" name="invoice_date" value="{{ old('invoice_date', $invoice->invoice_date) }}" required>
+                                       id="invoice_date" name="invoice_date" value="{{ old('invoice_date', date('Y-m-d')) }}" required>
                                 @error('invoice_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="due_date" class="form-label">Due Date</label>
-                                <input type="date" class="form-control" id="due_date" name="due_date" 
-                                       value="{{ old('due_date', $invoice->due_date) }}">
+                                <input type="date" class="form-control" id="due_date" name="due_date" value="{{ old('due_date') }}">
                             </div>
                         </div>
                     </div>
@@ -198,37 +183,28 @@
                                     </tr>
                                 </thead>
                                 <tbody id="itemsTableBody">
-                                    @foreach($invoice->items as $index => $item)
-                                        <tr>
-                                            <td>
-                                                <select class="form-select item-select" name="items[{{ $index }}][item_id]">
-                                                    <option value="">Select Item</option>
-                                                    @foreach($items as $item_option)
-                                                        <option value="{{ $item_option->id }}" {{ $item->item_id == $item_option->id ? 'selected' : '' }}>
-                                                            {{ $item_option->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </td>
-                                            <td><input type="text" class="form-control" name="items[{{ $index }}][description]" 
-                                                       value="{{ $item->description }}" placeholder="Description"></td>
-                                            <td><input type="text" class="form-control" name="items[{{ $index }}][hsn_code]" 
-                                                       value="{{ $item->hsn_code }}" placeholder="HSN Code"></td>
-                                            <td><input type="number" class="form-control qty" name="items[{{ $index }}][qty]" 
-                                                       value="{{ $item->qty }}" min="0" step="0.01"></td>
-                                            <td><input type="text" class="form-control" name="items[{{ $index }}][unit]" 
-                                                       value="{{ $item->unit }}" placeholder="PCS"></td>
-                                            <td><input type="number" class="form-control rate" name="items[{{ $index }}][rate]" 
-                                                       value="{{ $item->rate }}" min="0" step="0.01"></td>
-                                            <td><input type="number" class="form-control discount" name="items[{{ $index }}][discount]" 
-                                                       value="{{ $item->discount }}" min="0" max="100" step="0.01"></td>
-                                            <td><input type="number" class="form-control gst" name="items[{{ $index }}][gst]" 
-                                                       value="{{ $item->gst }}" min="0" max="100" step="0.01"></td>
-                                            <td><input type="text" class="form-control amount" name="items[{{ $index }}][amount]" 
-                                                       value="₹{{ number_format($item->amount, 2) }}" readonly></td>
-                                            <td><button type="button" class="btn btn-danger btn-sm remove-item"><i class="bi bi-trash"></i></button></td>
-                                        </tr>
-                                    @endforeach
+                                    <tr>
+                                        <td>
+                                            <select class="form-select item-select" name="items[0][item_id]">
+                                                <option value="">Select Item</option>
+                                                @foreach($items as $item)
+                                                    <option value="{{ $item->id }}">{{ $item->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </td>
+                                        <td><input type="text" class="form-control" name="items[0][description]" placeholder="Description"></td>
+                                        <td><input type="text" class="form-control" name="items[0][hsn_code]" placeholder="HSN Code"></td>
+                                        <td><input type="number" class="form-control qty" name="items[0][qty]" value="1" min="0" step="0.01"></td>
+                                        <td><input type="text" class="form-control" name="items[0][unit]" placeholder="PCS"></td>
+                                        <td><input type="number" class="form-control rate" name="items[0][rate]" value="0" min="0" step="0.01"></td>
+                                        <td><input type="number" class="form-control discount" name="items[0][discount]" value="0" min="0" max="100" step="0.01"></td>
+                                        <td><input type="number" class="form-control gst" name="items[0][gst]" value="18" min="0" max="100" step="0.01"></td>
+                                        <td>
+                                            <input type="text" class="form-control amount" name="items[0][amount]" value="₹0.00" readonly>
+                                            <input type="hidden" class="amount_numeric" name="items[0][line_total]" value="0.00">
+                                        </td>
+                                        <td><button type="button" class="btn btn-danger btn-sm remove-item"><i class="bi bi-trash"></i></button></td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -248,21 +224,25 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Subtotal:</label>
-                                    <input type="text" class="form-control" id="subtotal" value="₹{{ number_format($invoice->subtotal, 2) }}" readonly>
+                                    <input type="text" class="form-control" id="subtotal" value="₹0.00" readonly>
+                                    <input type="hidden" name="subtotal" id="subtotal_input" value="0.00">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Discount:</label>
-                                    <input type="text" class="form-control" id="total_discount" value="₹{{ number_format($invoice->discount_amount, 2) }}" readonly>
+                                    <input type="text" class="form-control" id="total_discount" value="₹0.00" readonly>
+                                    <input type="hidden" name="discount_amount" id="discount_input" value="0.00">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Tax Amount:</label>
-                                    <input type="text" class="form-control" id="tax_amount" value="₹{{ number_format($invoice->tax_amount, 2) }}" readonly>
+                                    <input type="text" class="form-control" id="tax_amount" value="₹0.00" readonly>
+                                    <input type="hidden" name="tax_amount" id="tax_input" value="0.00">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label"><strong>Total Amount:</strong></label>
-                                    <input type="text" class="form-control" id="total_amount" value="₹{{ number_format($invoice->total_amount, 2) }}" readonly>
+                                    <input type="text" class="form-control" id="total_amount" value="₹0.00" readonly>
+                                    <input type="hidden" name="total_amount" id="total_input" value="0.00">
                                 </div>
                             </div>
                         </div>
@@ -278,11 +258,11 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="notes" class="form-label">Notes</label>
-                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Additional notes for the invoice">{{ old('notes', $invoice->notes) }}</textarea>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Additional notes for the invoice">{{ old('notes') }}</textarea>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="terms_conditions" class="form-label">Terms & Conditions</label>
-                                <textarea class="form-control" id="terms_conditions" name="terms_conditions" rows="3" placeholder="Payment terms and conditions">{{ old('terms_conditions', $invoice->terms_conditions) }}</textarea>
+                                <textarea class="form-control" id="terms_conditions" name="terms_conditions" rows="3" placeholder="Payment terms and conditions">{{ old('terms_conditions') }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -294,7 +274,7 @@
                         <i class="bi bi-x me-2"></i>Cancel
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save me-2"></i>Update Invoice
+                        <i class="bi bi-save me-2"></i>Create Invoice
                     </button>
                 </div>
             </form>
@@ -305,15 +285,23 @@
 
 @push('scripts')
 <script>
+// Items data keyed by id for quick lookup
+const itemsData = @json($items->keyBy('id'));
+
 document.addEventListener('DOMContentLoaded', function() {
-    let itemIndex = {{ $invoice->items->count() - 1 }};
+    let itemIndex = 0;
     
     // Company selection handler
     document.getElementById('company_id').addEventListener('change', function() {
         const companyId = this.value;
         if (companyId) {
             // Fetch company details via AJAX
-            fetch(`/admin/companies/${companyId}`)
+            fetch(`/admin/companies/${companyId}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('company_name').value = data.name || '';
@@ -338,7 +326,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const customerId = this.value;
         if (customerId) {
             // Fetch customer details via AJAX
-            fetch(`/admin/customers/${customerId}`)
+            fetch(`/admin/customers/${customerId}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('customer_name').value = data.name || '';
@@ -382,23 +375,43 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><input type="number" class="form-control rate" name="items[${itemIndex}][rate]" value="0" min="0" step="0.01"></td>
             <td><input type="number" class="form-control discount" name="items[${itemIndex}][discount]" value="0" min="0" max="100" step="0.01"></td>
             <td><input type="number" class="form-control gst" name="items[${itemIndex}][gst]" value="18" min="0" max="100" step="0.01"></td>
-            <td><input type="text" class="form-control amount" name="items[${itemIndex}][amount]" value="₹0.00" readonly></td>
+            <td>
+                <input type="text" class="form-control amount" name="items[${itemIndex}][amount]" value="₹0.00" readonly>
+                <input type="hidden" class="amount_numeric" name="items[${itemIndex}][line_total]" value="0.00">
+            </td>
             <td><button type="button" class="btn btn-danger btn-sm remove-item"><i class="bi bi-trash"></i></button></td>
         `;
         document.getElementById('itemsTableBody').appendChild(newRow);
         attachItemEventListeners(newRow);
     });
 
-    // Remove item functionality
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-item')) {
-            e.target.closest('tr').remove();
-            calculateTotals();
-        }
-    });
+    // Remove item functionality is attached per-row inside attachItemEventListeners
 
     // Attach event listeners to item row
     function attachItemEventListeners(row) {
+        const itemSelect = row.querySelector('.item-select');
+        if (itemSelect) {
+            itemSelect.addEventListener('change', function() {
+                const selectedId = this.value;
+                if (selectedId && itemsData[selectedId]) {
+                    const item = itemsData[selectedId];
+                    const descInput = row.querySelector('input[name$="[description]"]');
+                    const hsnInput = row.querySelector('input[name$="[hsn_code]"]');
+                    const unitInput = row.querySelector('input[name$="[unit]"]');
+                    const rateInput = row.querySelector('input.rate');
+
+                    if (descInput) descInput.value = item.name || '';
+                    if (hsnInput) hsnInput.value = item.HSNCode ?? item.hsn_code ?? '';
+                    if (unitInput) unitInput.value = item.Unit ?? item.unit ?? '';
+                    // Prefer Srate then Mrp then Prate
+                    const rateVal = item.Srate ?? item.Mrp ?? item.Prate ?? item.rate ?? 0;
+                    if (rateInput) rateInput.value = parseFloat(rateVal) || 0;
+
+                    calculateItemAmount(row);
+                    calculateTotals();
+                }
+            });
+        }
         const qtyInput = row.querySelector('.qty');
         const rateInput = row.querySelector('.rate');
         const discountInput = row.querySelector('.discount');
@@ -411,6 +424,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 calculateTotals();
             });
         });
+
+        const removeBtn = row.querySelector('.remove-item');
+        if(removeBtn){
+            removeBtn.addEventListener('click', function(){
+                const tr = this.closest('tr');
+                tr && tr.remove();
+                calculateTotals();
+            });
+        }
     }
 
     // Calculate item amount
@@ -427,6 +449,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const total = taxableAmount + gstAmount;
 
         row.querySelector('.amount').value = `₹${total.toFixed(2)}`;
+        const amtNum = row.querySelector('.amount_numeric');
+        if (amtNum) amtNum.value = total.toFixed(2);
     }
 
     // Calculate totals
@@ -457,7 +481,22 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('total_discount').value = `₹${totalDiscount.toFixed(2)}`;
         document.getElementById('tax_amount').value = `₹${totalGst.toFixed(2)}`;
         document.getElementById('total_amount').value = `₹${totalAmount.toFixed(2)}`;
+    // set hidden numeric inputs
+    const subtotalInput = document.getElementById('subtotal_input');
+    const discountInput = document.getElementById('discount_input');
+    const taxInput = document.getElementById('tax_input');
+    const totalInput = document.getElementById('total_input');
+    if (subtotalInput) subtotalInput.value = subtotal.toFixed(2);
+    if (discountInput) discountInput.value = totalDiscount.toFixed(2);
+    if (taxInput) taxInput.value = totalGst.toFixed(2);
+    if (totalInput) totalInput.value = totalAmount.toFixed(2);
     }
+
+    // Pre-populate if values already selected (e.g., validation error returned)
+    const preCompanyId = document.getElementById('company_id').value;
+    if(preCompanyId){ document.getElementById('company_id').dispatchEvent(new Event('change')); }
+    const preCustomerId = document.getElementById('customer_id').value;
+    if(preCustomerId){ document.getElementById('customer_id').dispatchEvent(new Event('change')); }
 
     // Attach event listeners to existing rows
     document.querySelectorAll('#itemsTableBody tr').forEach(row => {
@@ -469,3 +508,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+

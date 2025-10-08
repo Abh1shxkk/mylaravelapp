@@ -24,7 +24,7 @@
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Name <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                                       name="name" value="{{ old('name') }}" required>
+                                       name="name" value="{{ old('name') }}">
                                 @error('name')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -43,27 +43,72 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">City</label>
-                                <input type="text" class="form-control" name="city" value="{{ old('city') }}">
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label">PIN Code</label>
-                                <input type="text" class="form-control" name="pin_code" value="{{ old('pin_code') }}">
-                            </div>
+                            <div class="row">
+    <!-- Country Dropdown -->
+    <div class="col-md-3 mb-3">
+        <label class="form-label">Country</label>
+        <select class="form-select" id="country" name="country_code">
+            <option value="">Select Country</option>
+            @if(isset($countries))
+                @foreach($countries as $country)
+                    <option value="{{ $country['iso2'] }}" 
+                            data-name="{{ $country['name'] }}"
+                            {{ old('country_code') == $country['iso2'] ? 'selected' : '' }}>
+                        {{ $country['name'] }}
+                    </option>
+                @endforeach
+            @endif
+        </select>
+        <input type="hidden" name="country_name" id="country_name" value="{{ old('country_name') }}">
+    </div>
+
+    <!-- State Dropdown -->
+    <div class="col-md-3 mb-3">
+        <label class="form-label">State</label>
+        <select class="form-select" id="state" name="state_code" disabled>
+            <option value="">Select State</option>
+        </select>
+        <input type="hidden" name="state_name" id="state_name" value="{{ old('state_name') }}">
+    </div>
+
+    <!-- City Dropdown -->
+    <div class="col-md-3 mb-3">
+        <label class="form-label">City</label>
+        <select class="form-select" id="city_dropdown" name="city" disabled>
+            <option value="">Select City</option>
+        </select>
+    </div>
+
+    <!-- PIN Code -->
+    <div class="col-md-3 mb-3">
+        <label class="form-label">PIN Code</label>
+        <input type="text" class="form-control" name="pin_code" value="{{ old('pin_code') }}">
+    </div>
+</div>
+
+
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Address</label>
-                                <textarea class="form-control" name="address" rows="2">{{ old('address') }}</textarea>
+                                <label class="form-label">Address <span class="text-danger">*</span></label>
+                                <textarea class="form-control @error('address') is-invalid @enderror" name="address" rows="2">{{ old('address') }}</textarea>
+                                @error('address')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Mobile</label>
-                                <input type="text" class="form-control" name="mobile" value="{{ old('mobile') }}">
+                                <label class="form-label">Mobile <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('mobile') is-invalid @enderror" name="mobile" value="{{ old('mobile') }}">
+                                @error('mobile')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" value="{{ old('email') }}">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
@@ -213,8 +258,11 @@
                                 <input type="text" class="form-control" name="tan_number" value="{{ old('tan_number') }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">PAN Number</label>
-                                <input type="text" class="form-control" name="pan_number" value="{{ old('pan_number') }}">
+                                <label class="form-label">PAN Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('pan_number') is-invalid @enderror" name="pan_number" value="{{ old('pan_number') }}">
+                                @error('pan_number')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">TIN Number</label>
@@ -231,8 +279,11 @@
                                 <input type="text" class="form-control" name="cst_registration" value="{{ old('cst_registration') }}">
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">GST Name</label>
-                                <input type="text" class="form-control" name="gst_name" value="{{ old('gst_name') }}">
+                                <label class="form-label">GST Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('gst_name') is-invalid @enderror" name="gst_name" value="{{ old('gst_name') }}">
+                                @error('gst_name')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">State Code (GST)</label>
@@ -325,4 +376,97 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+$(document).ready(function() {
+    const countrySelect = $('#country');
+    const stateSelect = $('#state');
+    const citySelect = $('#city_dropdown');
+    
+    // When country changes
+    countrySelect.on('change', function() {
+        const countryCode = $(this).val();
+        const countryName = $(this).find(':selected').data('name');
+        
+        // Store country name
+        $('#country_name').val(countryName);
+        
+        // Reset state and city
+        stateSelect.html('<option value="">Select State</option>').prop('disabled', true);
+        citySelect.html('<option value="">Select City</option>').prop('disabled', true);
+        
+        if (countryCode) {
+            // Fetch states
+            $.ajax({
+                url: `/admin/api/states/${countryCode}`,
+                type: 'GET',
+                success: function(states) {
+                    if (states && states.length > 0) {
+                        states.forEach(state => {
+                            stateSelect.append(
+                                `<option value="${state.iso2}" data-name="${state.name}">${state.name}</option>`
+                            );
+                        });
+                        stateSelect.prop('disabled', false);
+                    } else {
+                        alert('No states found for this country');
+                    }
+                },
+                error: function() {
+                    alert('Error loading states. Please try again.');
+                }
+            });
+        }
+    });
+    
+    // When state changes
+    stateSelect.on('change', function() {
+        const stateCode = $(this).val();
+        const stateName = $(this).find(':selected').data('name');
+        const countryCode = countrySelect.val();
+        
+        // Store state name
+        $('#state_name').val(stateName);
+        
+        // Reset city
+        citySelect.html('<option value="">Select City</option>').prop('disabled', true);
+        
+        if (stateCode && countryCode) {
+            // Fetch cities
+            $.ajax({
+                url: `/admin/api/cities/${countryCode}/${stateCode}`,
+                type: 'GET',
+                success: function(cities) {
+                    if (cities && cities.length > 0) {
+                        cities.forEach(city => {
+                            citySelect.append(
+                                `<option value="${city.name}">${city.name}</option>`
+                            );
+                        });
+                        citySelect.prop('disabled', false);
+                    } else {
+                        // No cities found
+                        alert('No cities found for this state. Please contact support.');
+                    }
+                },
+                error: function() {
+                    alert('Error loading cities. Please try again.');
+                }
+            });
+        }
+    });
+    
+    // Optional: Load old values on page load (for validation errors)
+    @if(old('country_code'))
+        countrySelect.trigger('change');
+        setTimeout(() => {
+            stateSelect.val('{{ old('state_code') }}').trigger('change');
+            setTimeout(() => {
+                citySelect.val('{{ old('city') }}');
+            }, 500);
+        }, 500);
+    @endif
+});
+</script>
+@endpush
 @endsection

@@ -47,8 +47,19 @@ class CompanyController extends Controller
 
     public function store(Request $request)
     {
-        // For debugging: accept all input and treat missing values as nullable
-        $data = $request->all();
+        // Validate required fields
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:companies,email',
+            'address' => 'required|string',
+            // Optional contact fields should also be unique if provided
+            'telephone' => 'nullable|string|max:255|unique:companies,telephone',
+            'mobile_1' => 'nullable|string|max:255|unique:companies,mobile_1',
+            'mobile_2' => 'nullable|string|max:255|unique:companies,mobile_2',
+        ]);
+
+        // Get all data and merge validated fields
+        $data = array_merge($request->all(), $validated);
         $data['status'] = (bool)($request->boolean('status'));
         $data['surcharge_after_dis_yn'] = $request->boolean('surcharge_after_dis_yn');
         $data['add_surcharge_yn'] = $request->boolean('add_surcharge_yn');
@@ -124,6 +135,11 @@ class CompanyController extends Controller
             'discount' => 'nullable|numeric',
             'flag' => 'nullable|string|max:255',
             'status' => 'nullable|boolean',
+             'country_code' => 'nullable|string|max:10',
+    'country_name' => 'nullable|string|max:100',
+    'state_code' => 'nullable|string|max:10',
+    'state_name' => 'nullable|string|max:100',
+    'city' => 'nullable|string|max:255',
         ];
     }
 }

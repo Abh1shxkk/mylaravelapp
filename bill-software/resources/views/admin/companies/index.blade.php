@@ -55,7 +55,7 @@
       <tbody id="company-table-body">
         @forelse($companies as $company)
           <tr>
-            <td>{{ $loop->iteration }}</td>
+            <td>{{ ($companies->currentPage() - 1) * $companies->perPage() + $loop->iteration }}</td>
             <td><a href="{{ route('admin.companies.show',$company) }}">{{ $company->name }}</a></td>
             <td>{{ $company->address }}</td>
             <td>{{ $company->email }}</td>
@@ -81,7 +81,13 @@
   <div class="card-footer d-flex justify-content-between align-items-center">
     <div class="small text-muted">Showing {{ $companies->firstItem() ?? 0 }}-{{ $companies->lastItem() ?? 0 }} of {{ $companies->total() }}</div>
     @if($companies->hasMorePages())
-      <button id="load-more-companies" class="btn btn-outline-secondary btn-sm" data-next-url="{{ $companies->appends(request()->query())->nextPageUrl() }}">Load more</button>
+      <div class="d-flex align-items-center gap-2">
+        <div id="company-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <span id="company-load-text" class="small text-muted">Scroll for more</span>
+      </div>
+      <div id="company-sentinel" data-next-url="{{ $companies->appends(request()->query())->nextPageUrl() }}" style="height: 1px;"></div>
     @endif
   </div>
 </div>
@@ -93,32 +99,60 @@ document.addEventListener('DOMContentLoaded', function(){
   const filterInputs = document.querySelectorAll('select[name="status"], input[name="date_from"], input[name="date_to"]');
   filterInputs.forEach(function(el){ el.addEventListener('change', function(){ this.form.submit(); }); });
 
-  const loadBtn = document.getElementById('load-more-companies');
-  if(!loadBtn) return;
-  loadBtn.addEventListener('click', async function(){
-    const btn = this;
-    const nextUrl = btn.getAttribute('data-next-url');
+  const sentinel = document.getElementById('company-sentinel');
+  const spinner = document.getElementById('company-spinner');
+  const loadText = document.getElementById('company-load-text');
+  const tbody = document.getElementById('company-table-body');
+  
+  if(!sentinel || !tbody) return;
+  
+  let isLoading = false;
+  
+  async function loadMore(){
+    if(isLoading) return;
+    const nextUrl = sentinel.getAttribute('data-next-url');
     if(!nextUrl) return;
-    btn.disabled = true; btn.textContent = 'Loading...';
+    
+    isLoading = true;
+    spinner && spinner.classList.remove('d-none');
+    loadText && (loadText.textContent = 'Loading...');
+    
     try{
       const res = await fetch(nextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
       const html = await res.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       const newRows = doc.querySelectorAll('#company-table-body tr');
-      const targetBody = document.querySelector('#company-table-body');
-      newRows.forEach(tr => targetBody.appendChild(tr));
-      const newBtn = doc.querySelector('#load-more-companies');
-      if(newBtn){
-        btn.setAttribute('data-next-url', newBtn.getAttribute('data-next-url'));
-        btn.disabled = false; btn.textContent = 'Load more';
+      newRows.forEach(tr => tbody.appendChild(tr));
+      
+      const newSentinel = doc.querySelector('#company-sentinel');
+      if(newSentinel){
+        sentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
+        spinner && spinner.classList.add('d-none');
+        loadText && (loadText.textContent = 'Scroll for more');
+        isLoading = false;
       } else {
-        btn.remove();
+        observer.disconnect();
+        sentinel.remove();
+        spinner && spinner.remove();
+        loadText && loadText.remove();
       }
     }catch(e){
-      btn.disabled = false; btn.textContent = 'Load more';
+      spinner && spinner.classList.add('d-none');
+      loadText && (loadText.textContent = 'Error loading');
+      isLoading = false;
     }
-  });
+  }
+  
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting && !isLoading){
+        loadMore();
+      }
+    });
+  }, { rootMargin: '100px' });
+  
+  observer.observe(sentinel);
 });
 </script>
 @endpush
