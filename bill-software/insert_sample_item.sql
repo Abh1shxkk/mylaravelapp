@@ -1,0 +1,31 @@
+INSERT INTO `items` (
+    `code`, `Barcode`, `name`, `Compcode`, `Compname`, `Pack`, `Unit`, `Location`, `Expiry`, `Generic`,
+    `Saltcode`, `Strength`, `saltcode1`, `Strength1`, `saltcode2`, `Strength2`, `saltcode3`, `Strength3`,
+    `Saltcode4`, `Strength4`, `Saltcode5`, `Strength5`, `Substitute`, `Saltno`, `Prate`, `Tsr`, `Psc`,
+    `ptax`, `Excise`, `Scm1`, `scm2`, `Srate`, `Sc`, `Saletype`, `Stax`, `Wsrate`, `Add_sc`, `Add_tsr`,
+    `Costrate`, `opqty`, `Clqty`, `status`, `Vdt`, `Batchcode`, `cname_bc`, `Defqty`, `BarcodeQty`,
+    `splrate`, `Mrp`, `Ssc`, `WsNet`, `SplNet`, `Hscm`, `Box`, `CommonItem`, `Sscm1`, `FDis`, `Sscm2`,
+    `FDisP`, `currentScm`, `ScmFrom`, `ScmTo`, `CurrScm1`, `CurrScm2`, `TrimName`, `PresReq`, `Division`,
+    `QScm`, `SconMrp`, `VAT`, `Margin`, `Inclusive`, `ItemCat`, `Gdn`, `PRateCase`, `PRateBox`, `Desc1`,
+    `Desc2`, `MinQty`, `MaxQty`, `ItCase`, `TRate`, `Wr`, `Pic`, `Mfg`, `TempOpqty`, `TempClqty`,
+    `TempAmt`, `TempAmt1`, `TempAmt2`, `TaxonMrp`, `ScmPer`, `IWeight`, `SubStrenght`, `ItemRef`,
+    `MaxInvQty`, `MaxQtyWr`, `OpFreeQty`, `VATonSrate`, `Exon`, `ExPer`, `UnitType`, `MfgQty`, `mTag`,
+    `DisContinue`, `MfgBy`, `Vol`, `VDisP`, `VDisS`, `FDisWR`, `LastYearCost`, `OpAddQty`, `SaleLessQty`,
+    `SplDisQty`, `SplDisPer`, `MinGP`, `LockScm`, `FullName`, `RateLock`, `MinRate`, `PurExciseAsRate`,
+    `PurNetRate`, `CostWFQ`, `LockBilling`, `SameBatchCost`, `EsCode`, `FdisPWS`, `ItemType`, `ItemGroup`,
+    `HSNCode`, `CGST`, `SGST`, `IGST`, `GSTCess`, `IucCode`, `Flag`, `miscsettings`, `SyncMark`
+) VALUES (
+    '00001', '1', 'PIOLET M 15mg', '1', 'INTAS', '1*10', '1', 'N', NULL, '0',
+    '0', '0', '0', '0', '0', '0', '0+0+0+0', '0', NULL, NULL, NULL, NULL, NULL, 0, 42.50, 0.00, '0.00',
+    0.00, 0.00, '0', '0', 42.50, '0.00', '1', 0.00, 0.00, 'N', 'N',
+    38.25, 0, 0, 0, '09-Jul-08', 'N', 'Y', 'N', 0,
+    0.00, 55.20, '$0.00', 'N', 'N', 'N', '0', 'N', '0', 'N', '0',
+    0, 'N', '2002-08-10', '2002-08-10', '0', '0', 'PIOLETM15mg', 'N', 'SUPRIMA',
+    'N', 0, 4, 0, 'N', '0', '0', 0, 0, '77500000', '0', '0',
+    '0', 0, 0, '0', 0, 'W', '0', 0, 0, 0,
+    0, 0, 0, 'N', 0, 0, '+++', 'N',
+    0, 0, 0, 'N', 'M', 0, '0', 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 'PIOLET M 15mg', 0, 0, 0,
+    0, 38.25, 'N', '38.25', '0', 0, '0', '0',
+    '0', 0, 0, 0, 0, '0', '0', '0', '0'
+);

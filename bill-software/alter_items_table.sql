@@ -1,0 +1,78 @@
+-- Fix date columns to accept text format dates
+ALTER TABLE `items` MODIFY `Expiry` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `ScmFrom` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `ScmTo` VARCHAR(50) NULL;
+
+-- Fix decimal columns to accept $ symbol (already done in migration as VARCHAR)
+-- These are already VARCHAR(50) after migration
+-- ALTER TABLE `items` MODIFY `splrate` VARCHAR(50) NULL;
+-- ALTER TABLE `items` MODIFY `Mrp` VARCHAR(50) NULL;
+
+-- Fix boolean columns to accept 'N', 'Y' text values (already done in migration)
+-- These are already VARCHAR after migration
+-- ALTER TABLE `items` MODIFY `DisContinue` VARCHAR(10) NULL;
+
+-- Fix other decimal columns that might have spaces or text
+ALTER TABLE `items` MODIFY `FDisWR` VARCHAR(50) NULL;
+
+-- Additional columns that might need VARCHAR for flexibility
+ALTER TABLE `items` MODIFY `Prate` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Tsr` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `ptax` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Excise` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Srate` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Stax` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Wsrate` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Costrate` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `opqty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Clqty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `FDisP` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `SconMrp` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `VAT` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Margin` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `PRateCase` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `PRateBox` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `MinQty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `MaxQty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `TRate` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `TempOpqty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `TempClqty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `TempAmt` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `TempAmt1` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `TempAmt2` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `ScmPer` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `IWeight` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `MaxInvQty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `MaxQtyWr` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `OpFreeQty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `ExPer` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `MfgQty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `Vol` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `VDisP` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `VDisS` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `LastYearCost` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `OpAddQty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `SaleLessQty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `SplDisQty` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `SplDisPer` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `MinGP` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `MinRate` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `PurExciseAsRate` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `PurNetRate` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `CostWFQ` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `FdisPWS` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `CGST` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `SGST` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `IGST` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `GSTCess` VARCHAR(50) NULL;
+
+-- Fix boolean columns to accept text
+ALTER TABLE `items` MODIFY `status` VARCHAR(10) NULL;
+ALTER TABLE `items` MODIFY `DisContinue` VARCHAR(10) NULL;
+ALTER TABLE `items` MODIFY `LockScm` VARCHAR(10) NULL;
+ALTER TABLE `items` MODIFY `RateLock` VARCHAR(10) NULL;
+ALTER TABLE `items` MODIFY `is_deleted` VARCHAR(10) NULL;
+
+-- Fix integer columns that might have text
+ALTER TABLE `items` MODIFY `Saltno` VARCHAR(50) NULL;
+ALTER TABLE `items` MODIFY `BarcodeQty` VARCHAR(50) NULL;
