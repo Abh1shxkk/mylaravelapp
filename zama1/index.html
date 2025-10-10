@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zama Staking Calculator - Calculate Your Rewards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #FFF4D6 0%, #FFF9E5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-box {
+            display: inline-block;
+            background: #FFD93D;
+            padding: 20px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 217, 61, 0.3);
+            margin-bottom: 20px;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .logo-box h1 {
+            font-size: 2.5rem;
+            color: #1F1F1F;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+
+        .header h2 {
+            font-size: 2rem;
+            color: #1F1F1F;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .calculator-card {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 1rem;
+            color: #1F1F1F;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border: 2px solid #E5E5E5;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #1F1F1F;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #FFD93D;
+            background: #FFF4D6;
+        }
+
+        .token-symbol {
+            position: absolute;
+            right: 20px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #666;
+            pointer-events: none;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .role-option {
+            background: #F9F9F9;
+            border: 2px solid #E5E5E5;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .role-option:hover {
+            border-color: #FFD93D;
+            background: #FFF4D6;
+            transform: translateY(-3px);
+        }
+
+        .role-option.active {
+            border-color: #FFD93D;
+            background: #FFD93D;
+            box-shadow: 0 8px 20px rgba(255, 217, 61, 0.3);
+        }
+
+        .role-option h3 {
+            font-size: 1.2rem;
+            color: #1F1F1F;
+            margin-bottom: 5px;
+        }
+
+        .role-option p {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .results-section {
+            background: linear-gradient(135deg, #FFD93D 0%, #FFC700 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-size: 1rem;
+            color: #1F1F1F;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 1.3rem;
+            color: #1F1F1F;
+            font-weight: 800;
+        }
+
+        .result-value.highlight {
+            font-size: 1.8rem;
+            color: #1F1F1F;
+        }
+
+        .info-box {
+            background: #FFF4D6;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        .info-box h4 {
+            font-size: 1rem;
+            color: #1F1F1F;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .info-box p {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .commission-slider {
+            margin-top: 15px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #E5E5E5;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFD93D;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(255, 217, 61, 0.5);
+        }
+
+        .slider-container input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #FFD93D;
+            cursor: pointer;
+            border: none;
+        }
+
+        .slider-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1F1F1F;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer-link a {
+            color: #1F1F1F;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .footer-link a:hover {
+            color: #FFD93D;
+            transform: translateX(5px);
+        }
+
+        @media (max-width: 768px) {
+            .calculator-card {
+                padding: 30px 25px;
+            }
+
+            .role-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .header h2 {
+                font-size: 1.6rem;
+            }
+
+            .result-value.highlight {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo-box">
+                <h1>ZAMA</h1>
+            </div>
+            <h2>Staking Calculator</h2>
+            <p>Calculate your potential rewards as an operator</p>
+        </div>
+
+        <div class="calculator-card">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="stakeAmount">Stake Amount</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="number" 
+                            id="stakeAmount" 
+                            placeholder="10000" 
+                            value="10000"
+                            min="0"
+                            oninput="calculateRewards()"
+                        >
+                        <span class="token-symbol">$ZAMA</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Select Role</label>
+                    <div class="role-selector">
+                        <div class="role-option active" id="kms" onclick="selectRole('kms')">
+                            <h3>🔐 KMS Node</h3>
+                            <p>4.6% rewards share</p>
+                        </div>
+                        <div class="role-option" id="coprocessor" onclick="selectRole('coprocessor')">
+                            <h3>⚡ Coprocessor</h3>
+                            <p>13.3% rewards share</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="inflationRate">Annual Inflation Rate</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="number" 
+                            id="inflationRate" 
+                            placeholder="10" 
+                            value="10"
+                            min="0"
+                            max="100"
+                            step="0.1"
+                            oninput="calculateRewards()"
+                        >
+                        <span class="token-symbol">%</span>
+                    </div>
+                </div>
+
+                <div class="commission-slider">
+                    <label>Commission Rate (for delegators)</label>
+                    <div class="slider-container">
+                        <input 
+                            type="range" 
+                            id="commissionRate" 
+                            min="0" 
+                            max="100" 
+                            value="20"
+                            oninput="updateCommission()"
+                        >
+                        <span class="slider-value" id="commissionValue">20%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <div class="result-item">
+                    <span class="result-label">Monthly Rewards</span>
+                    <span class="result-value" id="monthlyRewards">83.33 $ZAMA</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">Yearly Rewards</span>
+                    <span class="result-value highlight" id="yearlyRewards">1,000 $ZAMA</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">After Commission</span>
+                    <span class="result-value" id="afterCommission">800 $ZAMA/year</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">APY</span>
+                    <span class="result-value" id="apyRate">10.00%</span>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>📊 Role Information</h4>
+                <p id="roleInfo"><strong>KMS Node:</strong> Runs threshold decryption protocols. 13 nodes with 2/3 majority rule. Monthly infra cost: ~$2,500 per 50 TPS.</p>
+                <p><strong>Note:</strong> Calculations are based on 10% initial inflation rate. Commission is what you keep from delegators' rewards.</p>
+            </div>
+        </div>
+
+        <div class="footer-link">
+            <a href="https://www.zama.ai/" target="_blank">Learn more about Zama →</a>
+        </div>
+
+        <div class="footer-link" style="margin-top: 15px;">
+            <a href="https://x.com/abh1shxkk" target="_blank" style="color: #666; font-size: 0.95rem;">Built by @abh1shxkk →</a>
+        </div>
+    </div>
+
+    <script>
+        let selectedRole = 'kms';
+        const totalSupply = 1000000000; // 1 billion tokens (example)
+
+        // Role-specific data
+        const roleData = {
+            kms: {
+                rewardShare: 4.6,
+                operators: 13,
+                info: '<strong>KMS Node:</strong> Runs threshold decryption protocols. 13 nodes with 2/3 majority rule. Monthly infra cost: ~$2,500 per 50 TPS.',
+                infraCost: 2500
+            },
+            coprocessor: {
+                rewardShare: 13.3,
+                operators: 3,
+                info: '<strong>Coprocessor:</strong> Executes FHE computations and stores ciphertexts. 3 operators with majority consensus. Monthly infra cost: ~$20,000 per 10 TPS.',
+                infraCost: 20000
+            }
+        };
+
+        function selectRole(role) {
+            selectedRole = role;
+            
+            // Update UI
+            document.querySelectorAll('.role-option').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(role).classList.add('active');
+            
+            // Update info
+            document.getElementById('roleInfo').innerHTML = roleData[role].info;
+            
+            calculateRewards();
+        }
+
+        function updateCommission() {
+            const commissionRate = document.getElementById('commissionRate').value;
+            document.getElementById('commissionValue').textContent = commissionRate + '%';
+            calculateRewards();
+        }
+
+        function calculateRewards() {
+            const stakeAmount = parseFloat(document.getElementById('stakeAmount').value) || 0;
+            const inflationRate = parseFloat(document.getElementById('inflationRate').value) || 10;
+            const commissionRate = parseFloat(document.getElementById('commissionRate').value) || 20;
+            
+            const role = roleData[selectedRole];
+            
+            // Total rewards minted per year
+            const totalYearlyRewards = totalSupply * (inflationRate / 100);
+            
+            // Rewards for this role group
+            const roleGroupRewards = totalYearlyRewards * (role.rewardShare / 100);
+            
+            // Per operator rewards (distributed equally among operators)
+            const perOperatorRewards = roleGroupRewards / role.operators;
+            
+            // Calculate based on stake percentage (simplified: assuming your stake makes you an operator)
+            // In reality, only top stakers become operators
+            const yearlyRewards = perOperatorRewards;
+            const monthlyRewards = yearlyRewards / 12;
+            
+            // After commission (what you keep after paying delegators)
+            const afterCommission = yearlyRewards * (commissionRate / 100);
+            
+            // APY calculation
+            const apy = (yearlyRewards / stakeAmount) * 100;
+            
+            // Update UI
+            document.getElementById('monthlyRewards').textContent = monthlyRewards.toLocaleString('en-US', {maximumFractionDigits: 2}) + ' $ZAMA';
+            document.getElementById('yearlyRewards').textContent = yearlyRewards.toLocaleString('en-US', {maximumFractionDigits: 2}) + ' $ZAMA';
+            document.getElementById('afterCommission').textContent = afterCommission.toLocaleString('en-US', {maximumFractionDigits: 2}) + ' $ZAMA/year';
+            document.getElementById('apyRate').textContent = (isFinite(apy) ? apy : 0).toFixed(2) + '%';
+        }
+
+        // Initial calculation
+        calculateRewards();
+    </script>
+</body>
+</html>

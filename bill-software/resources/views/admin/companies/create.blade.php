@@ -39,18 +39,22 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">Email <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}">
                                 @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">GST Number</label>
+                                <input type="text" class="form-control" name="gst_number" value="{{ old('gst_number') }}" placeholder="Enter GST Number">
+                            </div>
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">Website</label>
                                 <input type="text" class="form-control" name="website" value="{{ old('website') }}" placeholder="https://">
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label class="form-label">Location</label>
                                 <input type="text" class="form-control" name="location" value="{{ old('location') }}">
                             </div>

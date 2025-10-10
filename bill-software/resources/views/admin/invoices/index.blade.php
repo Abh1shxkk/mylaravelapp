@@ -169,6 +169,14 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Select2 on status dropdown
+    $('#status').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'All Status',
+        allowClear: true
+    });
+    
     const filterInputs = document.querySelectorAll('select[name="status"], input[name="date_from"], input[name="date_to"]');
     filterInputs.forEach(input => {
         input.addEventListener('change', function() {

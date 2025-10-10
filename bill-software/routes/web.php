@@ -29,6 +29,7 @@ Route::middleware(['admin'])->group(function () {
         Route::resource('items', ItemController::class);
         Route::resource('suppliers', SupplierController::class);
         Route::resource('invoices', InvoiceController::class);
+        Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
         Route::get('/api/countries', [CustomerController::class, 'getCountries'])->name('api.countries');
         Route::get('/api/states/{country}', [CustomerController::class, 'getStates'])->name('api.states');
         Route::get('/api/cities/{country}/{state}', [CustomerController::class, 'getCities'])->name('api.cities');

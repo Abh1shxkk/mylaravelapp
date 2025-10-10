@@ -200,11 +200,11 @@
                         <div class="row">
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Prate</label>
-                                <input type="number" step="0.01" class="form-control" name="Prate" value="{{ old('Prate', $item->Prate ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Prate" value="{{ old('Prate', $item->Prate) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Tsr</label>
-                                <input type="number" step="0.01" class="form-control" name="Tsr" value="{{ old('Tsr', $item->Tsr ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Tsr" value="{{ old('Tsr', $item->Tsr) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Psc</label>
@@ -212,15 +212,25 @@
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">ptax</label>
-                                <input type="number" step="0.01" class="form-control" name="ptax" value="{{ old('ptax', $item->ptax ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="ptax" value="{{ old('ptax', $item->ptax) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Excise</label>
-                                <input type="number" step="0.01" class="form-control" name="Excise" value="{{ old('Excise', $item->Excise ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Excise" value="{{ old('Excise', $item->Excise) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Scm1</label>
                                 <input type="text" class="form-control" name="Scm1" value="{{ old('Scm1', $item->Scm1) }}">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Discount Amount</label>
+                                <input type="number" step="0.01" class="form-control" name="discount_amount" value="{{ old('discount_amount', $item->discount_amount) }}">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Discount Percent (%)</label>
+                                <input type="number" step="0.01" class="form-control" name="discount_percent" value="{{ old('discount_percent', $item->discount_percent) }}">
                             </div>
                         </div>
                         <div class="row">
@@ -230,7 +240,7 @@
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Srate</label>
-                                <input type="number" step="0.01" class="form-control" name="Srate" value="{{ old('Srate', $item->Srate ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Srate" value="{{ old('Srate', $item->Srate) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Sc</label>
@@ -242,29 +252,29 @@
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Stax</label>
-                                <input type="number" step="0.01" class="form-control" name="Stax" value="{{ old('Stax', $item->Stax ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Stax" value="{{ old('Stax', $item->Stax) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Wsrate</label>
-                                <input type="number" step="0.01" class="form-control" name="Wsrate" value="{{ old('Wsrate', $item->Wsrate ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Wsrate" value="{{ old('Wsrate', $item->Wsrate) }}">
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Add_sc</label>
-                                <input type="number" step="0.01" class="form-control" name="Add_sc" value="{{ old('Add_sc', $item->Add_sc ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Add_sc" value="{{ old('Add_sc', $item->Add_sc) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Add_tsr</label>
-                                <input type="number" step="0.01" class="form-control" name="Add_tsr" value="{{ old('Add_tsr', $item->Add_tsr ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Add_tsr" value="{{ old('Add_tsr', $item->Add_tsr) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Costrate</label>
-                                <input type="number" step="0.01" class="form-control" name="Costrate" value="{{ old('Costrate', $item->Costrate ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Costrate" value="{{ old('Costrate', $item->Costrate) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">ScmPer</label>
-                                <input type="number" step="0.01" class="form-control" name="ScmPer" value="{{ old('ScmPer', $item->ScmPer ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="ScmPer" value="{{ old('ScmPer', $item->ScmPer) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">currentScm</label>
@@ -272,7 +282,7 @@
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Mrp</label>
-                                <input type="number" step="0.01" class="form-control" name="Mrp" value="{{ old('Mrp', $item->Mrp ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Mrp" value="{{ old('Mrp', $item->Mrp) }}">
                             </div>
                         </div>
                         <div class="row">
@@ -305,11 +315,11 @@
                         <div class="row">
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">opqty</label>
-                                <input type="number" step="0.01" class="form-control" name="opqty" value="{{ old('opqty', $item->opqty ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="opqty" value="{{ old('opqty', $item->opqty) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Clqty</label>
-                                <input type="number" step="0.01" class="form-control" name="Clqty" value="{{ old('Clqty', $item->Clqty ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Clqty" value="{{ old('Clqty', $item->Clqty) }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Vdt</label>
@@ -327,7 +337,7 @@
                         <div class="row">
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">Defqty</label>
-                                <input type="number" step="0.01" class="form-control" name="Defqty" value="{{ old('Defqty', $item->Defqty ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="Defqty" value="{{ old('Defqty', $item->Defqty) }}">
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">BarcodeQty</label>
@@ -335,7 +345,7 @@
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label">splrate</label>
-                                <input type="number" step="0.01" class="form-control" name="splrate" value="{{ old('splrate', $item->splrate ?? '0.00') }}">
+                                <input type="number" step="0.01" class="form-control" name="splrate" value="{{ old('splrate', $item->splrate) }}">
                             </div>
                         </div>
                     </div>
@@ -749,10 +759,6 @@
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">S. Rate</label>
                                 <input type="number" step="0.01" class="form-control" name="Srate" value="{{ old('Srate', '0.00') }}">
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label class="form-label">MRP</label>
-                                <input type="number" step="0.01" class="form-control" name="Mrp" value="{{ old('Mrp', '0.00') }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Net</label>

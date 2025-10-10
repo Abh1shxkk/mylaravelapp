@@ -7,6 +7,9 @@
     <title>@yield('title', 'Admin')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <style>
         body {
             overflow: hidden;
@@ -320,14 +323,13 @@
                         style="background:transparent;">
                         <i class="bi bi-buildings me-2"></i> <span class="label">Companies</span>
                     </button>
-                    <div class="collapse" id="menuCompanies"><a class="nav-link ms-3 d-flex align-items-center"
-                            href="{{ route('admin.companies.create') }}">
+                    <div class="collapse" id="menuCompanies"><a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.companies.create') }}">
                             <span class="label">Add Company</span>
                         </a>
                         <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.companies.index') }}">
                             <span class="label">All Companies</span>
                         </a>
-
+                        
                     </div>
                 </div>
 
@@ -336,14 +338,13 @@
                         data-bs-toggle="collapse" data-bs-target="#menuCustomers" style="background:transparent;">
                         <i class="bi bi-people me-2"></i> <span class="label">Customers</span>
                     </button>
-                    <div class="collapse" id="menuCustomers"><a class="nav-link ms-3 d-flex align-items-center"
-                            href="{{ route('admin.customers.create') }}">
+                    <div class="collapse" id="menuCustomers"><a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.customers.create') }}">
                             <span class="label">Add Customer</span>
                         </a>
                         <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.customers.index') }}">
                             <span class="label">All Customers</span>
                         </a>
-
+                        
                     </div>
                 </div>
 
@@ -352,14 +353,13 @@
                         data-bs-toggle="collapse" data-bs-target="#menuItems" style="background:transparent;">
                         <i class="bi bi-box-seam me-2"></i> <span class="label">Items</span>
                     </button>
-                    <div class="collapse" id="menuItems"><a class="nav-link ms-3 d-flex align-items-center"
-                            href="{{ route('admin.items.create') }}">
+                    <div class="collapse" id="menuItems"><a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.items.create') }}">
                             <span class="label">Add Item</span>
                         </a>
                         <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.items.index') }}">
                             <span class="label">All Items</span>
                         </a>
-
+                        
                     </div>
                 </div>
 
@@ -368,8 +368,9 @@
                         data-bs-toggle="collapse" data-bs-target="#menuSuppliers" style="background:transparent;">
                         <i class="bi bi-truck me-2"></i> <span class="label">Suppliers</span>
                     </button>
-                    <div class="collapse" id="menuSuppliers">
-                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.suppliers.create') }}">
+                    <div class="collapse" id="menuSuppliers"> 
+                        <a class="nav-link ms-3 d-flex align-items-center"
+                            href="{{ route('admin.suppliers.create') }}">
                             <span class="label">Add Supplier</span>
                         </a>
                         <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.suppliers.index') }}">
@@ -406,8 +407,10 @@
                         <i class="bi bi-chevron-up ms-auto"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark">
-                        <li><a class="dropdown-item" href="{{ route('profile.settings') }}"><i
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal"><i
                                     class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><a class="dropdown-item" href="{{ route('password.change.form') }}"><i
+                                    class="bi bi-key me-2"></i>Change Password</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -460,254 +463,253 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        (function () {
-            const btn = document.getElementById('sidebarToggle');
-            const sidebar = document.querySelector('.sidebar');
-            const backdrop = document.getElementById('sidebarBackdrop');
-            const desktopBtn = document.getElementById('desktopSidebarToggle');
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+   <!-- jQuery (required for Select2) -->
+   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+   <!-- Select2 JS -->
+   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+(function(){
+    const btn = document.getElementById('sidebarToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const desktopBtn = document.getElementById('desktopSidebarToggle');
 
-            // --- MOBILE TOGGLE ---
-            function toggleSidebar() {
-                sidebar.classList.toggle('show');
-                backdrop.classList.toggle('show');
+    // --- MOBILE TOGGLE ---
+    function toggleSidebar(){
+        sidebar.classList.toggle('show');
+        backdrop.classList.toggle('show');
+    }
+    if(btn && backdrop){
+        btn.addEventListener('click', toggleSidebar);
+        backdrop.addEventListener('click', toggleSidebar);
+    }
+
+    // --- DESKTOP COLLAPSE ---
+    if(desktopBtn){
+        desktopBtn.addEventListener('click', e=>{
+            e.preventDefault();
+            document.body.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', document.body.classList.contains('collapsed') ? 'true' : 'false');
+        });
+        if(localStorage.getItem('sidebarCollapsed') === 'true'){
+            document.body.classList.add('collapsed');
+        }
+    }
+
+    // --- COLLAPSE HANDLING ---
+    const collapseEls = document.querySelectorAll('.sidebar .collapse');
+    const topMenuKey = 'sidebar:topMenuOpen';
+    const savedTopMenu = localStorage.getItem(topMenuKey);
+
+    collapseEls.forEach(collapseEl=>{
+        const collapse = new bootstrap.Collapse(collapseEl, {toggle:false});
+        const trigger = document.querySelector('[data-bs-target="#'+collapseEl.id+'"]');
+
+        const isTopLevel = collapseEl.id && collapseEl.id.startsWith('menu') && !collapseEl.closest('.collapse:not(#'+collapseEl.id+')');
+
+        // Restore saved open state
+        if(isTopLevel){
+            if(savedTopMenu && savedTopMenu === collapseEl.id){
+                collapse.show();
+                localStorage.setItem('collapse:'+collapseEl.id, 'true');
+            } else {
+                collapse.hide();
+                localStorage.setItem('collapse:'+collapseEl.id, 'false');
             }
-            if (btn && backdrop) {
-                btn.addEventListener('click', toggleSidebar);
-                backdrop.addEventListener('click', toggleSidebar);
-            }
+        } else {
+            const isOpen = localStorage.getItem('collapse:'+collapseEl.id) === 'true';
+            if(isOpen){ collapse.show(); }
+        }
 
-            // --- DESKTOP COLLAPSE ---
-            if (desktopBtn) {
-                desktopBtn.addEventListener('click', e => {
-                    e.preventDefault();
-                    document.body.classList.toggle('collapsed');
-                    localStorage.setItem('sidebarCollapsed', document.body.classList.contains('collapsed') ? 'true' : 'false');
-                });
-                if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                    document.body.classList.add('collapsed');
-                }
-            }
+        if(trigger){
+            trigger.addEventListener('click', e=>{
+                e.preventDefault();
+                e.stopPropagation();
+                if(document.body.classList.contains('collapsed')) return false;
 
-            // --- COLLAPSE HANDLING ---
-            const collapseEls = document.querySelectorAll('.sidebar .collapse');
-            const topMenuKey = 'sidebar:topMenuOpen';
-            const savedTopMenu = localStorage.getItem(topMenuKey);
-
-            collapseEls.forEach(collapseEl => {
-                const collapse = new bootstrap.Collapse(collapseEl, { toggle: false });
-                const trigger = document.querySelector('[data-bs-target="#' + collapseEl.id + '"]');
-
-                const isTopLevel = collapseEl.id && collapseEl.id.startsWith('menu') && !collapseEl.closest('.collapse:not(#' + collapseEl.id + ')');
-
-                // Restore saved open state
-                if (isTopLevel) {
-                    if (savedTopMenu && savedTopMenu === collapseEl.id) {
-                        collapse.show();
-                        localStorage.setItem('collapse:' + collapseEl.id, 'true');
-                    } else {
-                        collapse.hide();
-                        localStorage.setItem('collapse:' + collapseEl.id, 'false');
-                    }
-                } else {
-                    const isOpen = localStorage.getItem('collapse:' + collapseEl.id) === 'true';
-                    if (isOpen) { collapse.show(); }
-                }
-
-                if (trigger) {
-                    trigger.addEventListener('click', e => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        if (document.body.classList.contains('collapsed')) return false;
-
-                        if (isTopLevel) {
-                            // Close all other top-level menus
-                            collapseEls.forEach(other => {
-                                if (other !== collapseEl && other.id.startsWith('menu') && !other.closest('#' + collapseEl.id + '>.collapse')) {
-                                    const inst = bootstrap.Collapse.getInstance(other);
-                                    inst && inst.hide();
-                                    localStorage.setItem('collapse:' + other.id, 'false');
-                                }
-                            });
-                            // Remember this as the active top-level menu
-                            localStorage.setItem(topMenuKey, collapseEl.id);
+                if(isTopLevel){
+                    // Close all other top-level menus
+                    collapseEls.forEach(other=>{
+                        if(other!==collapseEl && other.id.startsWith('menu') && !other.closest('#'+collapseEl.id+'>.collapse')){
+                            const inst = bootstrap.Collapse.getInstance(other);
+                            inst && inst.hide();
+                            localStorage.setItem('collapse:'+other.id, 'false');
                         }
-
-                        // Toggle current
-                        const instance = bootstrap.Collapse.getInstance(collapseEl);
-                        instance.toggle();
-
-                        // Save state after toggle
-                        setTimeout(() => {
-                            const isNowOpen = collapseEl.classList.contains('show');
-                            localStorage.setItem('collapse:' + collapseEl.id, isNowOpen ? 'true' : 'false');
-                        }, 300);
                     });
+                    // Remember this as the active top-level menu
+                    localStorage.setItem(topMenuKey, collapseEl.id);
                 }
-            });
 
-            // --- WHEN SIDEBAR COLLAPSES, CLOSE ALL ---
-            function closeAll() {
-                collapseEls.forEach(el => {
-                    const inst = bootstrap.Collapse.getInstance(el);
-                    inst && inst.hide();
-                    localStorage.setItem('collapse:' + el.id, 'false');
-                });
-                localStorage.removeItem(topMenuKey);
+                // Toggle current
+                const instance = bootstrap.Collapse.getInstance(collapseEl);
+                instance.toggle();
+
+                // Save state after toggle
+                setTimeout(()=>{
+                    const isNowOpen = collapseEl.classList.contains('show');
+                    localStorage.setItem('collapse:'+collapseEl.id, isNowOpen ? 'true' : 'false');
+                },300);
+            });
+        }
+    });
+
+    // --- WHEN SIDEBAR COLLAPSES, CLOSE ALL ---
+     function closeAll(){
+        collapseEls.forEach(el=>{
+            const inst = bootstrap.Collapse.getInstance(el);
+            inst && inst.hide();
+            localStorage.setItem('collapse:'+el.id, 'false');
+        });
+         localStorage.removeItem(topMenuKey);
+    }
+
+    const observer = new MutationObserver(m=>{
+        m.forEach(mt=>{
+            if(mt.attributeName==='class' && document.body.classList.contains('collapsed')){
+                closeAll();
             }
-
-            const observer = new MutationObserver(m => {
-                m.forEach(mt => {
-                    if (mt.attributeName === 'class' && document.body.classList.contains('collapsed')) {
-                        closeAll();
-                    }
-                });
-            });
-            observer.observe(document.body, { attributes: true });
-        })();
-    </script>
+        });
+    });
+    observer.observe(document.body,{attributes:true});
+})();
+</script>
 
 
-    <!-- Global Delete Confirmation Modal -->
-    <div class="modal fade" id="globalDeleteModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="globalDeleteMessage">Are you sure you want to delete this item? This action cannot be undone.
-                    </p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button id="globalDeleteConfirm" type="button" class="btn btn-danger">Delete</button>
-                </div>
+<!-- Global Delete Confirmation Modal -->
+<div class="modal fade" id="globalDeleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="globalDeleteMessage">Are you sure you want to delete this item? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="globalDeleteConfirm" type="button" class="btn btn-danger">Delete</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Optional toast container for AJAX messages -->
-    <div id="ajaxToastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1060;"></div>
+<!-- Optional toast container for AJAX messages -->
+<div id="ajaxToastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1060;"></div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let pending = null; // {url, row}
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+        let pending = null; // {url, row}
 
-            function csrfToken() {
+        function csrfToken(){
                 const m = document.querySelector('meta[name="csrf-token"]');
                 return m ? m.getAttribute('content') : '';
-            }
+        }
 
-            document.body.addEventListener('click', function (e) {
+        document.body.addEventListener('click', function(e){
                 const btn = e.target.closest('[data-delete-url], .ajax-delete');
-                if (!btn) return;
+                if(!btn) return;
                 e.preventDefault();
 
                 const url = btn.getAttribute('data-delete-url') || btn.getAttribute('href') || (btn.closest('form') && btn.closest('form').action);
                 const row = btn.closest('tr');
                 const msg = btn.getAttribute('data-delete-message') || 'Are you sure you want to delete this item? This action cannot be undone.';
 
-                if (!url) return;
+                if(!url) return;
                 pending = { url, row };
 
                 document.getElementById('globalDeleteMessage').textContent = msg;
                 const modal = new bootstrap.Modal(document.getElementById('globalDeleteModal'));
                 modal.show();
-            });
+        });
 
-            document.getElementById('globalDeleteConfirm').addEventListener('click', async function () {
-                if (!pending) return;
-                const { url, row } = pending;
-                const modalEl = document.getElementById('globalDeleteModal');
-                const modal = bootstrap.Modal.getInstance(modalEl);
+        document.getElementById('globalDeleteConfirm').addEventListener('click', async function(){
+            if(!pending) return;
+            const { url, row } = pending;
+            const modalEl = document.getElementById('globalDeleteModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
 
-                // Use POST with method-spoofing to maximize compatibility (some servers block raw DELETE)
-                try {
-                    const fd = new FormData();
-                    fd.append('_method', 'DELETE');
-                    fd.append('_token', csrfToken());
-                    let res = await fetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': csrfToken(),
-                            'Accept': 'application/json'
-                        },
-                        body: fd
-                    });
+            // Use POST with method-spoofing to maximize compatibility (some servers block raw DELETE)
+            try{
+                const fd = new FormData();
+                fd.append('_method','DELETE');
+                fd.append('_token', csrfToken());
+                let res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': csrfToken(),
+                        'Accept': 'application/json'
+                    },
+                    body: fd
+                });
 
-                    // Treat 2xx and 3xx as success (some servers redirect after delete)
-                    if (res.ok || (res.status >= 200 && res.status < 400)) {
-                        if (row) row.remove();
-                        modal && modal.hide();
-                    } else {
-                        modal && modal.hide();
-                        // Try to extract a useful message only if server returned JSON
-                        let txt = '';
-                        try {
-                            const j = await res.json();
-                            if (j && j.message) txt = j.message;
-                        } catch (e) {
-                            // not JSON or no message; do not show blocking alert to user.
-                            console.warn('Delete request failed', res.status, res.statusText);
-                        }
+                // Treat 2xx and 3xx as success (some servers redirect after delete)
+                if(res.ok || (res.status >= 200 && res.status < 400)){
+                    if(row) row.remove();
+                    modal && modal.hide();
+                } else {
+                    modal && modal.hide();
+                    // Try to extract a useful message only if server returned JSON
+                    let txt = '';
+                    try{
+                        const j = await res.json();
+                        if(j && j.message) txt = j.message;
+                    }catch(e){
+                        // not JSON or no message; do not show blocking alert to user.
+                        console.warn('Delete request failed', res.status, res.statusText);
+                    }
 
-                        // Only show an alert if server provided a clear message
-                        if (txt) {
-                            // Use a non-blocking UI pattern: temporarily show a toast if available, otherwise fallback to console.warn
-                            try {
-                                // If Bootstrap Toast container exists, create and show a toast
-                                const toastContainer = document.getElementById('ajaxToastContainer');
-                                if (toastContainer) {
-                                    const toastEl = document.createElement('div');
-                                    toastEl.className = 'toast align-items-center text-bg-danger border-0';
-                                    toastEl.setAttribute('role', 'alert');
-                                    toastEl.setAttribute('aria-live', 'assertive');
-                                    toastEl.setAttribute('aria-atomic', 'true');
-                                    toastEl.innerHTML = `<div class="d-flex"><div class="toast-body">${txt}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-                                    toastContainer.appendChild(toastEl);
-                                    const bToast = new bootstrap.Toast(toastEl, { delay: 4000 });
-                                    bToast.show();
-                                } else {
-                                    console.warn('Delete failed: ' + txt);
-                                }
-                            } catch (e) {
-                                console.warn('Delete failed', txt);
+                    // Only show an alert if server provided a clear message
+                    if(txt){
+                        // Use a non-blocking UI pattern: temporarily show a toast if available, otherwise fallback to console.warn
+                        try{
+                            // If Bootstrap Toast container exists, create and show a toast
+                            const toastContainer = document.getElementById('ajaxToastContainer');
+                            if(toastContainer){
+                                const toastEl = document.createElement('div');
+                                toastEl.className = 'toast align-items-center text-bg-danger border-0';
+                                toastEl.setAttribute('role','alert');
+                                toastEl.setAttribute('aria-live','assertive');
+                                toastEl.setAttribute('aria-atomic','true');
+                                toastEl.innerHTML = `<div class="d-flex"><div class="toast-body">${txt}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+                                toastContainer.appendChild(toastEl);
+                                const bToast = new bootstrap.Toast(toastEl, { delay: 4000 });
+                                bToast.show();
+                            } else {
+                                console.warn('Delete failed: ' + txt);
                             }
+                        }catch(e){
+                            console.warn('Delete failed', txt);
                         }
                     }
-                } catch (err) {
-                    modal && modal.hide();
-                    console.warn('Delete network error', err);
-                    // optional toast
-                    try {
-                        const toastContainer = document.getElementById('ajaxToastContainer');
-                        if (toastContainer) {
-                            const toastEl = document.createElement('div');
-                            toastEl.className = 'toast align-items-center text-bg-warning border-0';
-                            toastEl.setAttribute('role', 'alert');
-                            toastEl.setAttribute('aria-live', 'polite');
-                            toastEl.setAttribute('aria-atomic', 'true');
-                            toastEl.innerHTML = `<div class="d-flex"><div class="toast-body">Delete failed — network error</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-                            toastContainer.appendChild(toastEl);
-                            const bToast = new bootstrap.Toast(toastEl, { delay: 4000 });
-                            bToast.show();
-                        }
-                    } catch (e) { console.warn(e); }
-                } finally {
-                    pending = null;
                 }
-            });
+            }catch(err){
+                modal && modal.hide();
+                console.warn('Delete network error', err);
+                // optional toast
+                try{
+                    const toastContainer = document.getElementById('ajaxToastContainer');
+                    if(toastContainer){
+                        const toastEl = document.createElement('div');
+                        toastEl.className = 'toast align-items-center text-bg-warning border-0';
+                        toastEl.setAttribute('role','alert');
+                        toastEl.setAttribute('aria-live','polite');
+                        toastEl.setAttribute('aria-atomic','true');
+                        toastEl.innerHTML = `<div class="d-flex"><div class="toast-body">Delete failed — network error</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+                        toastContainer.appendChild(toastEl);
+                        const bToast = new bootstrap.Toast(toastEl, { delay: 4000 });
+                        bToast.show();
+                    }
+                }catch(e){ console.warn(e); }
+            } finally {
+                pending = null;
+            }
         });
-    </script>
-    @if(!isset($jqueryLoaded))
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    @endif
-    @stack('scripts')
+});
+</script>
 
+@stack('scripts')
 </body>
-
 </html>

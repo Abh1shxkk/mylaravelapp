@@ -223,6 +223,16 @@
                             </div>
                         </div>
                         <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Discount Amount</label>
+                                <input type="number" step="0.01" class="form-control" name="discount_amount" value="{{ old('discount_amount','0.00') }}">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Discount Percent (%)</label>
+                                <input type="number" step="0.01" class="form-control" name="discount_percent" value="{{ old('discount_percent','0.00') }}">
+                            </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">scm2</label>
                                 <input type="text" class="form-control" name="scm2" value="{{ old('scm2') }}">
@@ -748,10 +758,6 @@
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">S. Rate</label>
                                 <input type="number" step="0.01" class="form-control" name="Srate" value="{{ old('Srate', '0.00') }}">
-                            </div>
-                            <div class="col-md-2 mb-3">
-                                <label class="form-label">MRP</label>
-                                <input type="number" step="0.01" class="form-control" name="Mrp" value="{{ old('Mrp', '0.00') }}">
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label">Net</label>

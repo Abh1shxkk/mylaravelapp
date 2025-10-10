@@ -9,7 +9,23 @@ class InvoiceItem extends Model
     protected $primaryKey = 'item_id';
 
     protected $fillable = [
-        'invoice_id','product_id','product_name','product_description','hsn_code','quantity','unit','unit_price','discount_percent','discount_amount','line_total','tax_rate','tax_amount','cgst_rate','sgst_rate','igst_rate','cess_rate'
+        'invoice_id',
+        'product_id',
+        'product_name',
+        'product_description',
+        'hsn_code',
+        'quantity',
+        'unit',
+        'unit_price',
+        'discount_percent',
+        'discount_amount',
+        'line_total',
+        'tax_rate',
+        'tax_amount',
+        'cgst_rate',
+        'sgst_rate',
+        'igst_rate',
+        'cess_rate'
     ];
 
     public function invoice()

@@ -135,16 +135,16 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="invoice_number" class="form-label">Invoice Number *</label>
                                 <input type="text" class="form-control @error('invoice_number') is-invalid @enderror" 
-                                       id="invoice_number" name="invoice_number" value="{{ old('invoice_number', 'INV-2025-1001') }}" required>
-                                <small class="form-text text-muted">Invoice number is automatically generated</small>
+                                       id="invoice_number" name="invoice_number" value="{{ old('invoice_number', $nextInvoiceNumber) }}" readonly>
+                                <small class="form-text text-muted">Auto-generated</small>
                                 @error('invoice_number')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="invoice_date" class="form-label">Invoice Date *</label>
                                 <input type="date" class="form-control @error('invoice_date') is-invalid @enderror" 
                                        id="invoice_date" name="invoice_date" value="{{ old('invoice_date', date('Y-m-d')) }}" required>
@@ -152,9 +152,36 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-3 mb-3">
                                 <label for="due_date" class="form-label">Due Date</label>
                                 <input type="date" class="form-control" id="due_date" name="due_date" value="{{ old('due_date') }}">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="status" class="form-label">Status *</label>
+                                <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
+                                    <option value="draft" {{ old('status', 'draft') == 'draft' ? 'selected' : '' }}>Draft</option>
+                                    <option value="sent" {{ old('status') == 'sent' ? 'selected' : '' }}>Sent</option>
+                                    <option value="paid" {{ old('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                </select>
+                                @error('status')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="currency" class="form-label">Currency</label>
+                                <select class="form-select" id="currency" name="currency">
+                                    <option value="INR" {{ old('currency', 'INR') == 'INR' ? 'selected' : '' }}>INR (₹)</option>
+                                    <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>USD ($)</option>
+                                    <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>EUR (€)</option>
+                                    <option value="GBP" {{ old('currency') == 'GBP' ? 'selected' : '' }}>GBP (£)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="payment_terms" class="form-label">Payment Terms</label>
+                                <input type="text" class="form-control" id="payment_terms" name="payment_terms" 
+                                       value="{{ old('payment_terms') }}" placeholder="e.g., Net 30 days">
                             </div>
                         </div>
                     </div>
@@ -221,7 +248,7 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
                                     <label class="form-label">Subtotal:</label>
                                     <input type="text" class="form-control" id="subtotal" value="₹0.00" readonly>
@@ -233,16 +260,43 @@
                                     <input type="hidden" name="discount_amount" id="discount_input" value="0.00">
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label class="form-label">Tax Amount:</label>
+                                    <label class="form-label">CGST Amount:</label>
+                                    <input type="text" class="form-control" id="cgst_amount" value="₹0.00" readonly>
+                                    <input type="hidden" name="cgst_amount" id="cgst_input" value="0.00">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">SGST Amount:</label>
+                                    <input type="text" class="form-control" id="sgst_amount" value="₹0.00" readonly>
+                                    <input type="hidden" name="sgst_amount" id="sgst_input" value="0.00">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">IGST Amount:</label>
+                                    <input type="text" class="form-control" id="igst_amount" value="₹0.00" readonly>
+                                    <input type="hidden" name="igst_amount" id="igst_input" value="0.00">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Total Tax:</label>
                                     <input type="text" class="form-control" id="tax_amount" value="₹0.00" readonly>
                                     <input type="hidden" name="tax_amount" id="tax_input" value="0.00">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label"><strong>Total Amount:</strong></label>
-                                    <input type="text" class="form-control" id="total_amount" value="₹0.00" readonly>
+                                    <input type="text" class="form-control fw-bold" id="total_amount" value="₹0.00" readonly>
                                     <input type="hidden" name="total_amount" id="total_input" value="0.00">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Paid Amount:</label>
+                                    <input type="number" class="form-control" id="paid_amount" name="paid_amount" 
+                                           value="{{ old('paid_amount', 0) }}" min="0" step="0.01">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Balance Amount:</label>
+                                    <input type="text" class="form-control" id="balance_amount" value="₹0.00" readonly>
+                                    <input type="hidden" name="balance_amount" id="balance_input" value="0.00">
                                 </div>
                             </div>
                         </div>
@@ -291,9 +345,9 @@ const itemsData = @json($items->keyBy('id'));
 document.addEventListener('DOMContentLoaded', function() {
     let itemIndex = 0;
     
-    // Company selection handler
-    document.getElementById('company_id').addEventListener('change', function() {
-        const companyId = this.value;
+    // Company selection handler (using jQuery for Select2 compatibility)
+    $('#company_id').on('change', function() {
+        const companyId = $(this).val();
         if (companyId) {
             // Fetch company details via AJAX
             fetch(`/admin/companies/${companyId}`, {
@@ -308,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('company_email').value = data.email || '';
                     document.getElementById('company_address').value = data.address || '';
                     document.getElementById('company_phone').value = data.telephone || '';
-                    document.getElementById('company_gst').value = data.tax_registration || '';
+                    document.getElementById('company_gst').value = data.gst_number || '';
                 })
                 .catch(error => console.error('Error:', error));
         } else {
@@ -321,9 +375,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Customer selection handler
-    document.getElementById('customer_id').addEventListener('change', function() {
-        const customerId = this.value;
+    // Customer selection handler (using jQuery for Select2 compatibility)
+    $('#customer_id').on('change', function() {
+        const customerId = $(this).val();
         if (customerId) {
             // Fetch customer details via AJAX
             fetch(`/admin/customers/${customerId}`, {
@@ -382,6 +436,16 @@ document.addEventListener('DOMContentLoaded', function() {
             <td><button type="button" class="btn btn-danger btn-sm remove-item"><i class="bi bi-trash"></i></button></td>
         `;
         document.getElementById('itemsTableBody').appendChild(newRow);
+        
+        // Initialize Select2 on the new row's item select immediately
+        $(newRow).find('.item-select').select2({
+            theme: 'bootstrap-5',
+            width: '100%',
+            placeholder: 'Select Item',
+            allowClear: true,
+            minimumResultsForSearch: 5
+        });
+        
         attachItemEventListeners(newRow);
     });
 
@@ -391,21 +455,25 @@ document.addEventListener('DOMContentLoaded', function() {
     function attachItemEventListeners(row) {
         const itemSelect = row.querySelector('.item-select');
         if (itemSelect) {
-            itemSelect.addEventListener('change', function() {
-                const selectedId = this.value;
+            // Use jQuery event for Select2 compatibility
+            $(itemSelect).on('change', function() {
+                const selectedId = $(this).val();
                 if (selectedId && itemsData[selectedId]) {
                     const item = itemsData[selectedId];
                     const descInput = row.querySelector('input[name$="[description]"]');
                     const hsnInput = row.querySelector('input[name$="[hsn_code]"]');
                     const unitInput = row.querySelector('input[name$="[unit]"]');
                     const rateInput = row.querySelector('input.rate');
+                    const discountInput = row.querySelector('input.discount');
 
                     if (descInput) descInput.value = item.name || '';
                     if (hsnInput) hsnInput.value = item.HSNCode ?? item.hsn_code ?? '';
                     if (unitInput) unitInput.value = item.Unit ?? item.unit ?? '';
-                    // Prefer Srate then Mrp then Prate
-                    const rateVal = item.Srate ?? item.Mrp ?? item.Prate ?? item.rate ?? 0;
+                    // Prefer Mrp for rate
+                    const rateVal = item.Mrp ?? item.Srate ?? item.Prate ?? item.rate ?? 0;
                     if (rateInput) rateInput.value = parseFloat(rateVal) || 0;
+                    // Auto-populate discount percentage from item
+                    if (discountInput) discountInput.value = parseFloat(item.discount_percent ?? 0) || 0;
 
                     calculateItemAmount(row);
                     calculateTotals();
@@ -458,6 +526,9 @@ document.addEventListener('DOMContentLoaded', function() {
         let subtotal = 0;
         let totalDiscount = 0;
         let totalGst = 0;
+        let totalCgst = 0;
+        let totalSgst = 0;
+        let totalIgst = 0;
 
         document.querySelectorAll('#itemsTableBody tr').forEach(row => {
             const qty = parseFloat(row.querySelector('.qty').value) || 0;
@@ -473,30 +544,54 @@ document.addEventListener('DOMContentLoaded', function() {
             subtotal += itemSubtotal;
             totalDiscount += itemDiscount;
             totalGst += itemGst;
+            
+            // For intra-state: CGST + SGST (split GST equally)
+            // For inter-state: IGST (full GST)
+            // For now, assuming intra-state (CGST + SGST)
+            totalCgst += itemGst / 2;
+            totalSgst += itemGst / 2;
         });
 
         const totalAmount = subtotal - totalDiscount + totalGst;
+        
+        // Calculate balance amount
+        const paidAmount = parseFloat(document.getElementById('paid_amount').value) || 0;
+        const balanceAmount = totalAmount - paidAmount;
 
         document.getElementById('subtotal').value = `₹${subtotal.toFixed(2)}`;
         document.getElementById('total_discount').value = `₹${totalDiscount.toFixed(2)}`;
+        document.getElementById('cgst_amount').value = `₹${totalCgst.toFixed(2)}`;
+        document.getElementById('sgst_amount').value = `₹${totalSgst.toFixed(2)}`;
+        document.getElementById('igst_amount').value = `₹${totalIgst.toFixed(2)}`;
         document.getElementById('tax_amount').value = `₹${totalGst.toFixed(2)}`;
         document.getElementById('total_amount').value = `₹${totalAmount.toFixed(2)}`;
-    // set hidden numeric inputs
-    const subtotalInput = document.getElementById('subtotal_input');
-    const discountInput = document.getElementById('discount_input');
-    const taxInput = document.getElementById('tax_input');
-    const totalInput = document.getElementById('total_input');
-    if (subtotalInput) subtotalInput.value = subtotal.toFixed(2);
-    if (discountInput) discountInput.value = totalDiscount.toFixed(2);
-    if (taxInput) taxInput.value = totalGst.toFixed(2);
-    if (totalInput) totalInput.value = totalAmount.toFixed(2);
+        document.getElementById('balance_amount').value = `₹${balanceAmount.toFixed(2)}`;
+        
+        // Set hidden numeric inputs
+        const subtotalInput = document.getElementById('subtotal_input');
+        const discountInput = document.getElementById('discount_input');
+        const cgstInput = document.getElementById('cgst_input');
+        const sgstInput = document.getElementById('sgst_input');
+        const igstInput = document.getElementById('igst_input');
+        const taxInput = document.getElementById('tax_input');
+        const totalInput = document.getElementById('total_input');
+        const balanceInput = document.getElementById('balance_input');
+        
+        if (subtotalInput) subtotalInput.value = subtotal.toFixed(2);
+        if (discountInput) discountInput.value = totalDiscount.toFixed(2);
+        if (cgstInput) cgstInput.value = totalCgst.toFixed(2);
+        if (sgstInput) sgstInput.value = totalSgst.toFixed(2);
+        if (igstInput) igstInput.value = totalIgst.toFixed(2);
+        if (taxInput) taxInput.value = totalGst.toFixed(2);
+        if (totalInput) totalInput.value = totalAmount.toFixed(2);
+        if (balanceInput) balanceInput.value = balanceAmount.toFixed(2);
     }
 
     // Pre-populate if values already selected (e.g., validation error returned)
-    const preCompanyId = document.getElementById('company_id').value;
-    if(preCompanyId){ document.getElementById('company_id').dispatchEvent(new Event('change')); }
-    const preCustomerId = document.getElementById('customer_id').value;
-    if(preCustomerId){ document.getElementById('customer_id').dispatchEvent(new Event('change')); }
+    const preCompanyId = $('#company_id').val();
+    if(preCompanyId){ $('#company_id').trigger('change'); }
+    const preCustomerId = $('#customer_id').val();
+    if(preCustomerId){ $('#customer_id').trigger('change'); }
 
     // Attach event listeners to existing rows
     document.querySelectorAll('#itemsTableBody tr').forEach(row => {
@@ -505,6 +600,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial calculation
     calculateTotals();
+    
+    // Recalculate balance when paid amount changes
+    document.getElementById('paid_amount').addEventListener('input', calculateTotals);
+
+    // Initialize Select2 on company and customer dropdowns immediately
+    $('#company_id, #customer_id').select2({
+        theme: 'bootstrap-5',
+        width: '100%',
+        placeholder: 'Select an option',
+        allowClear: true
+    });
+    
+    // Lazy initialize Select2 on item dropdowns - only when user interacts
+    let itemSelectsInitialized = false;
+    
+    function initializeItemSelects() {
+        if (!itemSelectsInitialized) {
+            $('.item-select').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'Select Item',
+                allowClear: true,
+                minimumResultsForSearch: 5
+            });
+            itemSelectsInitialized = true;
+        }
+    }
+    
+    // Initialize on first focus or after a short delay
+    $(document).one('focus', '.item-select', function() {
+        initializeItemSelects();
+    });
+    
+    // Also initialize after 500ms if user hasn't interacted yet
+    setTimeout(initializeItemSelects, 500);
 });
 </script>
 @endpush

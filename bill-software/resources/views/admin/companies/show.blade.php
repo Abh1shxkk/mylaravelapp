@@ -55,6 +55,12 @@
             </div>
             <div class="col-md-6">
               <div class="detail-item">
+                <label class="text-muted small mb-1">GST Number:</label>
+                <div class="fw-semibold">{{ $company->gst_number ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
                 <label class="text-muted small mb-1">Website:</label>
                 <div class="fw-semibold">{{ $company->website ?? '-' }}</div>
               </div>
