@@ -11,7 +11,7 @@ class CompanyController extends Controller
     public function index()
     {
         $search = request('search');
-        $status = request('status'); // 'active' | 'inactive'
+        $status = request('status');
         $dateFrom = request('date_from');
         $dateTo = request('date_to');
 
@@ -19,9 +19,9 @@ class CompanyController extends Controller
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%")
-                      ->orWhere('mobile_1', 'like', "%{$search}%")
-                      ->orWhere('address', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('mobile_1', 'like', "%{$search}%")
+                        ->orWhere('address', 'like', "%{$search}%");
                 });
             })
             ->when($status !== null && $status !== '', function ($query) use ($status) {
@@ -36,6 +36,11 @@ class CompanyController extends Controller
             ->latest()
             ->paginate(20)
             ->withQueryString();
+
+        // AJAX request ke liye sirf table return karo
+        if (request()->ajax()) {
+            return view('admin.companies.index', compact('companies', 'search', 'status', 'dateFrom', 'dateTo'));
+        }
 
         return view('admin.companies.index', compact('companies', 'search', 'status', 'dateFrom', 'dateTo'));
     }
@@ -52,7 +57,7 @@ class CompanyController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:companies,email',
             'address' => 'required|string',
-            // Optional contact fields should also be unique if provided
+            'gst_number' => 'required|string|max:15|unique:companies,gst_number',
             'telephone' => 'nullable|string|max:255|unique:companies,telephone',
             'mobile_1' => 'nullable|string|max:255|unique:companies,mobile_1',
             'mobile_2' => 'nullable|string|max:255|unique:companies,mobile_2',
@@ -60,13 +65,13 @@ class CompanyController extends Controller
 
         // Get all data and merge validated fields
         $data = array_merge($request->all(), $validated);
-        $data['status'] = (bool)($request->boolean('status'));
+        $data['status'] = (bool) ($request->boolean('status'));
         $data['surcharge_after_dis_yn'] = $request->boolean('surcharge_after_dis_yn');
         $data['add_surcharge_yn'] = $request->boolean('add_surcharge_yn');
         $data['inclusive_yn'] = $request->boolean('inclusive_yn');
         $data['fixed_maximum'] = $request->boolean('fixed_maximum');
         Company::create($data);
-        return redirect()->route('admin.companies.index')->with('success','Company created');
+        return redirect()->route('admin.companies.index')->with('success', 'Company created');
     }
 
     public function show(Company $company)
@@ -85,19 +90,19 @@ class CompanyController extends Controller
     public function update(Request $request, Company $company)
     {
         $data = $request->all();
-        $data['status'] = (bool)($request->boolean('status'));
+        $data['status'] = (bool) ($request->boolean('status'));
         $data['surcharge_after_dis_yn'] = $request->boolean('surcharge_after_dis_yn');
         $data['add_surcharge_yn'] = $request->boolean('add_surcharge_yn');
         $data['inclusive_yn'] = $request->boolean('inclusive_yn');
         $data['fixed_maximum'] = $request->boolean('fixed_maximum');
         $company->update($data);
-        return redirect()->route('admin.companies.index')->with('success','Company updated');
+        return redirect()->route('admin.companies.index')->with('success', 'Company updated');
     }
 
     public function destroy(Company $company)
     {
         $company->delete();
-        return back()->with('success','Company deleted');
+        return back()->with('success', 'Company deleted');
     }
 
     // Local validation rules helper
@@ -123,6 +128,7 @@ class CompanyController extends Controller
             'min_gp' => 'nullable|numeric',
             'pur_tax' => 'nullable|numeric',
             'sale_tax' => 'nullable|numeric',
+            'gst_number' => 'required|string|max:15',
             'generic' => 'nullable|string|max:255',
             'invoice_print_order' => 'nullable|string|max:255',
             'direct_indirect' => 'nullable|string|max:255',
@@ -135,11 +141,11 @@ class CompanyController extends Controller
             'discount' => 'nullable|numeric',
             'flag' => 'nullable|string|max:255',
             'status' => 'nullable|boolean',
-             'country_code' => 'nullable|string|max:10',
-    'country_name' => 'nullable|string|max:100',
-    'state_code' => 'nullable|string|max:10',
-    'state_name' => 'nullable|string|max:100',
-    'city' => 'nullable|string|max:255',
+            'country_code' => 'nullable|string|max:10',
+            'country_name' => 'nullable|string|max:100',
+            'state_code' => 'nullable|string|max:10',
+            'state_name' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:255',
         ];
     }
 }

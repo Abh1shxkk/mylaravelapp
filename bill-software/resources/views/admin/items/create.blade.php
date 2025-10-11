@@ -11,7 +11,7 @@
                 </a>
             </div>
 
-            <form action="{{ route('admin.items.store') }}" method="POST">
+            <form action="{{ route('admin.items.store') }}" method="POST"  novalidate>
                 @csrf
                 
                 <!-- General Item Information -->

@@ -50,18 +50,17 @@ class InvoiceController extends Controller
         return view('admin.invoices.index', compact('invoices'));
     }
 
-    public function create()
-    {
-        $companies = Company::orderBy('name')->get();
-        $customers = Customer::orderBy('name')->get();
-        $items = Item::orderBy('name')->get();
-        
-        // Generate next invoice number
-        $nextInvoiceNumber = $this->generateInvoiceNumber();
-        
-        return view('admin.invoices.create', compact('companies', 'customers', 'items', 'nextInvoiceNumber'));
-    }
-
+ public function create()
+{
+    $companies = Company::where('status', 1)->orderBy('name')->get();
+    $customers = Customer::where('status', 1)->orderBy('name')->get();
+    $items = Item::where('status', 1)->orderBy('name')->get(); // Only active items
+    
+    // Generate next invoice number
+    $nextInvoiceNumber = $this->generateInvoiceNumber();
+    
+    return view('admin.invoices.create', compact('companies', 'customers', 'items', 'nextInvoiceNumber'));
+}
     public function store(Request $request)
     {
         try {
@@ -154,14 +153,15 @@ class InvoiceController extends Controller
         return view('admin.invoices.print', compact('invoice', 'amountInWords'));
     }
 
-    public function edit(Invoice $invoice)
-    {
-        $companies = Company::orderBy('name')->get();
-        $customers = Customer::orderBy('name')->get();
-        $items = Item::orderBy('name')->get();
-        $invoice->load(['items', 'items.item', 'company', 'customer']);
-        return view('admin.invoices.edit', compact('invoice', 'companies', 'customers', 'items'));
-    }
+ public function edit(Invoice $invoice)
+{
+    $companies = Company::where('status', 1)->orderBy('name')->get();
+    $customers = Customer::where('status', 1)->orderBy('name')->get();
+    $items = Item::where('status', 1)->orderBy('name')->get(); // Only active items
+    
+    $invoice->load(['items', 'items.item', 'company', 'customer']);
+    return view('admin.invoices.edit', compact('invoice', 'companies', 'customers', 'items'));
+}
 
     public function update(Request $request, Invoice $invoice)
     {

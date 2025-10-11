@@ -3,18 +3,18 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
-    <div class="text-muted small">Manage your company database</div>
+   
     <h4 class="mb-0 d-flex align-items-center"><i class="bi bi-grid-3x3-gap-fill me-2"></i> Companies</h4>
+     <div class="text-muted small">Manage your company database</div>
   </div>
-  <a href="{{ route('admin.companies.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Add Company</a>
   </div>
 <div class="card shadow-sm">
   <div class="card mb-4">
     <div class="card-body">
-      <form method="GET" action="{{ route('admin.companies.index') }}" class="row g-3">
+<form method="GET" action="{{ route('admin.companies.index') }}" class="row g-3" id="company-filter-form">
         <div class="col-md-3">
           <label for="search" class="form-label">Search</label>
-          <input type="text" class="form-control" id="search" name="search" value="{{ request('search') }}" placeholder="Name, email, phone...">
+<input type="text" class="form-control" id="company-search" name="search" value="{{ request('search') }}" placeholder="Name, email, phone..." autocomplete="off">
         </div>
         <div class="col-md-2">
           <label for="status" class="form-label">Status</label>
@@ -24,18 +24,9 @@
             <option value="inactive" {{ request('status')==='inactive' ? 'selected' : '' }}>Inactive</option>
           </select>
         </div>
-        <div class="col-md-2">
-          <label for="date_from" class="form-label">From Date</label>
-          <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request('date_from') }}">
-        </div>
-        <div class="col-md-2">
-          <label for="date_to" class="form-label">To Date</label>
-          <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request('date_to') }}">
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-          <button type="submit" class="btn btn-outline-primary me-2"><i class="bi bi-search me-1"></i>Filter</button>
-          <a href="{{ route('admin.companies.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x me-1"></i>Clear</a>
-        </div>
+       
+      
+       
       </form>
     </div>
   </div>
@@ -56,7 +47,7 @@
         @forelse($companies as $company)
           <tr>
             <td>{{ ($companies->currentPage() - 1) * $companies->perPage() + $loop->iteration }}</td>
-            <td><a href="{{ route('admin.companies.show',$company) }}">{{ $company->name }}</a></td>
+            <td>{{ $company->name }}</td>
             <td>{{ $company->address }}</td>
             <td>{{ $company->email }}</td>
             <td>{{ $company->mobile_1 }}</td>
@@ -96,8 +87,71 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  const filterInputs = document.querySelectorAll('select[name="status"], input[name="date_from"], input[name="date_to"]');
-  filterInputs.forEach(function(el){ el.addEventListener('change', function(){ this.form.submit(); }); });
+
+  // YE CODE Line 86 ke baad add karna hai, DOMContentLoaded ke andar
+
+// Real-time search implementation
+const searchInput = document.getElementById('company-search');
+const statusSelect = document.getElementById('status');
+const filterForm = document.getElementById('company-filter-form');
+let searchTimeout;
+
+function performSearch() {
+  const formData = new FormData(filterForm);
+  const params = new URLSearchParams(formData);
+  
+  // Show loading state
+  tbody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+  
+  fetch(`{{ route('admin.companies.index') }}?${params.toString()}`, {
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => response.text())
+  .then(html => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const newRows = doc.querySelectorAll('#company-table-body tr');
+    
+    // Clear and update table
+    tbody.innerHTML = '';
+    newRows.forEach(tr => tbody.appendChild(tr));
+    
+    // Update pagination info
+    const newFooter = doc.querySelector('.card-footer');
+    const currentFooter = document.querySelector('.card-footer');
+    if(newFooter && currentFooter) {
+      currentFooter.innerHTML = newFooter.innerHTML;
+    }
+    
+    // Reset infinite scroll
+    if(sentinel) {
+      const newSentinel = doc.querySelector('#company-sentinel');
+      if(newSentinel) {
+        sentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
+      } else {
+        sentinel.remove();
+      }
+    }
+  })
+  .catch(error => {
+    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>';
+  });
+}
+
+// Search input with debounce
+if(searchInput) {
+  searchInput.addEventListener('keyup', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(performSearch, 500);
+  });
+}
+
+// Status filter real-time - Use jQuery for Select2 compatibility
+if(statusSelect) {
+  $(statusSelect).on('change', performSearch);
+}
 
   const sentinel = document.getElementById('company-sentinel');
   const spinner = document.getElementById('company-spinner');

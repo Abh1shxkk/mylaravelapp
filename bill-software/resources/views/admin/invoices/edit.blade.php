@@ -11,7 +11,7 @@
                 </a>
             </div>
 
-            <form action="{{ route('admin.invoices.update', $invoice->invoice_id) }}" method="POST" id="invoiceForm">
+            <form action="{{ route('admin.invoices.update', $invoice->invoice_id) }}" method="POST" id="invoiceForm" novalidate>
                 @csrf
                 @method('PUT')
                 

@@ -11,7 +11,7 @@
                 </a>
             </div>
 
-            <form action="{{ route('admin.suppliers.update', $supplier) }}" method="POST">
+            <form action="{{ route('admin.suppliers.update', $supplier) }}" method="POST" novalidate>
                 @csrf
                 @method('PUT')
                 

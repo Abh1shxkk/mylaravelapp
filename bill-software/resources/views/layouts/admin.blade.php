@@ -11,6 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <style>
+        /* Remove overflow hidden from body on mobile */
         body {
             overflow: hidden;
         }
@@ -20,15 +21,18 @@
             grid-template-columns: 260px 1fr;
             height: 100vh;
             transition: grid-template-columns 0.3s ease;
+            position: relative;
         }
 
         .sidebar {
             background: #0d1b2a;
             color: #fff;
-            position: sticky;
+            position: relative;
             top: 0;
+            left: 0;
             height: 100vh;
-            overflow: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             transition: width 0.3s ease, transform .25s ease;
             will-change: transform, width;
             width: 260px;
@@ -47,6 +51,7 @@
         .content {
             overflow: auto;
             background: #f6f8fb;
+            height: 100vh;
         }
 
         /* Sidebar header with toggle button */
@@ -123,19 +128,36 @@
             transition: all 0.3s ease;
         }
 
+        /* MOBILE FIXES - CRITICAL */
         @media (max-width: 991.98px) {
+            /* Prevent body scroll on mobile to fix sidebar issue */
+            body {
+                overflow: hidden !important;
+                position: fixed !important;
+                width: 100% !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+            }
+
             .app {
                 grid-template-columns: 1fr;
+                height: 100vh !important;
+                height: 100dvh !important;
+                overflow: hidden;
             }
 
             .sidebar {
-                position: fixed;
+                position: fixed !important;
                 width: 260px;
                 z-index: 1029;
                 left: 0;
-                top: 0;
+                top: 0 !important;
                 bottom: 0;
                 transform: translateX(-100%);
+                height: 100vh !important;
+                height: 100dvh !important; /* Dynamic viewport height for mobile browsers */
+                overflow-y: auto;
+                overflow-x: hidden;
             }
 
             .sidebar.show {
@@ -144,17 +166,30 @@
 
             .content {
                 grid-column: 1 / -1;
+                overflow-y: auto !important;
+                overflow-x: hidden !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                width: 100%;
+                padding: 60px 1rem 1rem 1rem !important; /* Top padding for toggle button */
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
             }
 
             .sidebar-backdrop {
                 content: "";
-                position: fixed;
-                inset: 0;
+                position: fixed !important;
+                inset: 0 !important;
                 background: rgba(0, 0, 0, .35);
                 z-index: 1028;
                 opacity: 0;
                 visibility: hidden;
                 transition: opacity .25s ease;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                height: 100vh !important;
+                height: 100dvh !important;
             }
 
             .sidebar-backdrop.show {
@@ -166,6 +201,8 @@
                 left: 10px;
                 top: 10px;
                 display: inline-flex !important;
+                position: fixed !important;
+                z-index: 1030 !important;
             }
 
             .sidebar-toggle-inside {
@@ -216,6 +253,159 @@
                 display: none;
             }
 
+            /* Fix Invoice Items Table Alignment - PC & Mobile */
+#itemsTable {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 1800px; /* Force minimum width */
+}
+
+#itemsTable thead th {
+    vertical-align: middle;
+    text-align: center;
+    white-space: nowrap; /* Prevent text wrapping */
+    padding: 12px 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 10;
+}
+
+#itemsTable tbody td {
+    vertical-align: middle;
+    padding: 8px 5px;
+}
+
+/* Column widths */
+#itemsTable th:nth-child(1), #itemsTable td:nth-child(1) { width: 80px; }
+#itemsTable th:nth-child(2), #itemsTable td:nth-child(2) { width: 150px; }
+#itemsTable th:nth-child(3), #itemsTable td:nth-child(3) { width: 120px; }
+#itemsTable th:nth-child(4), #itemsTable td:nth-child(4) { width: 90px; }
+#itemsTable th:nth-child(5), #itemsTable td:nth-child(5) { width: 80px; }
+#itemsTable th:nth-child(6), #itemsTable td:nth-child(6) { width: 110px; }
+#itemsTable th:nth-child(7), #itemsTable td:nth-child(7) { width: 70px; }
+#itemsTable th:nth-child(8), #itemsTable td:nth-child(8) { width: 70px; }
+#itemsTable th:nth-child(9), #itemsTable td:nth-child(9) { width: 70px; }
+#itemsTable th:nth-child(10), #itemsTable td:nth-child(10) { width: 80px; }
+#itemsTable th:nth-child(11), #itemsTable td:nth-child(11) { width: 90px; }
+#itemsTable th:nth-child(12), #itemsTable td:nth-child(12) { width: 80px; }
+#itemsTable th:nth-child(13), #itemsTable td:nth-child(13) { width: 80px; }
+#itemsTable th:nth-child(14), #itemsTable td:nth-child(14) { width: 100px; }
+#itemsTable th:nth-child(15), #itemsTable td:nth-child(15) { width: 60px; text-align: center; }
+
+/* Make inputs fit */
+#itemsTable input.form-control,
+#itemsTable select.form-select {
+    width: 100%;
+    font-size: 0.875rem;
+    padding: 0.375rem 0.5rem;
+}
+
+/* Select2 fix */
+#itemsTable .select2-container {
+    width: 100% !important;
+}
+
+#itemsTable .select2-selection {
+    min-height: 36px !important;
+}
+
+/* MOBILE FIX - Force horizontal scroll */
+.table-responsive {
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    width: 100%;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 768px) {
+    #itemsTable {
+        min-width: 1800px !important; /* Keep table wide */
+        font-size: 0.75rem;
+    }
+    
+    #itemsTable thead th {
+        font-size: 0.7rem !important;
+        padding: 8px 5px !important;
+        white-space: nowrap !important; /* Force single line - NO WRAPPING */
+        line-height: 1.2 !important;
+        height: auto !important;
+    }
+    
+    #itemsTable tbody td {
+        padding: 5px 3px !important;
+        white-space: nowrap !important;
+    }
+    
+    #itemsTable input.form-control,
+    #itemsTable select.form-select {
+        font-size: 0.7rem !important;
+        padding: 0.25rem 0.3rem !important;
+        height: 30px !important;
+        min-height: 30px !important;
+    }
+    
+    #itemsTable .select2-container .select2-selection {
+        min-height: 30px !important;
+        height: 30px !important;
+        font-size: 0.7rem !important;
+    }
+    
+    #itemsTable .select2-container .select2-selection__rendered {
+        line-height: 28px !important;
+        padding-left: 5px !important;
+    }
+    
+    #itemsTable .select2-container .select2-selection__arrow {
+        height: 28px !important;
+    }
+    
+    /* Compact column widths for mobile */
+    #itemsTable th:nth-child(1), #itemsTable td:nth-child(1) { width: 70px !important; }
+    #itemsTable th:nth-child(2), #itemsTable td:nth-child(2) { width: 130px !important; }
+    #itemsTable th:nth-child(3), #itemsTable td:nth-child(3) { width: 110px !important; }
+    #itemsTable th:nth-child(4), #itemsTable td:nth-child(4) { width: 80px !important; }
+    #itemsTable th:nth-child(5), #itemsTable td:nth-child(5) { width: 70px !important; }
+    #itemsTable th:nth-child(6), #itemsTable td:nth-child(6) { width: 100px !important; }
+    #itemsTable th:nth-child(7), #itemsTable td:nth-child(7) { width: 60px !important; }
+    #itemsTable th:nth-child(8), #itemsTable td:nth-child(8) { width: 60px !important; }
+    #itemsTable th:nth-child(9), #itemsTable td:nth-child(9) { width: 60px !important; }
+    #itemsTable th:nth-child(10), #itemsTable td:nth-child(10) { width: 70px !important; }
+    #itemsTable th:nth-child(11), #itemsTable td:nth-child(11) { width: 80px !important; }
+    #itemsTable th:nth-child(12), #itemsTable td:nth-child(12) { width: 70px !important; }
+    #itemsTable th:nth-child(13), #itemsTable td:nth-child(13) { width: 70px !important; }
+    #itemsTable th:nth-child(14), #itemsTable td:nth-child(14) { width: 90px !important; }
+    #itemsTable th:nth-child(15), #itemsTable td:nth-child(15) { width: 50px !important; }
+    
+    /* Remove extra spacing */
+    .card-body {
+        padding: 0.75rem !important;
+    }
+}
+
+/* Extra small devices */
+@media (max-width: 576px) {
+    #itemsTable {
+        min-width: 1600px !important;
+    }
+    
+    #itemsTable thead th {
+        font-size: 0.65rem !important;
+        padding: 6px 4px !important;
+    }
+    
+    #itemsTable input.form-control,
+    #itemsTable select.form-select {
+        font-size: 0.65rem !important;
+        padding: 0.2rem 0.25rem !important;
+        height: 28px !important;
+    }
+}
+
             /* Profile button in collapsed state */
             .collapsed .profile .btn {
                 justify-content: center;
@@ -251,7 +441,35 @@
             .collapsed .sidebar [data-bs-toggle="collapse"] i {
                 margin: 0 !important;
             }
-
+             /* Remove Bootstrap focus glow globally */
+        *:focus,
+        input:focus,
+        select:focus,
+        textarea:focus,
+        button:focus,
+        .form-control:focus,
+        .form-select:focus,
+        .btn:focus {
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
+        /* Keep border color normal */
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #dee2e6 !important;
+        }
+        
+        /* Select2 fix */
+        .select2-container--bootstrap-5 .select2-selection:focus,
+        .select2-container--bootstrap-5.select2-container--focus .select2-selection,
+        .select2-container--bootstrap-5.select2-container--open .select2-selection,
+        .select2-selection:focus,
+        .select2-selection--single:focus {
+            box-shadow: none !important;
+            outline: none !important;
+            border-color: #dee2e6 !important;
+        }
             /* Center align nav items when collapsed */
             .collapsed .sidebar .nav-link {
                 justify-content: center;
@@ -290,7 +508,7 @@
         [data-bs-toggle="collapse"]:hover {
             background: rgba(255, 255, 255, .08) !important;
         }
-    </style>
+</style>
     @stack('styles')
     @vite(['resources/js/app.js'])
     @csrf
@@ -407,11 +625,9 @@
                         <i class="bi bi-chevron-up ms-auto"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark">
-                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal"><i
-                                    class="bi bi-gear me-2"></i>Settings</a></li>
-                        <li><a class="dropdown-item" href="{{ route('password.change.form') }}"><i
-                                    class="bi bi-key me-2"></i>Change Password</a></li>
-                        <li>
+                      <li><a class="dropdown-item" href="{{ route('profile.settings') }}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+
+                        
                             <hr class="dropdown-divider">
                         </li>
                         <li>
@@ -430,38 +646,7 @@
         </main>
     </div>
 
-    <!-- Profile Modal -->
-    <div class="modal fade" id="profileModal" tabindex="-1">
-        <div class="modal-dialog">
-            <form class="modal-content" method="POST" action="{{ route('profile.update') }}"
-                enctype="multipart/form-data">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">Profile Settings</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Full Name</label>
-                        <input type="text" name="full_name" class="form-control"
-                            value="{{ auth()->user()->full_name }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control" value="{{ auth()->user()->email }}">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Profile Image</label>
-                        <input type="file" name="profile_picture" class="form-control">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button class="btn btn-primary">Save changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    
 
    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
    <!-- jQuery (required for Select2) -->
@@ -707,6 +892,80 @@ document.addEventListener('DOMContentLoaded', function(){
                 pending = null;
             }
         });
+});
+</script>
+
+<!-- Global Select2 Initialization for All Dropdowns -->
+<script>
+$(document).ready(function() {
+    // Initialize Select2 on all existing select elements
+    initializeSelect2();
+    
+    // Function to initialize Select2 on select elements
+    function initializeSelect2(container) {
+        const selectElements = container ? $(container).find('select:not(.select2-hidden-accessible)') : $('select:not(.select2-hidden-accessible)');
+        
+        selectElements.each(function() {
+            const $select = $(this);
+            
+            // Skip if already initialized or explicitly marked to skip
+            if ($select.hasClass('no-select2') || $select.data('select2')) {
+                return;
+            }
+            
+            // Get custom options from data attributes
+            const placeholder = $select.data('placeholder') || $select.find('option:first').text() || 'Select an option';
+            const allowClear = $select.data('allow-clear') !== false; // Default true
+            const minimumResultsForSearch = $select.data('minimum-results-for-search') || 0; // Show search by default
+            
+            // Initialize Select2 with Bootstrap 5 theme
+            $select.select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: placeholder,
+                allowClear: allowClear,
+                minimumResultsForSearch: minimumResultsForSearch,
+                dropdownAutoWidth: true,
+                language: {
+                    noResults: function() {
+                        return "No results found";
+                    },
+                    searching: function() {
+                        return "Searching...";
+                    }
+                }
+            });
+        });
+    }
+    
+    // Watch for dynamically added select elements using MutationObserver
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        // Check if the added node is a select or contains select elements
+                        if (node.tagName === 'SELECT') {
+                            initializeSelect2($(node).parent());
+                        } else if ($(node).find('select').length > 0) {
+                            initializeSelect2(node);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    
+    // Start observing the document body for changes
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    // Re-initialize Select2 when Bootstrap modals are shown
+    $(document).on('shown.bs.modal', function(e) {
+        initializeSelect2(e.target);
+    });
 });
 </script>
 
