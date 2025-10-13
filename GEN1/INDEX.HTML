@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Training Speed Race | Gensyn vs AWS vs Single GPU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a0b2e 50%, #0a0a0f 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            animation: pulse 2s ease infinite;
+        }
+
+        .logo-text {
+            font-size: 36px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 900;
+            margin-bottom: 15px;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #fff 0%, #8B5CF6 50%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 20px;
+            color: #9ca3af;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .config-section {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .config-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #fff;
+        }
+
+        .model-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .model-card {
+            background: rgba(10, 10, 15, 0.8);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            border-color: #8B5CF6;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+        }
+
+        .model-card.active {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(6, 182, 212, 0.3) 100%);
+            border-color: #06B6D4;
+            box-shadow: 0 10px 40px rgba(6, 182, 212, 0.4);
+        }
+
+        .model-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .model-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .model-desc {
+            font-size: 13px;
+            color: #9ca3af;
+            margin-bottom: 12px;
+        }
+
+        .model-params {
+            font-size: 12px;
+            color: #8B5CF6;
+            font-weight: 600;
+        }
+
+        .race-section {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+        }
+
+        .race-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 40px;
+            text-align: center;
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .race-track {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .racer {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .racer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .racer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .racer-icon {
+            font-size: 32px;
+        }
+
+        .racer-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .racer-time {
+            font-size: 16px;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(139, 92, 246, 0.2);
+            color: #8B5CF6;
+        }
+
+        .racer-time.winner {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .progress-track {
+            position: relative;
+            height: 60px;
+            background: rgba(10, 10, 15, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 24px;
+            transition: width 0.1s linear;
+        }
+
+        .progress-bar.single {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .progress-bar.aws {
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .progress-bar.gensyn {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            border: none;
+            border-radius: 16px;
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.4);
+            margin-top: 30px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.6);
+        }
+
+        .start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(10, 10, 15, 0.6);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-card.winner {
+            border-color: #10b981;
+        }
+
+        .stat-card.winner .stat-value {
+            color: #10b981;
+            -webkit-text-fill-color: #10b981;
+        }
+
+        .results-section {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.2);
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .winner-banner {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+            border-radius: 16px;
+            margin-bottom: 30px;
+            border: 2px solid #10b981;
+        }
+
+        .winner-text {
+            font-size: 48px;
+            font-weight: 900;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .winner-subtitle {
+            font-size: 20px;
+            color: #9ca3af;
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .comparison-table th {
+            font-weight: 700;
+            color: #8B5CF6;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .comparison-table td {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .comparison-table .winner-row {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 18px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1DA1F2 0%, #0c85d0 100%);
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(29, 161, 242, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(29, 161, 242, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(139, 92, 246, 0.2);
+            color: #8B5CF6;
+            border: 2px solid #8B5CF6;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(139, 92, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .info-box {
+            background: rgba(6, 182, 212, 0.1);
+            border-left: 4px solid #06B6D4;
+            padding: 24px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .info-box h3 {
+            color: #06B6D4;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .info-box p {
+            color: #9ca3af;
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .info-box strong {
+            color: #fff;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(139, 92, 246, 0.2);
+            color: #6b7280;
+        }
+
+        footer a {
+            color: #8B5CF6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #06B6D4;
+        }
+
+        .creator-tag {
+            margin-top: 15px;
+            font-size: 16px;
+            color: #9ca3af;
+        }
+
+        .creator-tag a {
+            color: #06B6D4;
+            font-weight: 700;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            .model-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .winner-text {
+                font-size: 36px;
+            }
+
+            .config-section,
+            .race-section,
+            .results-section {
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">G</div>
+                <div class="logo-text">Gensyn</div>
+            </div>
+            <h1>AI Training Speed Race</h1>
+            <p class="subtitle">Watch in real-time how Gensyn crushes traditional training methods. GPT-3 would take 355 years on a single GPU. On Gensyn? Just days. 🚀</p>
+        </div>
+
+        <div class="config-section">
+            <div class="config-title">🎯 Choose Your AI Model</div>
+            <div class="model-selector">
+                <div class="model-card active" onclick="selectModel('small')" id="model-small">
+                    <div class="model-icon">🤖</div>
+                    <div class="model-name">Small Model</div>
+                    <div class="model-desc">MNIST-like classifier</div>
+                    <div class="model-params">~400M operations</div>
+                </div>
+                <div class="model-card" onclick="selectModel('medium')" id="model-medium">
+                    <div class="model-icon">🧠</div>
+                    <div class="model-name">Medium Model</div>
+                    <div class="model-desc">BERT-scale transformer</div>
+                    <div class="model-params">~110M parameters</div>
+                </div>
+                <div class="model-card" onclick="selectModel('large')" id="model-large">
+                    <div class="model-icon">🚀</div>
+                    <div class="model-name">Large Model</div>
+                    <div class="model-desc">GPT-2-scale language model</div>
+                    <div class="model-params">~1.5B parameters</div>
+                </div>
+                <div class="model-card" onclick="selectModel('huge')" id="model-huge">
+                    <div class="model-icon">⚡</div>
+                    <div class="model-name">Huge Model</div>
+                    <div class="model-desc">GPT-3-scale foundation model</div>
+                    <div class="model-params">~175B parameters</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="race-section">
+            <div class="race-title">🏁 The Race Begins!</div>
+            
+            <div class="race-track">
+                <div class="racer">
+                    <div class="racer-header">
+                        <div class="racer-info">
+                            <span class="racer-icon">🐌</span>
+                            <span class="racer-name">Single GPU</span>
+                        </div>
+                        <span class="racer-time" id="time-single">8 minutes</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-bar single" id="bar-single">🐌</div>
+                    </div>
+                </div>
+
+                <div class="racer">
+                    <div class="racer-header">
+                        <div class="racer-info">
+                            <span class="racer-icon">☁️</span>
+                            <span class="racer-name">AWS Cluster</span>
+                        </div>
+                        <span class="racer-time" id="time-aws">48 seconds</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-bar aws" id="bar-aws">☁️</div>
+                    </div>
+                </div>
+
+                <div class="racer">
+                    <div class="racer-header">
+                        <div class="racer-info">
+                            <span class="racer-icon">⚡</span>
+                            <span class="racer-name">Gensyn Network</span>
+                        </div>
+                        <span class="racer-time winner" id="time-gensyn">12 seconds</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-bar gensyn" id="bar-gensyn">⚡</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="start-btn" onclick="startRace()" id="startBtn">
+                🏁 Start the Race!
+            </button>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Single GPU</div>
+                    <div class="stat-value" id="stat-single">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">AWS Cluster</div>
+                    <div class="stat-value" id="stat-aws">0%</div>
+                </div>
+                <div class="stat-card winner">
+                    <div class="stat-label">Gensyn Network</div>
+                    <div class="stat-value" id="stat-gensyn">0%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="winner-banner">
+                <div class="winner-text">🏆 Gensyn Wins!</div>
+                <div class="winner-subtitle">Finishing <span id="speedup">40x</span> faster than single GPU</div>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Time Taken</th>
+                        <th>Speed vs Single</th>
+                        <th>Cost (100 hrs)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>🐌 Single GPU</td>
+                        <td id="result-single">8 minutes</td>
+                        <td>1x (baseline)</td>
+                        <td>$28</td>
+                    </tr>
+                    <tr>
+                        <td>☁️ AWS Cluster</td>
+                        <td id="result-aws">48 seconds</td>
+                        <td id="speedup-aws">10x</td>
+                        <td>$200</td>
+                    </tr>
+                    <tr class="winner-row">
+                        <td>⚡ Gensyn Network</td>
+                        <td id="result-gensyn">12 seconds</td>
+                        <td id="speedup-gensyn">40x</td>
+                        <td>$40</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="shareTwitter()">
+                    <span>🐦</span>
+                    Share on X (Twitter)
+                </button>
+                <button class="btn btn-secondary" onclick="resetRace()">
+                    <span>🔄</span>
+                    Race Again
+                </button>
+            </div>
+
+            <div class="info-box">
+                <h3>🚀 Why is Gensyn So Fast?</h3>
+                <p><strong>Massive Parallelization:</strong> Gensyn distributes training across thousands of idle GPUs globally, achieving unprecedented speed without datacenter overhead.</p>
+                <p><strong>80% Cost Savings:</strong> By utilizing idle compute, Gensyn offers the same performance as AWS at a fraction of the cost ($40 vs $200 for 100 hours).</p>
+                <p><strong>Trustless Verification:</strong> Every computation is verified using proof-of-learning, ensuring quality without compromising speed.</p>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>💡 Real-World Impact</h3>
+            <p><strong>GPT-3 Training:</strong> Would take 355 years on a single GPU. On Gensyn's network with 1,000 GPUs? Just 3-4 days.</p>
+            <p><strong>DALL-E Training:</strong> 12 billion parameters trained on 400M images. Gensyn makes this accessible to indie researchers, not just Big Tech.</p>
+            <p><strong>Foundation Models:</strong> Train GPT-4-scale models collectively, owned by humanity, not corporations. This is the path to democratized AGI.</p>
+        </div>
+
+        <footer>
+            <p>Democratizing AI compute, one GPU at a time 🌍</p>
+            <p style="margin-top: 10px;">Learn more about <a href="https://www.gensyn.ai" target="_blank">Gensyn</a> | Follow <a href="https://twitter.com/gensynai" target="_blank">@gensynai</a></p>
+            <p class="creator-tag">Built by <a href="https://x.com/abh1shxkk" target="_blank">@abh1shxkk</a> 🚀</p>
+        </footer>
+    </div>
+
+    <script>
+        const models = {
+            small: {
+                single: 480,
+                aws: 48,
+                gensyn: 12
+            },
+            medium: {
+                single: 86400,
+                aws: 3600,
+                gensyn: 900
+            },
+            large: {
+                single: 2592000,
+                aws: 259200,
+                gensyn: 86400
+            },
+            huge: {
+                single: 31104000,
+                aws: 604800,
+                gensyn: 259200
+            }
+        };
+
+        let selectedModel = 'small';
+        let isRacing = false;
+        let intervals = [];
+
+        // Generate stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function selectModel(model) {
+            selectedModel = model;
+            document.querySelectorAll('.model-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById('model-' + model).classList.add('active');
+            updateTimes();
+        }
+
+        function formatTime(seconds) {
+            if (seconds < 60) return seconds + ' seconds';
+            if (seconds < 3600) return Math.round(seconds / 60) + ' minutes';
+            if (seconds < 86400) return Math.round(seconds / 3600) + ' hours';
+            return Math.round(seconds / 86400) + ' days';
+        }
+
+        function updateTimes() {
+            const times = models[selectedModel];
+            document.getElementById('time-single').textContent = formatTime(times.single);
+            document.getElementById('time-aws').textContent = formatTime(times.aws);
+            document.getElementById('time-gensyn').textContent = formatTime(times.gensyn);
+        }
+
+        function startRace() {
+            if (isRacing) return;
+            isRacing = true;
+            
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = true;
+            startBtn.textContent = '🏁 Racing...';
+
+            const times = models[selectedModel];
+            const duration = 5000;
+            const fps = 60;
+            const frames = duration / (1000 / fps);
+
+            ['single', 'aws', 'gensyn'].forEach(id => {
+                document.getElementById('bar-' + id).style.width = '0%';
+                document.getElementById('stat-' + id).textContent = '0%';
+            });
+
+            document.getElementById('resultsSection').classList.remove('show');
+
+            ['single', 'aws', 'gensyn'].forEach(id => {
+                let frame = 0;
+                const speed = times[id];
+                const slowest = times.single;
+                const relativeSpeed = slowest / speed;
+                
+                const interval = setInterval(() => {
+                    frame++;
+                    const progress = (frame / frames) * relativeSpeed * 100;
+                    const displayProgress = Math.min(progress, 100);
+                    
+                    document.getElementById('bar-' + id).style.width = displayProgress + '%';
+                    document.getElementById('stat-' + id).textContent = Math.round(displayProgress) + '%';
+
+                    if (displayProgress >= 100 || frame >= frames * 2) {
+                        clearInterval(interval);
+                    }
+                }, 1000 / fps);
+
+                intervals.push(interval);
+            });
+
+            setTimeout(() => {
+                showResults();
+            }, duration + 1000);
+        }
+
+        function showResults() {
+            const times = models[selectedModel];
+            
+            document.getElementById('result-single').textContent = formatTime(times.single);
+            document.getElementById('result-aws').textContent = formatTime(times.aws);
+            document.getElementById('result-gensyn').textContent = formatTime(times.gensyn);
+
+            const speedupAWS = Math.round(times.single / times.aws);
+            const speedupGensyn = Math.round(times.single / times.gensyn);
+
+            document.getElementById('speedup-aws').textContent = speedupAWS + 'x';
+            document.getElementById('speedup-gensyn').textContent = speedupGensyn + 'x';
+            document.getElementById('speedup').textContent = speedupGensyn + 'x';
+
+            document.getElementById('resultsSection').classList.add('show');
+
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = false;
+            startBtn.textContent = '🏁 Start the Race!';
+            isRacing = false;
+        }
+
+        function resetRace() {
+            intervals.forEach(interval => clearInterval(interval));
+            intervals = [];
+            
+            ['single', 'aws', 'gensyn'].forEach(id => {
+                document.getElementById('bar-' + id).style.width = '0%';
+                document.getElementById('stat-' + id).textContent = '0%';
+            });
+
+            document.getElementById('resultsSection').classList.remove('show');
+            
+            const startBtn = document.getElementById('startBtn');
+            startBtn.disabled = false;
+            startBtn.textContent = '🏁 Start the Race!';
+            isRacing = false;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function shareTwitter() {
+            const times = models[selectedModel];
+            const speedup = Math.round(times.single / times.gensyn);
+            const modelNames = {
+                small: 'a small model',
+                medium: 'BERT-scale model',
+                large: 'GPT-2-scale model',
+                huge: 'GPT-3-scale model'
+            };
+            
+            const text = `🚀 Just watched Gensyn crush traditional AI training!\n\nTraining ${modelNames[selectedModel]}:\n🐌 Single GPU: ${formatTime(times.single)}\n☁️ AWS: ${formatTime(times.aws)}\n⚡ Gensyn: ${formatTime(times.gensyn)}\n\n${speedup}x faster than single GPU! The future of AI is decentralized. 🌍\n\nTry it yourself:`;
+            
+            const url = window.location.href;
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+            window.open(twitterUrl, '_blank');
+        }
+
+        createStars();
+        updateTimes();
+    </script>
+</body>
+</html>
