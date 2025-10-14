@@ -34,7 +34,7 @@ class CompanyController extends Controller
                 $query->whereDate('created_at', '<=', $dateTo);
             })
             ->latest()
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
         // AJAX request ke liye sirf table return karo

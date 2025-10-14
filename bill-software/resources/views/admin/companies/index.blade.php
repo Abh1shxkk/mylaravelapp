@@ -1,6 +1,51 @@
 @extends('layouts.admin')
 @section('title','Companies')
 @section('content')
+<style>
+  /* Scroll to Top Button Styles */
+   #scrollToTop {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    background: #0d6efd;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  #scrollToTop.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  
+  #scrollToTop.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  #scrollToTop:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    background: #0b5ed7;
+  }
+  
+  #scrollToTop i {
+    font-size: 22px;
+  }
+</style>
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
    
@@ -69,94 +114,162 @@
       </tbody>
     </table>
   </div>
-  <div class="card-footer d-flex justify-content-between align-items-center">
-    <div class="small text-muted">Showing {{ $companies->firstItem() ?? 0 }}-{{ $companies->lastItem() ?? 0 }} of {{ $companies->total() }}</div>
+  <div class="card-footer d-flex flex-column gap-2">
+    <div class="align-self-start">Showing {{ $companies->firstItem() ?? 0 }}-{{ $companies->lastItem() ?? 0 }} of {{ $companies->total() }}</div>
     @if($companies->hasMorePages())
-      <div class="d-flex align-items-center gap-2">
-        <div id="company-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status">
+      <div class="d-flex align-items-center justify-content-center gap-2">
+        <div id="company-spinner" class="spinner-border text-primary d-none" style="width: 2rem; height: 2rem;" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <span id="company-load-text" class="small text-muted">Scroll for more</span>
+        <span id="company-load-text" class="text-muted" style="font-size: 0.9rem;">Scroll for more</span>
       </div>
       <div id="company-sentinel" data-next-url="{{ $companies->appends(request()->query())->nextPageUrl() }}" style="height: 1px;"></div>
     @endif
   </div>
 </div>
+<!-- Scroll to Top Button -->
+<button id="scrollToTop" type="button" title="Scroll to top" onclick="scrollToTopNow()" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
+  <i class="bi bi-arrow-up"></i>
+</button>
+
 @endsection
 
+
 @push('scripts')
+
 <script>
+// GLOBAL FUNCTION for smooth scroll to top
+function scrollToTopNow() {
+  console.log('Scrolling to top...');
+  
+  // Main content scrollable container
+  const contentDiv = document.querySelector('.content');
+  if(contentDiv) {
+    // Smooth scroll with animation
+    contentDiv.scrollTo({ 
+      top: 0, 
+      behavior: 'smooth' 
+    });
+  }
+  
+  // Fallback for window scroll (bhi smooth)
+  window.scrollTo({ 
+    top: 0, 
+    behavior: 'smooth' 
+  });
+  
+  console.log('Smooth scrolling...');
+}
+
 document.addEventListener('DOMContentLoaded', function(){
-
-  // YE CODE Line 86 ke baad add karna hai, DOMContentLoaded ke andar
-
-// Real-time search implementation
-const searchInput = document.getElementById('company-search');
-const statusSelect = document.getElementById('status');
-const filterForm = document.getElementById('company-filter-form');
-let searchTimeout;
-
-function performSearch() {
-  const formData = new FormData(filterForm);
-  const params = new URLSearchParams(formData);
   
-  // Show loading state
-  tbody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+  const scrollBtn = document.getElementById('scrollToTop');
+  const contentDiv = document.querySelector('.content');
   
-  fetch(`{{ route('admin.companies.index') }}?${params.toString()}`, {
-    headers: {
-      'X-Requested-With': 'XMLHttpRequest'
-    }
-  })
-  .then(response => response.text())
-  .then(html => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    const newRows = doc.querySelectorAll('#company-table-body tr');
-    
-    // Clear and update table
-    tbody.innerHTML = '';
-    newRows.forEach(tr => tbody.appendChild(tr));
-    
-    // Update pagination info
-    const newFooter = doc.querySelector('.card-footer');
-    const currentFooter = document.querySelector('.card-footer');
-    if(newFooter && currentFooter) {
-      currentFooter.innerHTML = newFooter.innerHTML;
-    }
-    
-    // Reset infinite scroll
-    if(sentinel) {
-      const newSentinel = doc.querySelector('#company-sentinel');
-      if(newSentinel) {
-        sentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
+  if(scrollBtn && contentDiv) {
+    // Show/hide button based on .content scroll
+    contentDiv.addEventListener('scroll', function() {
+      const scrollPos = contentDiv.scrollTop;
+      
+      if (scrollPos > 200) {
+        scrollBtn.style.display = 'flex';
+        scrollBtn.style.opacity = '1';
+        scrollBtn.style.visibility = 'visible';
       } else {
-        sentinel.remove();
+        scrollBtn.style.opacity = '0';
+        scrollBtn.style.visibility = 'hidden';
       }
+    });
+    
+    // Initial check
+    if(contentDiv.scrollTop > 200) {
+      scrollBtn.style.display = 'flex';
+      scrollBtn.style.opacity = '1';
+      scrollBtn.style.visibility = 'visible';
     }
-  })
-  .catch(error => {
-    tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>';
-  });
-}
+  }
 
-// Search input with debounce
-if(searchInput) {
-  searchInput.addEventListener('keyup', function() {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(performSearch, 500);
-  });
-}
-
-// Status filter real-time - Use jQuery for Select2 compatibility
-if(statusSelect) {
-  $(statusSelect).on('change', performSearch);
-}
-
+  // REST OF YOUR CODE (search, infinite scroll, etc.)
+  const searchInput = document.getElementById('company-search');
+  const statusSelect = document.getElementById('status');
+  const filterForm = document.getElementById('company-filter-form');
   const sentinel = document.getElementById('company-sentinel');
   const spinner = document.getElementById('company-spinner');
   const loadText = document.getElementById('company-load-text');
   const tbody = document.getElementById('company-table-body');
+  let searchTimeout;
+
+  function performSearch() {
+    const formData = new FormData(filterForm);
+    const params = new URLSearchParams(formData);
+    
+    // Delayed footer spinner (avoid instant flash)
+    const footerSpinner = document.getElementById('company-spinner');
+    const footerLoadText = document.getElementById('company-load-text');
+    let spinnerTimer = setTimeout(() => {
+      footerSpinner && footerSpinner.classList.remove('d-none');
+      footerLoadText && (footerLoadText.textContent = 'Loading...');
+    }, 250);
+    
+    fetch(`{{ route('admin.companies.index') }}?${params.toString()}`, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const newRows = doc.querySelectorAll('#company-table-body tr');
+      const realRows = Array.from(newRows).filter(tr => {
+        const tds = tr.querySelectorAll('td');
+        return !(tds.length === 1 && tr.querySelector('td[colspan]'));
+      });
+      
+      tbody.innerHTML = '';
+      if(realRows.length) {
+        realRows.forEach(tr => tbody.appendChild(tr));
+      } else {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No companies found</td></tr>';
+      }
+      
+      const newFooter = doc.querySelector('.card-footer');
+      const currentFooter = document.querySelector('.card-footer');
+      if(newFooter && currentFooter) {
+        currentFooter.innerHTML = newFooter.innerHTML;
+      }
+      
+      if(sentinel) {
+        const newSentinel = doc.querySelector('#company-sentinel');
+        if(newSentinel) {
+          sentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
+        } else {
+          sentinel.remove();
+        }
+      }
+    })
+    .catch(error => {
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>';
+    })
+    .finally(() => {
+      typeof spinnerTimer !== 'undefined' && clearTimeout(spinnerTimer);
+      const s = document.getElementById('company-spinner');
+      const t = document.getElementById('company-load-text');
+      s && s.classList.add('d-none');
+      t && (t.textContent = 'Scroll for more');
+    });
+  }
+
+  if(searchInput) {
+    searchInput.addEventListener('keyup', function() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(performSearch, 500);
+    });
+  }
+
+  if(statusSelect) {
+    $(statusSelect).on('change', performSearch);
+  }
   
   if(!sentinel || !tbody) return;
   
@@ -172,12 +285,23 @@ if(statusSelect) {
     loadText && (loadText.textContent = 'Loading...');
     
     try{
-      const res = await fetch(nextUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      // Add current search/filter params to nextUrl
+      const formData = new FormData(filterForm);
+      const params = new URLSearchParams(formData);
+      const url = new URL(nextUrl, window.location.origin);
+      params.forEach((value, key) => {
+        if(value) url.searchParams.set(key, value);
+      });
+      const res = await fetch(url.toString(), { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
       const html = await res.text();
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       const newRows = doc.querySelectorAll('#company-table-body tr');
-      newRows.forEach(tr => tbody.appendChild(tr));
+      const realRows = Array.from(newRows).filter(tr => {
+        const tds = tr.querySelectorAll('td');
+        return !(tds.length === 1 && tr.querySelector('td[colspan]'));
+      });
+      realRows.forEach(tr => tbody.appendChild(tr));
       
       const newSentinel = doc.querySelector('#company-sentinel');
       if(newSentinel){
@@ -209,6 +333,9 @@ if(statusSelect) {
   observer.observe(sentinel);
 });
 </script>
+
+
 @endpush
+
 
 

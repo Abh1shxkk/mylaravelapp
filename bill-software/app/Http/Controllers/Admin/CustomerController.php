@@ -37,7 +37,7 @@ class CustomerController extends Controller
                 $query->whereDate('created_at', '<=', $dateTo);
             })
             ->orderByDesc('created_date')
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
         return view('admin.customers.index', compact('customers', 'search', 'status', 'dateFrom', 'dateTo'));

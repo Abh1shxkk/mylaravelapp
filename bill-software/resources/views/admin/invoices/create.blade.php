@@ -13,8 +13,71 @@
 
                 <form action="{{ route('admin.invoices.store') }}" method="POST" id="invoiceForm" novalidate>
                     @csrf
-
-                    <!-- Company Information -->
+ <!-- Invoice Details -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Invoice Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="invoice_number" class="form-label">Invoice Number *</label>
+                                    <input type="text" class="form-control @error('invoice_number') is-invalid @enderror"
+                                        id="invoice_number" name="invoice_number"
+                                        value="{{ old('invoice_number', $nextInvoiceNumber) }}" readonly>
+                                    <small class="form-text text-muted">Auto-generated</small>
+                                    @error('invoice_number')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="invoice_date" class="form-label">Invoice Date *</label>
+                                    <input type="date" class="form-control @error('invoice_date') is-invalid @enderror"
+                                        id="invoice_date" name="invoice_date"
+                                        value="{{ old('invoice_date', date('Y-m-d')) }}" required>
+                                    @error('invoice_date')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="due_date" class="form-label">Due Date</label>
+                                    <input type="date" class="form-control" id="due_date" name="due_date"
+                                        value="{{ old('due_date') }}">
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <label for="status" class="form-label">Status *</label>
+                                    <select class="form-select @error('status') is-invalid @enderror" id="status"
+                                        name="status" required>
+                                        <option value="draft" {{ old('status', 'draft') == 'draft' ? 'selected' : '' }}>Draft
+                                        </option>
+                                        <option value="sent" {{ old('status') == 'sent' ? 'selected' : '' }}>Sent</option>
+                                        <option value="paid" {{ old('status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                    </select>
+                                    @error('status')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="currency" class="form-label">Currency</label>
+                                    <select class="form-select" id="currency" name="currency">
+                                        <option value="INR" {{ old('currency', 'INR') == 'INR' ? 'selected' : '' }}>INR (₹)
+                                        </option>
+                                        <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>USD ($)</option>
+                                        <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>EUR (€)</option>
+                                        <option value="GBP" {{ old('currency') == 'GBP' ? 'selected' : '' }}>GBP (£)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="payment_terms" class="form-label">Payment Terms</label>
+                                    <input type="text" class="form-control" id="payment_terms" name="payment_terms"
+                                        value="{{ old('payment_terms') }}" placeholder="e.g., Net 30 days">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Company Information
                     <div class="card mb-4">
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0"><i class="bi bi-building me-2"></i>Company Information</h5>
@@ -69,7 +132,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
 
                     <!-- Customer Information -->
                     <div class="card mb-4">
@@ -135,70 +198,7 @@
                         </div>
                     </div>
 
-                    <!-- Invoice Details -->
-                    <div class="card mb-4">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0"><i class="bi bi-receipt me-2"></i>Invoice Details</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label for="invoice_number" class="form-label">Invoice Number *</label>
-                                    <input type="text" class="form-control @error('invoice_number') is-invalid @enderror"
-                                        id="invoice_number" name="invoice_number"
-                                        value="{{ old('invoice_number', $nextInvoiceNumber) }}" readonly>
-                                    <small class="form-text text-muted">Auto-generated</small>
-                                    @error('invoice_number')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="invoice_date" class="form-label">Invoice Date *</label>
-                                    <input type="date" class="form-control @error('invoice_date') is-invalid @enderror"
-                                        id="invoice_date" name="invoice_date"
-                                        value="{{ old('invoice_date', date('Y-m-d')) }}" required>
-                                    @error('invoice_date')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="due_date" class="form-label">Due Date</label>
-                                    <input type="date" class="form-control" id="due_date" name="due_date"
-                                        value="{{ old('due_date') }}">
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="status" class="form-label">Status *</label>
-                                    <select class="form-select @error('status') is-invalid @enderror" id="status"
-                                        name="status" required>
-                                        <option value="draft" {{ old('status', 'draft') == 'draft' ? 'selected' : '' }}>Draft
-                                        </option>
-                                        <option value="sent" {{ old('status') == 'sent' ? 'selected' : '' }}>Sent</option>
-                                        <option value="paid" {{ old('status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                                    </select>
-                                    @error('status')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="currency" class="form-label">Currency</label>
-                                    <select class="form-select" id="currency" name="currency">
-                                        <option value="INR" {{ old('currency', 'INR') == 'INR' ? 'selected' : '' }}>INR (₹)
-                                        </option>
-                                        <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>USD ($)</option>
-                                        <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>EUR (€)</option>
-                                        <option value="GBP" {{ old('currency') == 'GBP' ? 'selected' : '' }}>GBP (£)</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="payment_terms" class="form-label">Payment Terms</label>
-                                    <input type="text" class="form-control" id="payment_terms" name="payment_terms"
-                                        value="{{ old('payment_terms') }}" placeholder="e.g., Net 30 days">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                   
 
                     <!-- Invoice Items -->
                     <div class="card mb-4">

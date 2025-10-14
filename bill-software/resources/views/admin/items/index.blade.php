@@ -70,19 +70,23 @@
       </tbody>
     </table>
   </div>
-  <div class="card-footer bg-light d-flex justify-content-between align-items-center">
-    <div class="small text-muted">Showing {{ $items->firstItem() ?? 0 }}-{{ $items->lastItem() ?? 0 }} of {{ $items->total() }}</div>
+  <div class="card-footer bg-light d-flex flex-column gap-2">
+    <div class="align-self-start">Showing {{ $items->firstItem() ?? 0 }}-{{ $items->lastItem() ?? 0 }} of {{ $items->total() }}</div>
     @if($items->hasMorePages())
-      <div class="d-flex align-items-center gap-2">
-        <div id="item-spinner" class="spinner-border spinner-border-sm text-primary d-none" role="status">
+      <div class="d-flex align-items-center justify-content-center gap-2">
+        <div id="item-spinner" class="spinner-border text-primary d-none" style="width: 2rem; height: 2rem;" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
-        <span id="item-load-text" class="small text-muted">Scroll for more</span>
+        <span id="item-load-text" class="text-muted" style="font-size: 0.9rem;">Scroll for more</span>
       </div>
       <div id="item-sentinel" data-next-url="{{ $items->appends(request()->query())->nextPageUrl() }}" style="height: 1px;"></div>
     @endif
   </div>
 </div>
+<!-- Scroll to Top Button -->
+<button id="scrollToTop" type="button" title="Scroll to top" onclick="scrollToTopNow()" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; border-radius: 50%; width: 50px; height: 50px; background: #0d6efd; color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; visibility: hidden;">
+  <i class="bi bi-arrow-up"></i>
+</button>
 @endsection
 
 @push('scripts')
@@ -97,13 +101,54 @@ document.addEventListener('DOMContentLoaded', function(){
   let isLoading = false;
   let observer = null;
 
+  // Scroll to Top function and visibility handlers
+  function scrollToTopNow() {
+    const contentDiv = document.querySelector('.content');
+    if(contentDiv) {
+      contentDiv.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  window.scrollToTopNow = scrollToTopNow;
+
+  const scrollBtn = document.getElementById('scrollToTop');
+  const contentDiv = document.querySelector('.content');
+  if(scrollBtn && contentDiv) {
+    contentDiv.addEventListener('scroll', function(){
+      const y = contentDiv.scrollTop;
+      if (y > 200) {
+        scrollBtn.style.opacity = '1';
+        scrollBtn.style.visibility = 'visible';
+      } else {
+        scrollBtn.style.opacity = '0';
+        scrollBtn.style.visibility = 'hidden';
+      }
+    });
+  }
+  if(scrollBtn) {
+    window.addEventListener('scroll', function(){
+      const y = window.scrollY || document.documentElement.scrollTop;
+      if (y > 200) {
+        scrollBtn.style.opacity = '1';
+        scrollBtn.style.visibility = 'visible';
+      } else {
+        scrollBtn.style.opacity = '0';
+        scrollBtn.style.visibility = 'hidden';
+      }
+    });
+  }
+
   // Real-time search implementation
   function performSearch() {
     const formData = new FormData(filterForm);
     const params = new URLSearchParams(formData);
     
-    // Show loading state
-    tbody.innerHTML = '<tr><td colspan="9" class="text-center"><div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>';
+    const footerSpinner = document.getElementById('item-spinner');
+    const footerLoadText = document.getElementById('item-load-text');
+    let spinnerTimer = setTimeout(() => {
+      footerSpinner && footerSpinner.classList.remove('d-none');
+      footerLoadText && (footerLoadText.textContent = 'Loading...');
+    }, 250);
     
     fetch(`{{ route('admin.items.index') }}?${params.toString()}`, {
       headers: {
@@ -115,10 +160,18 @@ document.addEventListener('DOMContentLoaded', function(){
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       const newRows = doc.querySelectorAll('#item-table-body tr');
+      const realRows = Array.from(newRows).filter(tr => {
+        const tds = tr.querySelectorAll('td');
+        return !(tds.length === 1 && tr.querySelector('td[colspan]'));
+      });
       
       // Clear and update table
       tbody.innerHTML = '';
-      newRows.forEach(tr => tbody.appendChild(tr));
+      if(realRows.length) {
+        realRows.forEach(tr => tbody.appendChild(tr));
+      } else {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No items found</td></tr>';
+      }
       
       // Update pagination info and reinitialize infinite scroll
       const newFooter = doc.querySelector('.card-footer');
@@ -131,6 +184,13 @@ document.addEventListener('DOMContentLoaded', function(){
     })
     .catch(error => {
       tbody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">Error loading data</td></tr>';
+    })
+    .finally(() => {
+      typeof spinnerTimer !== 'undefined' && clearTimeout(spinnerTimer);
+      const s = document.getElementById('item-spinner');
+      const t = document.getElementById('item-load-text');
+      s && s.classList.add('d-none');
+      t && (t.textContent = 'Scroll for more');
     });
   }
 
@@ -187,7 +247,11 @@ document.addEventListener('DOMContentLoaded', function(){
         const parser = new DOMParser();
         const doc = parser.parseFromString(html, 'text/html');
         const newRows = doc.querySelectorAll('#item-table-body tr');
-        newRows.forEach(tr => tbody.appendChild(tr));
+        const realRows = Array.from(newRows).filter(tr => {
+          const tds = tr.querySelectorAll('td');
+          return !(tds.length === 1 && tr.querySelector('td[colspan]'));
+        });
+        realRows.forEach(tr => tbody.appendChild(tr));
         
         const newSentinel = doc.querySelector('#item-sentinel');
         if(newSentinel){

@@ -44,7 +44,7 @@ class InvoiceController extends Controller
                 $query->whereDate('invoice_date', '<=', $dateTo);
             })
             ->latest('invoice_date')
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
         
         return view('admin.invoices.index', compact('invoices'));

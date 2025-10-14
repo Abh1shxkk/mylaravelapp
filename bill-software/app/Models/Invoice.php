@@ -8,6 +8,11 @@ class Invoice extends Model
 {
     protected $primaryKey = 'invoice_id';
 
+    public function getRouteKeyName()
+    {
+        return 'invoice_id';
+    }
+
     protected $fillable = [
         'invoice_number',
         'invoice_date',
