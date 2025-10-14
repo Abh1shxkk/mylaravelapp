@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FHE vs Traditional Encryption - Interactive Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0f;
+            color: #ffffff;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated background gradient */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a0f 50%);
+            z-index: -2;
+        }
+
+        .bg-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 217, 61, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(78, 205, 196, 0.08) 0%, transparent 50%);
+            animation: breathe 8s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        .header-title {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #FFD93D 0%, #4ECDC4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .header-subtitle {
+            font-size: 1.3em;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* Scenario Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+
+        .scenario-btn {
+            padding: 14px 28px;
+            font-size: 0.95em;
+            font-weight: 500;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+        }
+
+        .scenario-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 217, 61, 0.4);
+            color: #FFD93D;
+            transform: translateY(-2px);
+        }
+
+        .scenario-btn.active {
+            background: linear-gradient(135deg, rgba(255, 217, 61, 0.15), rgba(78, 205, 196, 0.15));
+            border-color: #FFD93D;
+            color: #FFD93D;
+            box-shadow: 0 4px 20px rgba(255, 217, 61, 0.2);
+        }
+
+        /* Comparison Container */
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .encryption-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .encryption-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
+            opacity: 0.6;
+        }
+
+        .traditional {
+            --accent-color: #FF6B6B;
+        }
+
+        .fhe {
+            --accent-color: #4ECDC4;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: var(--accent-color);
+        }
+
+        .visualization-area {
+            min-height: 450px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 40px 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .data-box {
+            padding: 20px 32px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 500;
+            text-align: center;
+            min-width: 220px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 1px solid;
+        }
+
+        .original-data {
+            background: rgba(102, 126, 234, 0.15);
+            border-color: rgba(102, 126, 234, 0.4);
+            color: #667eea;
+        }
+
+        .encrypted-data {
+            background: rgba(245, 87, 108, 0.15);
+            border-color: rgba(245, 87, 108, 0.4);
+            color: #f5576c;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .decrypted-data {
+            background: rgba(79, 172, 254, 0.15);
+            border-color: rgba(79, 172, 254, 0.4);
+            color: #4facfe;
+        }
+
+        .computation-area {
+            background: rgba(67, 233, 123, 0.15);
+            border: 1px solid rgba(67, 233, 123, 0.4);
+            color: #43e97b;
+            padding: 20px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            min-width: 280px;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            font-size: 1.8em;
+            margin: 15px 0;
+            color: rgba(255, 217, 61, 0.6);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 8, 68, 0.2), rgba(255, 177, 153, 0.2));
+            border: 1px solid rgba(255, 8, 68, 0.4);
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 500;
+            color: #ff6b6b;
+            font-size: 0.95em;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, rgba(17, 153, 142, 0.2), rgba(56, 239, 125, 0.2));
+            border: 1px solid rgba(56, 239, 125, 0.4);
+            padding: 16px 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: 500;
+            color: #4ECDC4;
+            font-size: 0.95em;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 16px 48px;
+            font-size: 1.05em;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: 0.3px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .share-btn {
+            background: linear-gradient(135deg, #1DA1F2, #0d8bd9);
+            color: white;
+            box-shadow: 0 4px 20px rgba(29, 161, 242, 0.3);
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(29, 161, 242, 0.4);
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+        }
+
+        .stats-title {
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #FFD93D;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 217, 61, 0.3);
+            box-shadow: 0 10px 30px rgba(255, 217, 61, 0.1);
+        }
+
+        .stat-label {
+            font-size: 0.95em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 2.2em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FFD93D, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 80px;
+            padding: 50px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+        }
+
+        .footer-title {
+            font-size: 1.6em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #FFD93D, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .footer-description {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 30px;
+            font-size: 1.05em;
+        }
+
+        .footer-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .footer-section-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #FFD93D;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .footer-link {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-link:hover {
+            color: #4ECDC4;
+            transform: translateX(5px);
+        }
+
+        .footer-bottom {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9em;
+        }
+
+        .footer-bottom a {
+            color: #FFD93D;
+            text-decoration: none;
+        }
+
+        .footer-bottom a:hover {
+            color: #4ECDC4;
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .computing {
+            animation: computing 1.5s ease-in-out infinite;
+        }
+
+        @keyframes computing {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            .header-title { font-size: 2.5em; }
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+            .footer-sections {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .footer-links {
+                align-items: center;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header-title { font-size: 2em; }
+            .header-subtitle { font-size: 1.1em; }
+            .controls { flex-direction: column; }
+            .scenario-btn { width: 100%; }
+            .action-buttons { flex-direction: column; width: 100%; }
+            .action-btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="header-title">FHE vs Traditional Encryption</h1>
+            <p class="header-subtitle">Experience the revolutionary difference between traditional encryption and Fully Homomorphic Encryption</p>
+        </header>
+
+        <!-- Scenario Controls -->
+        <div class="controls">
+            <button class="scenario-btn active" data-scenario="addition">➕ Addition</button>
+            <button class="scenario-btn" data-scenario="voting">🗳️ Private Voting</button>
+            <button class="scenario-btn" data-scenario="auction">💰 Sealed Auction</button>
+            <button class="scenario-btn" data-scenario="salary">💵 Confidential Salary</button>
+        </div>
+
+        <!-- Comparison Section -->
+        <div class="comparison-container">
+            <!-- Traditional Encryption -->
+            <div class="encryption-section traditional">
+                <h2 class="section-title">🔴 Traditional Encryption</h2>
+                <div class="visualization-area" id="traditionalViz">
+                    <div class="data-box original-data" id="tradOriginal">Data: 42</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="data-box encrypted-data" id="tradEncrypted">🔒 Encrypted</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="warning-box hidden" id="tradWarning">⚠️ MUST DECRYPT TO COMPUTE</div>
+                    <div class="data-box decrypted-data hidden" id="tradDecrypted">Decrypted: 42</div>
+                    <div class="flow-arrow hidden" id="tradCompArrow">↓</div>
+                    <div class="computation-area hidden" id="tradComputation">Computing: 42 + 8 = 50</div>
+                    <div class="flow-arrow hidden" id="tradResultArrow">↓</div>
+                    <div class="data-box encrypted-data hidden" id="tradResult">Result: 50 🔒</div>
+                </div>
+            </div>
+
+            <!-- FHE Encryption -->
+            <div class="encryption-section fhe">
+                <h2 class="section-title">🟢 FHE (Zama)</h2>
+                <div class="visualization-area" id="fheViz">
+                    <div class="data-box original-data" id="fheOriginal">Data: 42</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="data-box encrypted-data" id="fheEncrypted">🔒 Encrypted</div>
+                    <div class="flow-arrow">↓</div>
+                    <div class="success-box hidden" id="fheSuccess">✅ COMPUTE ON ENCRYPTED DATA</div>
+                    <div class="computation-area hidden" id="fheComputation">🔐 Computing: [encrypted] + [encrypted]</div>
+                    <div class="flow-arrow hidden" id="fheResultArrow">↓</div>
+                    <div class="data-box encrypted-data hidden" id="fheResult">Result: 🔒 [encrypted 50]</div>
+                    <div class="flow-arrow hidden" id="fheDecryptArrow">↓</div>
+                    <div class="data-box decrypted-data hidden" id="fheDecrypted">Decrypted: 50 ✨</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn start-btn" id="startDemo">▶️ Start Visualization</button>
+            <button class="action-btn reset-btn" id="resetDemo">🔄 Reset</button>
+            <button class="action-btn share-btn" id="shareBtn">𝕏 Share Results</button>
+        </div>
+
+        <!-- Stats Panel -->
+        <section class="stats-panel">
+            <h2 class="stats-title">Key Differences</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Privacy Breach Risk</div>
+                    <div class="stat-value" id="statPrivacy">0%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Data Exposure</div>
+                    <div class="stat-value" id="statExposure">Never</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Security Level</div>
+                    <div class="stat-value" id="statSecurity">128-bit</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Computation Mode</div>
+                    <div class="stat-value" id="statSpeed">Encrypted</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <h3 class="footer-title">Powered by Zama FHE Technology</h3>
+            <p class="footer-description">
+                Experience the future of privacy-preserving computation with Fully Homomorphic Encryption
+            </p>
+
+            <div class="footer-sections">
+                <div>
+                    <h4 class="footer-section-title">Learn More</h4>
+                    <div class="footer-links">
+                        <a href="https://www.zama.ai" target="_blank" class="footer-link">🌐 Zama Official Website</a>
+                        <a href="https://docs.zama.ai" target="_blank" class="footer-link">📚 Documentation</a>
+                        <a href="https://github.com/zama-ai" target="_blank" class="footer-link">💻 GitHub</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="footer-section-title">Community</h4>
+                    <div class="footer-links">
+                        <a href="https://twitter.com/zama_fhe" target="_blank" class="footer-link">𝕏 @zama_fhe</a>
+                        <a href="https://discord.gg/zama" target="_blank" class="footer-link">💬 Discord</a>
+                        <a href="https://t.me/zama_fhe" target="_blank" class="footer-link">📱 Telegram</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="footer-section-title">Connect</h4>
+                    <div class="footer-links">
+                        <a href="https://twitter.com/abh1shxkk" target="_blank" class="footer-link">𝕏 @abh1shxkk</a>
+                        <a href="https://github.com/abh1shxkk" target="_blank" class="footer-link">💻 GitHub</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>Built with 💛 by <a href="https://twitter.com/abh1shxkk" target="_blank">@abh1shxkk</a></p>
+                <p style="margin-top: 10px;">Visualizer demonstrates FHE concepts • Not production implementation</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentScenario = 'addition';
+        let isAnimating = false;
+
+        const scenarios = {
+            addition: {
+                original: '42',
+                operation: '42 + 8 = 50',
+                fheOperation: '[encrypted] + [encrypted]',
+                result: '50',
+                tradPrivacy: 'HIGH',
+                fhePrivacy: 'ZERO',
+                exposure: 'YES',
+                fheExposure: 'NEVER'
+            },
+            voting: {
+                original: 'Vote: Candidate A',
+                operation: 'Count Vote A',
+                fheOperation: '[encrypted vote] counted',
+                result: 'Vote Recorded',
+                tradPrivacy: 'EXPOSED',
+                fhePrivacy: 'PRIVATE',
+                exposure: 'YES',
+                fheExposure: 'NEVER'
+            },
+            auction: {
+                original: 'Bid: $1000',
+                operation: 'Compare Bids',
+                fheOperation: '[encrypted bids] compared',
+                result: 'Winner Found',
+                tradPrivacy: 'VISIBLE',
+                fhePrivacy: 'SEALED',
+                exposure: 'YES',
+                fheExposure: 'NEVER'
+            },
+            salary: {
+                original: 'Salary: $5000',
+                operation: 'Calculate Tax: $5000 × 0.2',
+                fheOperation: '[encrypted salary] × [rate]',
+                result: 'Tax: $1000',
+                tradPrivacy: 'EXPOSED',
+                fhePrivacy: 'PRIVATE',
+                exposure: 'YES',
+                fheExposure: 'NEVER'
+            }
+        };
+
+        // Scenario Selection
+        document.querySelectorAll('.scenario-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (isAnimating) return;
+                
+                document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentScenario = btn.dataset.scenario;
+                resetDemo();
+            });
+        });
+
+        // Start Demo
+        document.getElementById('startDemo').addEventListener('click', () => {
+            if (isAnimating) return;
+            startAnimation();
+        });
+
+        // Reset Demo
+        document.getElementById('resetDemo').addEventListener('click', () => {
+            resetDemo();
+        });
+
+        // Share Button
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            shareOnX();
+        });
+
+        function shareOnX() {
+            const scenario = scenarios[currentScenario];
+            const scenarioName = currentScenario.charAt(0).toUpperCase() + currentScenario.slice(1);
+            
+            const tweetText = `I just explored the difference between Traditional Encryption and FHE using @abh1shxkk's interactive visualizer! 🔐
+
+Scenario: ${scenarioName}
+Traditional: Data ${scenario.tradPrivacy} during computation ⚠️
+FHE (Zama): ${scenario.fhePrivacy} - computes on encrypted data! ✨
+
+Experience it yourself: ${window.location.href}
+
+Built with @zama_fhe technology. The future of privacy is here! 🚀
+
+#FHE #Privacy #Web3 #Encryption`;
+            
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+            window.open(tweetUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        function resetDemo() {
+            isAnimating = false;
+            const scenario = scenarios[currentScenario];
+            
+            // Reset Traditional
+            document.getElementById('tradOriginal').textContent = `Data: ${scenario.original}`;
+            document.getElementById('tradEncrypted').textContent = '🔒 Encrypted';
+            document.getElementById('tradWarning').classList.add('hidden');
+            document.getElementById('tradDecrypted').classList.add('hidden');
+            document.getElementById('tradComputation').classList.add('hidden');
+            document.getElementById('tradResult').classList.add('hidden');
+            document.getElementById('tradCompArrow').classList.add('hidden');
+            document.getElementById('tradResultArrow').classList.add('hidden');
+            
+            // Reset FHE
+            document.getElementById('fheOriginal').textContent = `Data: ${scenario.original}`;
+            document.getElementById('fheEncrypted').textContent = '🔒 Encrypted';
+            document.getElementById('fheSuccess').classList.add('hidden');
+            document.getElementById('fheComputation').classList.add('hidden');
+            document.getElementById('fheResult').classList.add('hidden');
+            document.getElementById('fheDecrypted').classList.add('hidden');
+            document.getElementById('fheResultArrow').classList.add('hidden');
+            document.getElementById('fheDecryptArrow').classList.add('hidden');
+            
+            // Reset Stats
+            updateStats('reset');
+        }
+
+        async function startAnimation() {
+            isAnimating = true;
+            const scenario = scenarios[currentScenario];
+            
+            // Step 1: Encryption phase
+            await sleep(600);
+            
+            // Step 2: Show warnings/success
+            document.getElementById('tradWarning').classList.remove('hidden');
+            document.getElementById('tradWarning').classList.add('fade-in');
+            
+            document.getElementById('fheSuccess').classList.remove('hidden');
+            document.getElementById('fheSuccess').classList.add('fade-in');
+            
+            updateStats('encrypted');
+            await sleep(1500);
+            
+            // Step 3: Traditional must decrypt
+            document.getElementById('tradDecrypted').classList.remove('hidden');
+            document.getElementById('tradDecrypted').classList.add('fade-in');
+            document.getElementById('tradDecrypted').textContent = `Decrypted: ${scenario.original}`;
+            document.getElementById('tradCompArrow').classList.remove('hidden');
+            
+            updateStats('traditional-decrypt');
+            await sleep(1200);
+            
+            // Step 4: Computation phase
+            document.getElementById('tradComputation').classList.remove('hidden');
+            document.getElementById('tradComputation').classList.add('fade-in', 'computing');
+            document.getElementById('tradComputation').textContent = `Computing: ${scenario.operation}`;
+            document.getElementById('tradResultArrow').classList.remove('hidden');
+            
+            document.getElementById('fheComputation').classList.remove('hidden');
+            document.getElementById('fheComputation').classList.add('fade-in', 'computing');
+            document.getElementById('fheComputation').textContent = `🔐 Computing: ${scenario.fheOperation}`;
+            document.getElementById('fheResultArrow').classList.remove('hidden');
+            
+            await sleep(2200);
+            
+            document.getElementById('tradComputation').classList.remove('computing');
+            document.getElementById('fheComputation').classList.remove('computing');
+            
+            // Step 5: Results
+            document.getElementById('tradResult').classList.remove('hidden');
+            document.getElementById('tradResult').classList.add('fade-in');
+            document.getElementById('tradResult').textContent = `Result: ${scenario.result} 🔒`;
+            
+            document.getElementById('fheResult').classList.remove('hidden');
+            document.getElementById('fheResult').classList.add('fade-in');
+            document.getElementById('fheResult').textContent = `Result: 🔒 [encrypted ${scenario.result}]`;
+            document.getElementById('fheDecryptArrow').classList.remove('hidden');
+            
+            await sleep(1200);
+            
+            // Step 6: FHE final decrypt
+            document.getElementById('fheDecrypted').classList.remove('hidden');
+            document.getElementById('fheDecrypted').classList.add('fade-in');
+            document.getElementById('fheDecrypted').textContent = `Decrypted: ${scenario.result} ✨`;
+            
+            updateStats('complete');
+            
+            isAnimating = false;
+        }
+
+        function updateStats(stage) {
+            const scenario = scenarios[currentScenario];
+            
+            if (stage === 'reset') {
+                document.getElementById('statPrivacy').textContent = '0%';
+                document.getElementById('statExposure').textContent = 'Never';
+                document.getElementById('statSecurity').textContent = '128-bit';
+                document.getElementById('statSpeed').textContent = 'Encrypted';
+            } else if (stage === 'encrypted') {
+                document.getElementById('statPrivacy').textContent = 'Protected';
+                document.getElementById('statSecurity').textContent = '128-bit';
+            } else if (stage === 'traditional-decrypt') {
+                document.getElementById('statPrivacy').textContent = scenario.tradPrivacy;
+                document.getElementById('statExposure').textContent = scenario.exposure;
+            } else if (stage === 'complete') {
+                document.getElementById('statPrivacy').textContent = scenario.fhePrivacy;
+                document.getElementById('statExposure').textContent = scenario.fheExposure;
+                document.getElementById('statSpeed').textContent = 'On-Chain';
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>
