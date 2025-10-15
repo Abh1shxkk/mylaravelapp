@@ -58,33 +58,43 @@
     <div class="card-body">
 <form method="GET" action="{{ route('admin.companies.index') }}" class="row g-3" id="company-filter-form">
         <div class="col-md-3">
-          <label for="search" class="form-label">Search</label>
-<input type="text" class="form-control" id="company-search" name="search" value="{{ request('search') }}" placeholder="Name, email, phone..." autocomplete="off">
-        </div>
-        <div class="col-md-2">
-          <label for="status" class="form-label">Status</label>
-          <select class="form-select" id="status" name="status">
-            <option value="">All</option>
-            <option value="active" {{ request('status')==='active' ? 'selected' : '' }}>Active</option>
-            <option value="inactive" {{ request('status')==='inactive' ? 'selected' : '' }}>Inactive</option>
+          <label for="search_field" class="form-label">Search By</label>
+          <select class="form-select" id="search_field" name="search_field">
+            <option value="all" {{ request('search_field', 'all') == 'all' ? 'selected' : '' }}>All Fields</option>
+            <option value="alter_code" {{ request('search_field') == 'alter_code' ? 'selected' : '' }}>Alter Code</option>
+            <option value="name" {{ request('search_field') == 'name' ? 'selected' : '' }}>Name</option>
+            <option value="mobile" {{ request('search_field') == 'mobile' ? 'selected' : '' }}>Mobile</option>
+            <option value="telephone" {{ request('search_field') == 'telephone' ? 'selected' : '' }}>Telephone</option>
+            <option value="address" {{ request('search_field') == 'address' ? 'selected' : '' }}>Address</option>
           </select>
         </div>
-       
-      
-       
+        <div class="col-md-9">
+          <label for="search" class="form-label">Search</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="company-search" name="search" value="{{ request('search') }}" placeholder="Type to search..." autocomplete="off">
+            <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   </div>
-  <div class="table-responsive" id="company-table-wrapper">
+  <div class="table-responsive" id="company-table-wrapper" style="position: relative;">
+    <div id="search-loading" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 999; align-items: center; justify-content: center;">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
     <table class="table align-middle mb-0">
       <thead class="table-light">
         <tr>
           <th>#</th>
+          <th>Alter Code</th>
           <th>Name</th>
           <th>Address</th>
           <th>Email</th>
           <th>Mobile 1</th>
-          <th>Status</th>
           <th class="text-end">Actions</th>
         </tr>
       </thead>
@@ -92,13 +102,11 @@
         @forelse($companies as $company)
           <tr>
             <td>{{ ($companies->currentPage() - 1) * $companies->perPage() + $loop->iteration }}</td>
+            <td>{{ $company->alter_code }}</td>
             <td>{{ $company->name }}</td>
             <td>{{ $company->address }}</td>
             <td>{{ $company->email }}</td>
             <td>{{ $company->mobile_1 }}</td>
-            <td>
-              <span class="badge {{ $company->status ? 'bg-success':'bg-secondary' }}">{{ $company->status ? 'Active':'Inactive' }}</span>
-            </td>
             <td class="text-end">
               <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.companies.show',$company) }}" title="View"><i class="bi bi-eye"></i></a>
               <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.companies.edit',$company) }}"><i class="bi bi-pencil"></i></a>
@@ -109,7 +117,7 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="7" class="text-center text-muted">No data</td></tr>
+          <tr><td colspan="8" class="text-center text-muted">No data</td></tr>
         @endforelse
       </tbody>
     </table>
@@ -191,25 +199,39 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // REST OF YOUR CODE (search, infinite scroll, etc.)
   const searchInput = document.getElementById('company-search');
-  const statusSelect = document.getElementById('status');
+  const clearSearchBtn = document.getElementById('clear-search');
+  const searchFieldSelect = document.getElementById('search_field');
   const filterForm = document.getElementById('company-filter-form');
   const sentinel = document.getElementById('company-sentinel');
   const spinner = document.getElementById('company-spinner');
   const loadText = document.getElementById('company-load-text');
   const tbody = document.getElementById('company-table-body');
   let searchTimeout;
+  let isSearching = false;
 
   function performSearch() {
+    if(isSearching) return;
+    isSearching = true;
+    
     const formData = new FormData(filterForm);
     const params = new URLSearchParams(formData);
     
-    // Delayed footer spinner (avoid instant flash)
-    const footerSpinner = document.getElementById('company-spinner');
-    const footerLoadText = document.getElementById('company-load-text');
-    let spinnerTimer = setTimeout(() => {
-      footerSpinner && footerSpinner.classList.remove('d-none');
-      footerLoadText && (footerLoadText.textContent = 'Loading...');
-    }, 250);
+    // Debug logging
+    console.log('Search params:', {
+      search: formData.get('search'),
+      search_field: formData.get('search_field')
+    });
+    
+    // Show loading spinner
+    const loadingSpinner = document.getElementById('search-loading');
+    if(loadingSpinner) {
+      loadingSpinner.style.display = 'flex';
+    }
+    
+    // Add visual feedback
+    if(searchInput) {
+      searchInput.style.opacity = '0.6';
+    }
     
     fetch(`{{ route('admin.companies.index') }}?${params.toString()}`, {
       headers: {
@@ -218,41 +240,65 @@ document.addEventListener('DOMContentLoaded', function(){
     })
     .then(response => response.text())
     .then(html => {
+      console.log('Response received, parsing...');
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       const newRows = doc.querySelectorAll('#company-table-body tr');
+      console.log('Total rows found:', newRows.length);
+      
       const realRows = Array.from(newRows).filter(tr => {
         const tds = tr.querySelectorAll('td');
-        return !(tds.length === 1 && tr.querySelector('td[colspan]'));
+        const hasColspan = tr.querySelector('td[colspan]');
+        const isRealRow = !(tds.length === 1 && hasColspan);
+        console.log('Row check:', { tdCount: tds.length, hasColspan: !!hasColspan, isRealRow });
+        return isRealRow;
       });
+      
+      console.log('Real rows after filter:', realRows.length);
       
       tbody.innerHTML = '';
       if(realRows.length) {
         realRows.forEach(tr => tbody.appendChild(tr));
+        console.log('Appended', realRows.length, 'rows to tbody');
       } else {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No companies found</td></tr>';
+        console.log('No real rows found, showing empty message');
       }
       
+      // Update footer with pagination info and sentinel
       const newFooter = doc.querySelector('.card-footer');
       const currentFooter = document.querySelector('.card-footer');
       if(newFooter && currentFooter) {
         currentFooter.innerHTML = newFooter.innerHTML;
       }
       
-      if(sentinel) {
+      // Re-query sentinel after footer update (it may have been recreated)
+      const updatedSentinel = document.getElementById('company-sentinel');
+      if(updatedSentinel) {
         const newSentinel = doc.querySelector('#company-sentinel');
-        if(newSentinel) {
-          sentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
-        } else {
-          sentinel.remove();
+        if(newSentinel && newSentinel.getAttribute('data-next-url')) {
+          updatedSentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
         }
       }
+      
+      // Re-setup infinite scroll observer for the updated/new sentinel
+      setupInfiniteScroll();
     })
     .catch(error => {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading data</td></tr>';
     })
     .finally(() => {
-      typeof spinnerTimer !== 'undefined' && clearTimeout(spinnerTimer);
+      isSearching = false;
+      
+      // Hide loading spinner
+      const loadingSpinner = document.getElementById('search-loading');
+      if(loadingSpinner) {
+        loadingSpinner.style.display = 'none';
+      }
+      
+      if(searchInput) {
+        searchInput.style.opacity = '1';
+      }
       const s = document.getElementById('company-spinner');
       const t = document.getElementById('company-load-text');
       s && s.classList.add('d-none');
@@ -260,27 +306,77 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   }
 
+  // Attach debounced keyup on search input (reduced to 300ms for faster response)
   if(searchInput) {
     searchInput.addEventListener('keyup', function() {
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(performSearch, 500);
+      searchTimeout = setTimeout(performSearch, 300);
     });
   }
 
-  if(statusSelect) {
-    $(statusSelect).on('change', performSearch);
+  // Clear search button
+  if(clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', function() {
+      if(searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+        performSearch();
+      }
+    });
+  }
+
+  // Trigger search when search field dropdown changes
+  if(searchFieldSelect) {
+    searchFieldSelect.addEventListener('change', function() {
+      performSearch();
+    });
   }
   
-  if(!sentinel || !tbody) return;
-  
   let isLoading = false;
+  let observer = null;
+  
+  // Function to setup infinite scroll observer
+  function setupInfiniteScroll() {
+    const currentSentinel = document.getElementById('company-sentinel');
+    if(!currentSentinel || !tbody) return;
+    
+    // Disconnect previous observer if exists
+    if(observer) {
+      observer.disconnect();
+    }
+    
+    // Get the scrolling container (.content div)
+    const contentDiv = document.querySelector('.content');
+    
+    // Create new observer with correct root (scrolling container)
+    observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting && !isLoading) {
+          console.log('Sentinel visible, loading more...');
+          loadMore();
+        }
+      });
+    }, { 
+      root: contentDiv, // Watch scrolling within .content div
+      threshold: 0.1,
+      rootMargin: '100px' // Trigger 100px before sentinel is visible
+    });
+    
+    observer.observe(currentSentinel);
+    console.log('Infinite scroll observer setup complete');
+  }
   
   async function loadMore(){
     if(isLoading) return;
-    const nextUrl = sentinel.getAttribute('data-next-url');
+    const currentSentinel = document.getElementById('company-sentinel');
+    if(!currentSentinel) return;
+    
+    const nextUrl = currentSentinel.getAttribute('data-next-url');
     if(!nextUrl) return;
     
     isLoading = true;
+    const spinner = document.getElementById('company-spinner');
+    const loadText = document.getElementById('company-load-text');
     spinner && spinner.classList.remove('d-none');
     loadText && (loadText.textContent = 'Loading...');
     
@@ -305,13 +401,13 @@ document.addEventListener('DOMContentLoaded', function(){
       
       const newSentinel = doc.querySelector('#company-sentinel');
       if(newSentinel){
-        sentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
+        currentSentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
         spinner && spinner.classList.add('d-none');
         loadText && (loadText.textContent = 'Scroll for more');
         isLoading = false;
       } else {
-        observer.disconnect();
-        sentinel.remove();
+        observer && observer.disconnect();
+        currentSentinel.remove();
         spinner && spinner.remove();
         loadText && loadText.remove();
       }
@@ -322,20 +418,12 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }
   
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting && !isLoading){
-        loadMore();
-      }
-    });
-  }, { rootMargin: '100px' });
-  
-  observer.observe(sentinel);
+  // Initial setup of infinite scroll
+  setupInfiniteScroll();
 });
 </script>
 
 
 @endpush
-
 
 

@@ -49,14 +49,7 @@
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">GST Number <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('gst_number') is-invalid @enderror"
-                                        name="gst_number" value="{{ old('gst_number') }}" placeholder="Enter GST Number">
-                                    @error('gst_number')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
+
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Website</label>
                                     <input type="text" class="form-control" name="website" value="{{ old('website') }}"
@@ -77,6 +70,16 @@
                                     @enderror
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label">Notes</label>
+                                    <textarea class="form-control @error('notes') is-invalid @enderror" name="notes"
+                                        rows="3" placeholder="Add any additional notes or remarks here...">{{ old('notes') }}</textarea>
+                                    @error('notes')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -89,8 +92,7 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Contact Person I</label>
-                                    <input type="text" class="form-control" name="contact_person_1"
-                                        value="{{ old('contact_person_1') }}">
+                                    <input type="text" class="form-control" name="contact_person_1" value="{{ old('contact_person_1') }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Mobile 1</label>
@@ -104,8 +106,7 @@
                             <div class="row">
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Contact Person II</label>
-                                    <input type="text" class="form-control" name="contact_person_2"
-                                        value="{{ old('contact_person_2') }}">
+                                    <input type="text" class="form-control" name="contact_person_2" value="{{ old('contact_person_2') }}">
                                 </div>
                                 <div class="col-md-4 mb-3">
                                     <label class="form-label">Mobile 2</label>
@@ -114,6 +115,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Financial Information -->
                     <div class="card mb-4">
@@ -160,9 +162,9 @@
                                         value="{{ old('vat_percent', '0.00') }}">
                                 </div>
                                 <div class="col-md-3 mb-3">
-                                    <label class="form-label">Discount</label>
+                                    <label class="form-label">Discount (Locked)</label>
                                     <input type="number" step="0.01" class="form-control" name="discount"
-                                        value="{{ old('discount', '0.00') }}">
+                                        value="{{ old('discount', '0') }}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -175,75 +177,132 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Expiry</label>
-                                    <input type="text" class="form-control" name="expiry" value="{{ old('expiry', 'N') }}"
-                                        maxlength="1">
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Generic</label>
-                                    <input type="text" class="form-control" name="generic" value="{{ old('generic') }}">
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">D(irect) / I(ndirect)</label>
-                                    <input type="text" class="form-control" name="direct_indirect"
-                                        value="{{ old('direct_indirect') }}" maxlength="1">
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Invoice Print Order</label>
-                                    <input type="number" class="form-control" name="invoice_print_order"
-                                        value="{{ old('invoice_print_order') }}">
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Disallow Expiry After (months)</label>
-                                    <input type="number" class="form-control" name="disallow_expiry_after_months"
-                                        value="{{ old('disallow_expiry_after_months', '0') }}">
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label">Flag</label>
-                                    <input type="text" class="form-control" name="flag" value="{{ old('flag') }}">
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label d-block">F(ixed) / M(aximum)</label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" name="fixed_maximum"
-                                            id="fixed_maximum" {{ old('fixed_maximum') ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="fixed_maximum">Enable</label>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Expiry (Y/N)</label>
+                                        <select class="form-select @error('expiry') is-invalid @enderror" name="expiry">
+                                            <option value="n" {{ old('expiry', 'n') == 'n' ? 'selected' : '' }}>N</option>
+                                            <option value="y" {{ old('expiry') == 'y' ? 'selected' : '' }}>Y</option>
+                                        </select>
+                                        @error('expiry')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Generic (Y/N)</label>
+                                        <select class="form-select @error('generic') is-invalid @enderror" name="generic">
+                                            <option value="n" {{ old('generic', 'n') == 'n' ? 'selected' : '' }}>N</option>
+                                            <option value="y" {{ old('generic') == 'y' ? 'selected' : '' }}>Y</option>
+                                        </select>
+                                        @error('generic')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">D(irect) / I(ndirect)</label>
+                                        <select class="form-select @error('direct_indirect') is-invalid @enderror"
+                                            name="direct_indirect">
+                                            <option value="d" {{ old('direct_indirect', 'd') == 'd' ? 'selected' : '' }}>D
+                                            </option>
+                                            <option value="i" {{ old('direct_indirect') == 'i' ? 'selected' : '' }}>I</option>
+                                        </select>
+                                        @error('direct_indirect')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Invoice Print Order</label>
+                                        <input type="number" class="form-control" name="invoice_print_order"
+                                            value="{{ old('invoice_print_order') }}">
                                     </div>
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label d-block">Surcharge After Dis.</label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" name="surcharge_after_dis_yn"
-                                            id="surcharge_after_dis_yn" {{ old('surcharge_after_dis_yn') ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="surcharge_after_dis_yn">Yes</label>
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Disallow Expiry After (months)</label>
+                                        <input type="number" class="form-control" name="disallow_expiry_after_months"
+                                            value="{{ old('disallow_expiry_after_months', '0') }}">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Flag</label>
+                                        <input type="text" class="form-control" name="flag" value="{{ old('flag') }}">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">F(ixed) / M(aximum)</label>
+                                        <select class="form-select @error('fixed_maximum') is-invalid @enderror"
+                                            name="fixed_maximum" id="fixed_maximum">
+                                            <option value="f" {{ old('fixed_maximum', 'f') == 'f' ? 'selected' : '' }}>F
+                                            </option>
+                                            <option value="m" {{ old('fixed_maximum') == 'm' ? 'selected' : '' }}>M</option>
+                                        </select>
+                                        @error('fixed_maximum')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Surcharge After Dis. (Y/N)</label>
+                                        <select class="form-select @error('surcharge_after_dis_yn') is-invalid @enderror"
+                                            name="surcharge_after_dis_yn" id="surcharge_after_dis_yn">
+                                            <option value="n" {{ old('surcharge_after_dis_yn', 'n') == 'n' ? 'selected' : '' }}>N</option>
+                                            <option value="y" {{ old('surcharge_after_dis_yn') == 'y' ? 'selected' : '' }}>Y
+                                            </option>
+                                        </select>
+                                        @error('surcharge_after_dis_yn')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label d-block">Add Surcharge</label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" name="add_surcharge_yn"
-                                            id="add_surcharge_yn" {{ old('add_surcharge_yn') ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="add_surcharge_yn">Yes</label>
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Add Surcharge (Y/N)</label>
+                                        <select class="form-select @error('add_surcharge_yn') is-invalid @enderror"
+                                            name="add_surcharge_yn" id="add_surcharge_yn">
+                                            <option value="n" {{ old('add_surcharge_yn', 'n') == 'n' ? 'selected' : '' }}>N
+                                            </option>
+                                            <option value="y" {{ old('add_surcharge_yn') == 'y' ? 'selected' : '' }}>Y
+                                            </option>
+                                        </select>
+                                        @error('add_surcharge_yn')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Inclusive (Y/N)</label>
+                                        <select class="form-select @error('inclusive_yn') is-invalid @enderror"
+                                            name="inclusive_yn" id="inclusive_yn">
+                                            <option value="n" {{ old('inclusive_yn', 'n') == 'n' ? 'selected' : '' }}>N
+                                            </option>
+                                            <option value="y" {{ old('inclusive_yn') == 'y' ? 'selected' : '' }}>Y</option>
+                                        </select>
+                                        @error('inclusive_yn')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Lock AIOCD (Y/N)</label>
+                                        <select class="form-select @error('lock_aiocd') is-invalid @enderror"
+                                            name="lock_aiocd">
+                                            <option value="n" {{ old('lock_aiocd', 'n') == 'n' ? 'selected' : '' }}>N</option>
+                                            <option value="y" {{ old('lock_aiocd') == 'y' ? 'selected' : '' }}>Y</option>
+                                        </select>
+                                        @error('lock_aiocd')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Lock IMS (Y/N)</label>
+                                        <select class="form-select @error('lock_ims') is-invalid @enderror" name="lock_ims">
+                                            <option value="n" {{ old('lock_ims', 'n') == 'n' ? 'selected' : '' }}>N</option>
+                                            <option value="y" {{ old('lock_ims') == 'y' ? 'selected' : '' }}>Y</option>
+                                        </select>
+                                        @error('lock_ims')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label d-block">Inclusive</label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" name="inclusive_yn"
-                                            id="inclusive_yn" {{ old('inclusive_yn') ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="inclusive_yn">Yes</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 mb-3">
-                                    <label class="form-label d-block">Status</label>
-                                    <div class="form-check form-switch mt-2">
-                                        <input class="form-check-input" type="checkbox" name="status" id="status" {{ old('status', true) ? 'checked' : '' }}>
-                                        <label class="form-check-label" for="status">Active</label>
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Status (max 5 chars)</label>
+                                        <input type="text" maxlength="5" class="form-control" name="status" id="status"
+                                            value="{{ old('status') }}" placeholder="e.g. ACTV">
                                     </div>
                                 </div>
                             </div>

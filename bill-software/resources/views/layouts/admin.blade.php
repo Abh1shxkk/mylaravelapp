@@ -1021,7 +1021,7 @@
     </div>
 
     <!-- Optional toast container for AJAX messages -->
-    <div id="ajaxToastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1060;"></div>
+    <div id="ajaxToastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1060;"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {

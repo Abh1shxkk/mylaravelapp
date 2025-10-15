@@ -37,4 +37,60 @@ class InvoiceItem extends Model
     {
         return $this->belongsTo(Item::class, 'product_id');
     }
+
+    // Accessors for form compatibility
+    public function getItemIdAttribute()
+    {
+        return $this->product_id;
+    }
+
+    public function getCodeAttribute()
+    {
+        return $this->item ? $this->item->code : '';
+    }
+
+    public function getDescriptionAttribute()
+    {
+        return $this->product_description;
+    }
+
+    public function getQtyAttribute()
+    {
+        return $this->quantity;
+    }
+
+    public function getFreeQtyAttribute()
+    {
+        return 0; // Default value since this column doesn't exist in DB
+    }
+
+    public function getRateAttribute()
+    {
+        return $this->unit_price;
+    }
+
+    public function getDiscountAttribute()
+    {
+        return $this->discount_percent;
+    }
+
+    public function getMrpAttribute()
+    {
+        return $this->item ? $this->item->Mrp : 0;
+    }
+
+    public function getGstAttribute()
+    {
+        return $this->tax_rate;
+    }
+
+    public function getBatchAttribute()
+    {
+        return $this->item ? $this->item->Batchcode : '';
+    }
+
+    public function getExpiryAttribute()
+    {
+        return $this->item ? $this->item->Expiry : null;
+    }
 }

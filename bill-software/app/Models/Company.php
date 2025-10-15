@@ -28,7 +28,6 @@ class Company extends Model
         'dis_on_sale_percent',
         'min_gp',
         'pur_tax',
-        'gst_number',
         'sale_tax',
         'generic',
         'invoice_print_order',
@@ -37,11 +36,14 @@ class Company extends Model
         'add_surcharge_yn',
         'vat_percent',
         'inclusive_yn',
+        'lock_aiocd',
+        'lock_ims',
         'disallow_expiry_after_months',
         'fixed_maximum',
         'discount',
         'flag',
         'status',
+        'notes',
         'is_deleted',
         'deleted_at'
     ];
