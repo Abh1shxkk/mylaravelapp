@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\InvoiceController;
+use App\Http\Controllers\Admin\HsnCodeController;
 use App\Http\Controllers\ProfileController;
 
 // Auth routes
@@ -29,6 +30,7 @@ Route::middleware(['admin'])->group(function () {
         Route::resource('items', ItemController::class);
         Route::resource('suppliers', SupplierController::class);
         Route::resource('invoices', InvoiceController::class);
+        Route::resource('hsn-codes', HsnCodeController::class);
         Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
         Route::get('/api/countries', [CustomerController::class, 'getCountries'])->name('api.countries');
         Route::get('/api/states/{country}', [CustomerController::class, 'getStates'])->name('api.states');

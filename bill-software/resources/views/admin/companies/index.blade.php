@@ -135,10 +135,6 @@
     @endif
   </div>
 </div>
-<!-- Scroll to Top Button -->
-<button id="scrollToTop" type="button" title="Scroll to top" onclick="scrollToTopNow()" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
-  <i class="bi bi-arrow-up"></i>
-</button>
 
 @endsection
 
@@ -146,57 +142,7 @@
 @push('scripts')
 
 <script>
-// GLOBAL FUNCTION for smooth scroll to top
-function scrollToTopNow() {
-  console.log('Scrolling to top...');
-  
-  // Main content scrollable container
-  const contentDiv = document.querySelector('.content');
-  if(contentDiv) {
-    // Smooth scroll with animation
-    contentDiv.scrollTo({ 
-      top: 0, 
-      behavior: 'smooth' 
-    });
-  }
-  
-  // Fallback for window scroll (bhi smooth)
-  window.scrollTo({ 
-    top: 0, 
-    behavior: 'smooth' 
-  });
-  
-  console.log('Smooth scrolling...');
-}
-
 document.addEventListener('DOMContentLoaded', function(){
-  
-  const scrollBtn = document.getElementById('scrollToTop');
-  const contentDiv = document.querySelector('.content');
-  
-  if(scrollBtn && contentDiv) {
-    // Show/hide button based on .content scroll
-    contentDiv.addEventListener('scroll', function() {
-      const scrollPos = contentDiv.scrollTop;
-      
-      if (scrollPos > 200) {
-        scrollBtn.style.display = 'flex';
-        scrollBtn.style.opacity = '1';
-        scrollBtn.style.visibility = 'visible';
-      } else {
-        scrollBtn.style.opacity = '0';
-        scrollBtn.style.visibility = 'hidden';
-      }
-    });
-    
-    // Initial check
-    if(contentDiv.scrollTop > 200) {
-      scrollBtn.style.display = 'flex';
-      scrollBtn.style.opacity = '1';
-      scrollBtn.style.visibility = 'visible';
-    }
-  }
-
   // REST OF YOUR CODE (search, infinite scroll, etc.)
   const searchInput = document.getElementById('company-search');
   const clearSearchBtn = document.getElementById('clear-search');

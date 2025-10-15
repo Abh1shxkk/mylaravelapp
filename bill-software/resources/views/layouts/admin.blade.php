@@ -683,6 +683,61 @@
             transform: scale(1);
             opacity: 0.9;
         }
+
+        /* Global Scroll to Top Button - Fixed positioning */
+        #scrollToTop {
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            z-index: 10000 !important;
+            border-radius: 50% !important;
+            width: 50px !important;
+            height: 50px !important;
+            background: #0d6efd !important;
+            color: #fff !important;
+            border: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            line-height: 1 !important;
+        }
+
+        #scrollToTop:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) !important;
+            background: #0b5ed7 !important;
+        }
+
+        #scrollToTop:active {
+            transform: translateY(-1px) !important;
+        }
+
+        #scrollToTop i {
+            font-size: 22px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* Show state for scroll to top button */
+        #scrollToTop.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        }
+
+        #scrollToTop.hide {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
     </style>
     @stack('styles')
     @vite(['resources/js/app.js'])
@@ -774,6 +829,22 @@
 
                 <div class="mt-2">
                     <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuHsnCodes" style="background:transparent;">
+                        <i class="bi bi-upc-scan me-2"></i> <span class="label">HSN Master</span>
+                    </button>
+                    <div class="collapse" id="menuHsnCodes">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.hsn-codes.create') }}">
+                            <span class="label">Add HSN Code</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.hsn-codes.index') }}">
+                            <span class="label">All HSN Codes</span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
                         data-bs-toggle="collapse" data-bs-target="#menuInvoices" style="background:transparent;">
                         <i class="bi bi-receipt-cutoff me-2"></i> <span class="label">Invoices</span>
                     </button>
@@ -822,12 +893,58 @@
         @include('layouts.footer')
     </div>
 
+    <!-- Global Scroll to Top Button -->
+    <button id="scrollToTop" type="button" title="Scroll to top" onclick="scrollToTopNow()">
+        <i class="bi bi-arrow-up"></i>
+    </button>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- jQuery (required for Select2) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        // Global function for smooth scroll to top
+        function scrollToTopNow() {
+            const contentDiv = document.querySelector('.content');
+            if (contentDiv) {
+                contentDiv.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Global scroll to top button handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const scrollBtn = document.getElementById('scrollToTop');
+            const contentDiv = document.querySelector('.content');
+            
+            if (scrollBtn && contentDiv) {
+                contentDiv.addEventListener('scroll', function() {
+                    const y = contentDiv.scrollTop;
+                    if (y > 200) {
+                        scrollBtn.classList.add('show');
+                        scrollBtn.classList.remove('hide');
+                    } else {
+                        scrollBtn.classList.add('hide');
+                        scrollBtn.classList.remove('show');
+                    }
+                });
+            }
+            
+            if (scrollBtn) {
+                window.addEventListener('scroll', function() {
+                    const y = window.scrollY || document.documentElement.scrollTop;
+                    if (y > 200) {
+                        scrollBtn.classList.add('show');
+                        scrollBtn.classList.remove('hide');
+                    } else {
+                        scrollBtn.classList.add('hide');
+                        scrollBtn.classList.remove('show');
+                    }
+                });
+            }
+        });
+
         (function () {
             const btn = document.getElementById('sidebarToggle');
             const sidebar = document.querySelector('.sidebar');

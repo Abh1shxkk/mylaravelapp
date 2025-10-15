@@ -96,10 +96,6 @@
     @endif
   </div>
 </div>
-<!-- Scroll to Top Button -->
-<button id="scrollToTop" type="button" title="Scroll to top" onclick="scrollToTopNow()" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; border-radius: 50%; width: 50px; height: 50px; background: #0d6efd; color: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; visibility: hidden;">
-  <i class="bi bi-arrow-up"></i>
-</button>
 @endsection
 
 @push('scripts')
@@ -113,43 +109,6 @@ document.addEventListener('DOMContentLoaded', function(){
   let searchTimeout;
   let isLoading = false;
   let observer = null;
-
-  // Scroll to Top function and visibility handlers
-  function scrollToTopNow() {
-    const contentDiv = document.querySelector('.content');
-    if(contentDiv) {
-      contentDiv.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-  window.scrollToTopNow = scrollToTopNow;
-
-  const scrollBtn = document.getElementById('scrollToTop');
-  const contentDiv = document.querySelector('.content');
-  if(scrollBtn && contentDiv) {
-    contentDiv.addEventListener('scroll', function(){
-      const y = contentDiv.scrollTop;
-      if (y > 200) {
-        scrollBtn.style.opacity = '1';
-        scrollBtn.style.visibility = 'visible';
-      } else {
-        scrollBtn.style.opacity = '0';
-        scrollBtn.style.visibility = 'hidden';
-      }
-    });
-  }
-  if(scrollBtn) {
-    window.addEventListener('scroll', function(){
-      const y = window.scrollY || document.documentElement.scrollTop;
-      if (y > 200) {
-        scrollBtn.style.opacity = '1';
-        scrollBtn.style.visibility = 'visible';
-      } else {
-        scrollBtn.style.opacity = '0';
-        scrollBtn.style.visibility = 'hidden';
-      }
-    });
-  }
 
   // Real-time search implementation
   function performSearch() {

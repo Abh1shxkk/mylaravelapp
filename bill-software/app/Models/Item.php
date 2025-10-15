@@ -7,8 +7,45 @@ use Illuminate\Database\Eloquent\Model;
 class Item extends Model
 {
     protected $fillable = [
-        'code','Barcode','name','Compcode','Compname','Pack','Unit','Location','Expiry','Generic','Saltcode','Strength','saltcode1','Strength1','saltcode2','Strength2','saltcode3','Strength3','Saltcode4','Strength4','Saltcode5','Strength5','Substitute','Saltno','Prate','Tsr','Psc','ptax','Excise','Scm1','scm2','Srate','Sc','Saletype','Stax','Wsrate','Add_sc','Add_tsr','Costrate','opqty','Clqty','status','Vdt','Batchcode','cname_bc','Defqty','BarcodeQty','splrate','Mrp','Ssc','WsNet','SplNet','Hscm','Box','CommonItem','Sscm1','FDis','Sscm2','FDisP','currentScm','ScmFrom','ScmTo','CurrScm1','CurrScm2','TrimName','PresReq','Division','QScm','SconMrp','VAT','Margin','Inclusive','ItemCat','Gdn','PRateCase','PRateBox','Desc1','Desc2','MinQty','MaxQty','ItCase','TRate','Wr','Pic','Mfg','TempOpqty','TempClqty','TempAmt','TempAmt1','TempAmt2','TaxonMrp','ScmPer','IWeight','SubStrenght','ItemRef','MaxInvQty','MaxQtyWr','OpFreeQty','VATonSrate','Exon','ExPer','UnitType','MfgQty','mTag','DisContinue','MfgBy','Vol','VDisP','VDisS','FDisWR','LastYearCost','OpAddQty','SaleLessQty','SplDisQty','SplDisPer','MinGP','LockScm','FullName','RateLock','MinRate','PurExciseAsRate','PurNetRate','CostWFQ','LockBilling','SameBatchCost','EsCode','FdisPWS','ItemType','ItemGroup','HSNCode','CGST','SGST','IGST','GSTCess','IucCode','Flag','miscsettings','SyncMark','is_deleted','discount_amount','discount_percent'
+        // Company Information
+        'company_id', 'company_short_name',
+        
+        // Basic Item Information
+        'name', 'packing', 'mfg_by', 'location', 'status', 'schedule', 'box_qty', 'case_qty',
+        'bar_code', 'division', 'flag',
+        
+        // Header Section - Part 1
+        'unit', 'unit_type', 'min_level', 'max_level', 'narcotic_flag',
+        
+        // Sale Details Section
+        's_rate', 'mrp', 'ws_rate', 'ws_net_toggle', 'spl_rate', 'spl_net_toggle', 'scheme_plus', 'scheme_minus', 'min_gp',
+        
+        // Purchase Details Section
+        'pur_rate', 'cost', 'pur_scheme_plus', 'pur_scheme_minus', 'nr',
+        
+        // GST Details Section
+        'hsn_code', 'cgst_percent', 'sgst_percent', 'igst_percent', 'cess_percent',
+        
+        // Other Details Section
+        'vat_percent', 'fixed_dis', 'fixed_dis_percent', 'fixed_dis_type', 'expiry_flag', 'inclusive_flag', 'generic_flag',
+        'h_scm_flag', 'q_scm_flag', 'locks_flag', 'max_inv_qty_value', 'max_inv_qty_new', 'weight_new', 'bar_code_flag',
+        'def_qty_flag', 'volume_new', 'comp_name_bc_new', 'dpc_item_flag', 'lock_sale_flag', 'max_min_flag',
+        'mrp_for_sale_new',
+        
+        // Bottom Section
+        'commodity', 'current_scheme_flag', 'from_date', 'to_date', 'scheme_plus_value', 'scheme_minus_value', 'category', 'category_2', 'upc',
+        
+        // System fields
+        'is_deleted'
     ];
+
+    /**
+     * Relationship with Company
+     */
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
 
     protected $casts = [
         // All fields are now VARCHAR to accept various data formats
