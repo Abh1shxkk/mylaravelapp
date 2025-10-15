@@ -108,9 +108,9 @@
         </div>
       </div>
 
-      <!-- Address & Account Section -->
+      <!-- Address & Contact Section -->
       <div class="mb-4">
-        <h5 class="border-bottom pb-2 mb-3"><i class="bi bi-geo-alt me-2"></i>Address & Account Details</h5>
+        <h5 class="border-bottom pb-2 mb-3"><i class="bi bi-geo-alt me-2"></i>Address & Contact Details</h5>
         
         <div class="row">
           <div class="col-md-6 mb-3">
@@ -123,6 +123,17 @@
           </div>
 
           <div class="col-md-6 mb-3">
+            <label for="telephone" class="form-label">Telephone</label>
+            <input type="text" class="form-control @error('telephone') is-invalid @enderror" 
+                   id="telephone" name="telephone" value="{{ old('telephone', $cashBankBook->telephone) }}">
+            @error('telephone')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
             <label for="address1" class="form-label">Address 1</label>
             <textarea class="form-control @error('address1') is-invalid @enderror" 
                       id="address1" name="address1" rows="2">{{ old('address1', $cashBankBook->address1) }}</textarea>
@@ -130,8 +141,91 @@
             <div class="invalid-feedback">{{ $message }}</div>
             @enderror
           </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="email" class="form-label">E-Mail</label>
+            <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                   id="email" name="email" value="{{ old('email', $cashBankBook->email) }}">
+            @error('email')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
         </div>
 
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <label for="birth_day" class="form-label">B' Day</label>
+            <input type="date" class="form-control @error('birth_day') is-invalid @enderror" 
+                   id="birth_day" name="birth_day" value="{{ old('birth_day', $cashBankBook->birth_day) }}">
+            @error('birth_day')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+
+          <div class="col-md-3 mb-3">
+            <label for="anniversary_day" class="form-label">A' Day</label>
+            <input type="date" class="form-control @error('anniversary_day') is-invalid @enderror" 
+                   id="anniversary_day" name="anniversary_day" value="{{ old('anniversary_day', $cashBankBook->anniversary_day) }}">
+            @error('anniversary_day')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="fax" class="form-label">Fax</label>
+            <input type="text" class="form-control @error('fax') is-invalid @enderror" 
+                   id="fax" name="fax" value="{{ old('fax', $cashBankBook->fax) }}">
+            @error('fax')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="contact_person_1" class="form-label">Contact Person I</label>
+            <input type="text" class="form-control @error('contact_person_1') is-invalid @enderror" 
+                   id="contact_person_1" name="contact_person_1" value="{{ old('contact_person_1', $cashBankBook->contact_person_1) }}">
+            @error('contact_person_1')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="mobile_1" class="form-label">Mobile</label>
+            <input type="text" class="form-control @error('mobile_1') is-invalid @enderror" 
+                   id="mobile_1" name="mobile_1" value="{{ old('mobile_1', $cashBankBook->mobile_1) }}">
+            @error('mobile_1')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="contact_person_2" class="form-label">Contact Person II</label>
+            <input type="text" class="form-control @error('contact_person_2') is-invalid @enderror" 
+                   id="contact_person_2" name="contact_person_2" value="{{ old('contact_person_2', $cashBankBook->contact_person_2) }}">
+            @error('contact_person_2')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label for="mobile_2" class="form-label">Mobile</label>
+            <input type="text" class="form-control @error('mobile_2') is-invalid @enderror" 
+                   id="mobile_2" name="mobile_2" value="{{ old('mobile_2', $cashBankBook->mobile_2) }}">
+            @error('mobile_2')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Details Section -->
+      <div class="mb-4">
+        <h5 class="border-bottom pb-2 mb-3"><i class="bi bi-bank me-2"></i>Account Details</h5>
+        
         <div class="row">
           <div class="col-md-6 mb-3">
             <label for="account_no" class="form-label">Account No</label>

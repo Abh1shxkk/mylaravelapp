@@ -14,7 +14,7 @@
     <style>
         :root {
             --header-h: 56px;
-            --footer-h: 56px;
+            --footer-h: 24px;
         }
 
         body {
@@ -36,18 +36,20 @@
         }
 
         .sidebar {
-            background: #0d1b2a;
+            background: #2c3e50;
             color: #fff;
             position: relative;
             top: 0;
             left: 0;
             height: 100vh;
-            overflow-y: auto;
-            overflow-x: hidden;
+            overflow: hidden; /* Changed to hidden to control scroll in nav section */
             transition: width 0.3s ease, transform .25s ease;
             will-change: transform, width;
             width: 260px;
             grid-area: sidebar;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
         }
 
         .sidebar a {
@@ -62,12 +64,14 @@
 
         .app-header {
             grid-area: header;
-            z-index: 1;
+            z-index: 10;
+            position: relative;
         }
 
         .app-footer {
             grid-area: footer;
             z-index: 1;
+            position: relative;
         }
 
         .content {
@@ -76,6 +80,8 @@
             height: auto;
             padding-bottom: 1rem;
             grid-area: main;
+            z-index: 10;
+            position: relative;
         }
 
         /* Sidebar header with toggle button */
@@ -115,24 +121,51 @@
             transition: transform 0.3s ease;
         }
 
+        .sidebar-header {
+            flex-shrink: 0; /* Don't shrink header */
+        }
+
+        .sidebar-nav-container {
+            flex: 1; /* Take remaining space */
+            overflow-y: auto; /* Make scrollable */
+            overflow-x: hidden;
+            padding-bottom: 1rem;
+        }
+
+        .sidebar-nav-container::-webkit-scrollbar {
+            width: 0px; /* Hide scrollbar */
+            background: transparent;
+        }
+
+        .sidebar-nav-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-nav-container::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+
+        /* For Firefox */
+        .sidebar-nav-container {
+            scrollbar-width: none; /* Hide scrollbar */
+        }
+
         .profile {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: .75rem;
+            flex-shrink: 0; /* Don't shrink profile */
+            padding: 0.5rem 0.75rem;
             border-top: 1px solid rgba(255, 255, 255, .1);
-            height: 60px;
+            height: 50px;
+            z-index: 1000; /* Higher z-index than menu items */
+            background: #2c3e50; /* Ensure background covers menu items */
+            display: flex;
+            align-items: center;
         }
 
         .profile .dropdown-menu {
             position: absolute !important;
-            inset: auto auto 56px 0 !important;
+            inset: auto auto 50px 0 !important;
             transition: all 0.3s ease;
-        }
-
-        .sidebar nav.nav {
-            padding-bottom: 68px;
+            z-index: 1001; /* Even higher for dropdown */
         }
 
         /* Label transitions */
@@ -186,8 +219,9 @@
                 height: 100vh !important;
                 height: 100dvh !important;
                 /* Dynamic viewport height for mobile browsers */
-                overflow-y: auto;
-                overflow-x: hidden;
+                overflow: hidden; /* Keep consistent with desktop */
+                display: flex;
+                flex-direction: column;
             }
 
             .sidebar.show {
@@ -241,6 +275,10 @@
 
             .collapsed .sidebar {
                 width: 72px;
+            }
+
+            .collapsed .sidebar .sidebar-nav-container {
+                overflow: hidden; /* Hide scrollbar when collapsed */
             }
 
             .collapsed .sidebar .label {
@@ -401,7 +439,6 @@
                 min-height: 36px !important;
             }
 
-            /* MOBILE FIX - Force horizontal scroll */
             .table-responsive {
                 overflow-x: auto !important;
                 overflow-y: visible;
@@ -576,6 +613,7 @@
                 left: 72px !important;
                 bottom: 0 !important;
                 min-width: 200px !important;
+                inset: auto auto 0 72px !important;
             }
 
             /* Collapse button icons */
@@ -738,6 +776,16 @@
             visibility: hidden !important;
             pointer-events: none !important;
         }
+
+        .app-footer .py-3 {
+            padding-top: 12px !important;
+            padding-bottom: 12px !important;
+        }
+
+         .app-header .py-3 {
+            padding-top: 11px !important;
+            padding-bottom: 11px !important;
+        }
     </style>
     @stack('styles')
     @vite(['resources/js/app.js'])
@@ -757,7 +805,8 @@
                 </div>
             </div>
 
-            <nav class="nav flex-column small">
+            <div class="sidebar-nav-container">
+                <nav class="nav flex-column small">
                 <a class="nav-link text-white d-flex align-items-center px-2" href="/admin/dashboard">
                     <i class="bi bi-speedometer2 me-2"></i><span class="label">Dashboard</span>
                 </a>
@@ -924,16 +973,153 @@
                         </a>
                     </div>
                 </div>
-            </nav>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuSalesMen" style="background:transparent;">
+                        <i class="bi bi-person-badge me-2"></i> <span class="label">Sales Man</span>
+                    </button>
+                    <div class="collapse" id="menuSalesMen">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.sales-men.create') }}">
+                            <span class="label">Add Sales Man</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.sales-men.index') }}">
+                            <span class="label">All Sales Men</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuAreas" style="background:transparent;">
+                        <i class="bi bi-geo-alt me-2"></i> <span class="label">Area</span>
+                    </button>
+                    <div class="collapse" id="menuAreas">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.areas.create') }}">
+                            <span class="label">Add Area</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.areas.index') }}">
+                            <span class="label">All Areas</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuRoutes" style="background:transparent;">
+                        <i class="bi bi-signpost me-2"></i> <span class="label">Route</span>
+                    </button>
+                    <div class="collapse" id="menuRoutes">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.routes.create') }}">
+                            <span class="label">Add Route</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.routes.index') }}">
+                            <span class="label">All Routes</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuStates" style="background:transparent;">
+                        <i class="bi bi-map me-2"></i> <span class="label">State</span>
+                    </button>
+                    <div class="collapse" id="menuStates">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.states.create') }}">
+                            <span class="label">Add State</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.states.index') }}">
+                            <span class="label">All States</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuAreaManagers" style="background:transparent;">
+                        <i class="bi bi-person-workspace me-2"></i> <span class="label">Area Mgr.</span>
+                    </button>
+                    <div class="collapse" id="menuAreaManagers">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.area-managers.create') }}">
+                            <span class="label">Add Area Manager</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.area-managers.index') }}">
+                            <span class="label">All Area Managers</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuRegionalManagers" style="background:transparent;">
+                        <i class="bi bi-people-fill me-2"></i> <span class="label">Regn.mgr</span>
+                    </button>
+                    <div class="collapse" id="menuRegionalManagers">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.regional-managers.create') }}">
+                            <span class="label">Add Regional Manager</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.regional-managers.index') }}">
+                            <span class="label">All Regional Managers</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuMarketingManagers" style="background:transparent;">
+                        <i class="bi bi-megaphone me-2"></i> <span class="label">Mkt.mgr</span>
+                    </button>
+                    <div class="collapse" id="menuMarketingManagers">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.marketing-managers.create') }}">
+                            <span class="label">Add Marketing Manager</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.marketing-managers.index') }}">
+                            <span class="label">All Marketing Managers</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuDivisionalManagers" style="background:transparent;">
+                        <i class="bi bi-diagram-3 me-2"></i> <span class="label">D.c.mgr</span>
+                    </button>
+                    <div class="collapse" id="menuDivisionalManagers">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.divisional-managers.create') }}">
+                            <span class="label">Add Divisional Manager</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.divisional-managers.index') }}">
+                            <span class="label">All Divisional Managers</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuCountryManagers" style="background:transparent;">
+                        <i class="bi bi-globe me-2"></i> <span class="label">C.mgr</span>
+                    </button>
+                    <div class="collapse" id="menuCountryManagers">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.country-managers.create') }}">
+                            <span class="label">Add Country Manager</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.country-managers.index') }}">
+                            <span class="label">All Country Managers</span>
+                        </a>
+                    </div>
+                </div>
+
+                </nav>
+            </div>
 
             <div class="profile">
-                <div class="dropup">
-                    <button class="btn w-100 d-flex align-items-center text-white p-0" data-bs-toggle="dropdown"
-                        style="background:transparent;border:none;">
+                <div class="dropup w-100">
+                    <button class="btn w-100 d-flex align-items-center text-white" data-bs-toggle="dropdown"
+                        style="background:transparent;border:none;padding:0.25rem 0;height:100%;">
                         <img src="{{ auth()->user()->profile_picture ? asset(auth()->user()->profile_picture) : 'https://i.pravatar.cc/32' }}"
-                            class="rounded-circle me-2" width="32" height="32" alt="profile">
-                        <span class="flex-grow-1 text-truncate label text-start">{{ auth()->user()->full_name }}</span>
-                        <i class="bi bi-chevron-up ms-auto"></i>
+                            class="rounded-circle me-2" width="28" height="28" alt="profile">
+                        <span class="flex-grow-1 text-truncate label text-start small">{{ auth()->user()->full_name }}</span>
+                        <i class="bi bi-chevron-up ms-auto small"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-dark">
                         <li><a class="dropdown-item" href="{{ route('profile.settings') }}"><i

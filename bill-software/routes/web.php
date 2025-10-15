@@ -13,6 +13,15 @@ use App\Http\Controllers\Admin\CashBankBookController;
 use App\Http\Controllers\Admin\SaleLedgerController;
 use App\Http\Controllers\Admin\PurchaseLedgerController;
 use App\Http\Controllers\Admin\AllLedgerController;
+use App\Http\Controllers\Admin\SalesManController;
+use App\Http\Controllers\Admin\AreaController;
+use App\Http\Controllers\Admin\RouteController;
+use App\Http\Controllers\Admin\StateController;
+use App\Http\Controllers\Admin\AreaManagerController;
+use App\Http\Controllers\Admin\RegionalManagerController;
+use App\Http\Controllers\Admin\MarketingManagerController;
+use App\Http\Controllers\Admin\DivisionalManagerController;
+use App\Http\Controllers\Admin\CountryManagerController;
 use App\Http\Controllers\ProfileController;
 
 // Auth routes
@@ -39,10 +48,22 @@ Route::middleware(['admin'])->group(function () {
         
         // Ledger Routes
         Route::get('all-ledger', [AllLedgerController::class, 'index'])->name('all-ledger.index');
+        Route::get('all-ledger/details', [AllLedgerController::class, 'getLedgerDetails'])->name('all-ledger.details');
         Route::resource('general-ledger', GeneralLedgerController::class);
         Route::resource('cash-bank-books', CashBankBookController::class);
         Route::resource('sale-ledger', SaleLedgerController::class);
         Route::resource('purchase-ledger', PurchaseLedgerController::class);
+        
+        // Sales & Management Routes
+        Route::resource('sales-men', SalesManController::class);
+        Route::resource('areas', AreaController::class);
+        Route::resource('routes', RouteController::class);
+        Route::resource('states', StateController::class);
+        Route::resource('area-managers', AreaManagerController::class);
+        Route::resource('regional-managers', RegionalManagerController::class);
+        Route::resource('marketing-managers', MarketingManagerController::class);
+        Route::resource('divisional-managers', DivisionalManagerController::class);
+        Route::resource('country-managers', CountryManagerController::class);
         
         Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
         Route::get('/api/countries', [CustomerController::class, 'getCountries'])->name('api.countries');

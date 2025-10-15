@@ -71,13 +71,13 @@
       </div>
     </div>
 
-    <!-- Address & Account Details Section -->
+    <!-- Address & Contact Details Section -->
     <div class="card shadow-sm border-0 rounded-lg mb-4">
       <div class="card-body p-4">
         <div class="section-card mb-5">
           <div class="section-header mb-4">
-            <i class="bi bi-geo-alt text-primary me-2"></i>
-            <h5 class="mb-0">Address & Account Details</h5>
+            <i class="bi bi-geo-alt text-success me-2"></i>
+            <h5 class="mb-0">Address & Contact Details</h5>
           </div>
           <div class="row g-4">
             <div class="col-12">
@@ -92,6 +92,74 @@
                 <div class="fw-semibold" style="white-space: pre-wrap;">{{ $cashBankBook->address1 ?? '-' }}</div>
               </div>
             </div>
+            <div class="col-md-6">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">Telephone:</label>
+                <div class="fw-semibold">{{ $cashBankBook->telephone ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">E-Mail:</label>
+                <div class="fw-semibold">{{ $cashBankBook->email ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">Fax:</label>
+                <div class="fw-semibold">{{ $cashBankBook->fax ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">B' Day:</label>
+                <div class="fw-semibold">{{ $cashBankBook->birth_day ? $cashBankBook->birth_day->format('M d, Y') : '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">A' Day:</label>
+                <div class="fw-semibold">{{ $cashBankBook->anniversary_day ? $cashBankBook->anniversary_day->format('M d, Y') : '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">Contact Person I:</label>
+                <div class="fw-semibold">{{ $cashBankBook->contact_person_1 ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">Mobile 1:</label>
+                <div class="fw-semibold">{{ $cashBankBook->mobile_1 ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">Contact Person II:</label>
+                <div class="fw-semibold">{{ $cashBankBook->contact_person_2 ?? '-' }}</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="detail-item">
+                <label class="text-muted small mb-1">Mobile 2:</label>
+                <div class="fw-semibold">{{ $cashBankBook->mobile_2 ?? '-' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Details Section -->
+    <div class="card shadow-sm border-0 rounded-lg mb-4">
+      <div class="card-body p-4">
+        <div class="section-card mb-5">
+          <div class="section-header mb-4">
+            <i class="bi bi-bank text-info me-2"></i>
+            <h5 class="mb-0">Account Details</h5>
+          </div>
+          <div class="row g-4">
             <div class="col-md-6">
               <div class="detail-item">
                 <label class="text-muted small mb-1">Account No:</label>

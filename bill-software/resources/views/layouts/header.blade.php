@@ -1,6 +1,6 @@
-<nav id="appHeader" class="navbar navbar-expand-lg navbar-dark app-header" style="background-color:#0d1b2a;">
+<nav id="appHeader" class="navbar navbar-expand-lg navbar-light app-header" style="background-color: white; border-bottom: 1px solid #dee2e6;">
   <div class="container-fluid">
-    <button class="btn btn-outline-light me-2" id="headerSidebarToggle" aria-label="Toggle sidebar">
+    <button class="btn btn-outline-dark me-2" id="headerSidebarToggle" aria-label="Toggle sidebar">
       <i class="bi bi-list"></i>
     </button>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topbarNav"
@@ -47,7 +47,7 @@
             <li><a class="dropdown-item" href="#">Misc. Transaction Reports</a></li>
             <li><a class="dropdown-item" href="#">Breakage/Expiry Reports</a></li>
             <li><a class="dropdown-item" href="#">Receipt/Payment Reports</a></li>
-            <li><a class="dropdown-item" href="#">FinancialReports/a></li>
+            <li><a class="dropdown-item" href="#">FinancialReports</a></li>
             <li><a class="dropdown-item" href="#">Other Reports</a></li>
             <li><a class="dropdown-item" href="#">Label Generation</a></li>
             <li><a class="dropdown-item" href="#">GST Reports</a></li>
@@ -190,35 +190,32 @@
     padding-bottom: 1rem;
     grid-area: main;
     position: relative;
-    z-index: 1; /* Content ko lower z-index do */
+    z-index: 10;
 }
 
-/* Header ko high z-index do */
 .app-header {
     grid-area: header;
-    z-index: 100; /* Header ko high z-index */
+    z-index: 100; 
     position: relative;
 }
 
-/* Dropdown items ke liye */
 .dropdown-menu {
-    z-index: 1060 !important;
+    z-index: 15 !important;
     position: absolute !important;
 }
 
-/* Mobile view ke liye bhi fix karo */
 @media (max-width: 991.98px) {
     .app-header {
-        z-index: 1030 !important;
+        z-index: 100 !important; 
     }
     
     .dropdown-menu {
-        z-index: 1060 !important;
+        z-index: 15 !important; 
     }
 }
-  /* Dropdown z-index fix */
+  /* Dropdown z-index fix - limited to header area */
   .dropdown-menu {
-    z-index: 2000 !important;
+    z-index: 15 !important; /* Consistent with above */
     animation: dropdownFade 0.2s ease-in-out;
     transform-origin: top;
   }
@@ -235,46 +232,151 @@
     }
   }
 
-  /* Optional hover and appearance tweaks */
+  /* Enhanced dropdown menu styling */
   .navbar .dropdown-menu {
-    background-color: #1b263b;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    padding: 0.5rem 0;
-    min-width: 200px;
+    padding: 0.25rem 0;
+    min-width: 160px;
+    max-width: 250px;
+    max-height: 300px; /* Limit height to prevent full screen */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    margin-top: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Hide horizontal scroll */
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .navbar .dropdown-menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth scrolling behavior */
+  .navbar .dropdown-menu {
+    scroll-behavior: smooth;
+  }
+
+  /* Add subtle fade effect at top/bottom when scrolling */
+  .navbar .dropdown-menu::before,
+  .navbar .dropdown-menu::after {
+    content: '';
+    position: sticky;
+    display: block;
+    height: 8px;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .navbar .dropdown-menu::before {
+    top: 0;
+    background: linear-gradient(to bottom, white, transparent);
+  }
+
+  .navbar .dropdown-menu::after {
+    bottom: 0;
+    background: linear-gradient(to top, white, transparent);
+  }
+
+  .navbar .dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
   }
 
   .navbar .dropdown-item {
-    color: #e0e1dd;
-    transition: background-color 0.2s, color 0.2s;
+    color: #333;
+    padding: 0.4rem 0.75rem;
+    border-radius: 6px !important;
+    margin: 0.1rem 0.5rem;
+    transition: all 0.25s ease;
+    position: relative;
+    font-weight: 400;
+    font-size: 0.875rem;
+    display: block;
+    width: auto;
+    white-space: nowrap; /* Prevent text wrapping */
+    text-overflow: ellipsis; /* Add ... for long text */
+    overflow: hidden;
   }
 
   .navbar .dropdown-item:hover,
   .navbar .dropdown-item:focus {
-    background-color: #415a77;
-    color: #fff;
+    background-color: rgba(13, 110, 253, 0.1) !important;
+    color: #0d6efd !important;
+    transform: translateX(2px);
+    border-radius: 6px !important;
+    /* Ensure rounded on both sides */
   }
 
-  /* Adjust the dropdown toggle color */
-  .navbar-dark .navbar-nav .nav-link {
-    color: #e0e1dd;
+  /* Dropdown item icons (if any) */
+  .navbar .dropdown-item i {
+    margin-right: 0.5rem;
+    transition: transform 0.25s ease;
   }
 
-  .navbar-dark .navbar-nav .nav-link:hover {
-    color: #fff;
+  .navbar .dropdown-item:hover i {
+    transform: scale(1.1);
+  }
+
+  /* Enhanced header menu styling */
+  .navbar-light .navbar-nav .nav-link {
+    color: #333;
+    padding: 0.75rem 1rem !important;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    position: relative;
+    font-weight: 500;
+  }
+
+  .navbar-light .navbar-nav .nav-link:hover {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.1);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15);
+  }
+
+  /* Active menu item */
+  .navbar-light .navbar-nav .nav-link:active,
+  .navbar-light .navbar-nav .nav-link.active {
+    color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.15);
+  }
+
+  /* Dropdown arrow animation */
+  .navbar-light .navbar-nav .dropdown-toggle::after {
+    transition: transform 0.3s ease;
+  }
+
+  .navbar-light .navbar-nav .dropdown-toggle:hover::after {
+    transform: rotate(180deg);
+  }
+
+  .navbar-light .navbar-nav .dropdown.show .dropdown-toggle::after {
+    transform: rotate(180deg);
   }
 
   /* Fix overlapping toggler icon on mobile */
   .navbar-toggler {
     border: none;
-  }#headerSidebarToggle {
+  }
+  #headerSidebarToggle {
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
   }
 
   #headerSidebarToggle:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.1);
     border: none !important;
   }
 
@@ -283,21 +385,89 @@
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(0, 0, 0, 0.15);
   }
 </style>
 <script>
-  document.querySelectorAll('.nav-item.dropdown').forEach((dropdown) => {
-    dropdown.addEventListener('mouseenter', () => {
+  document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced dropdown functionality with animations
+    document.querySelectorAll('.nav-item.dropdown').forEach((dropdown) => {
       const menu = dropdown.querySelector('.dropdown-menu');
-      if (menu) {
-        menu.classList.add('show');
+      const toggle = dropdown.querySelector('.dropdown-toggle');
+      let hoverTimeout;
+
+      dropdown.addEventListener('mouseenter', () => {
+        clearTimeout(hoverTimeout);
+        if (menu) {
+          menu.style.display = 'block';
+          // Small delay for smooth animation
+          setTimeout(() => {
+            menu.classList.add('show');
+          }, 10);
+        }
+        if (toggle) {
+          toggle.classList.add('show');
+        }
+      });
+
+      dropdown.addEventListener('mouseleave', () => {
+        if (menu) {
+          menu.classList.remove('show');
+          // Hide after animation completes
+          hoverTimeout = setTimeout(() => {
+            menu.style.display = 'none';
+          }, 300);
+        }
+        if (toggle) {
+          toggle.classList.remove('show');
+        }
+      });
+
+      // Click functionality for mobile
+      if (toggle) {
+        toggle.addEventListener('click', (e) => {
+          e.preventDefault();
+          const isShown = menu.classList.contains('show');
+          
+          // Close all other dropdowns
+          document.querySelectorAll('.dropdown-menu.show').forEach(otherMenu => {
+            if (otherMenu !== menu) {
+              otherMenu.classList.remove('show');
+              setTimeout(() => {
+                otherMenu.style.display = 'none';
+              }, 300);
+            }
+          });
+
+          if (!isShown) {
+            menu.style.display = 'block';
+            setTimeout(() => {
+              menu.classList.add('show');
+            }, 10);
+            toggle.classList.add('show');
+          } else {
+            menu.classList.remove('show');
+            setTimeout(() => {
+              menu.style.display = 'none';
+            }, 300);
+            toggle.classList.remove('show');
+          }
+        });
       }
     });
-    dropdown.addEventListener('mouseleave', () => {
-      const menu = dropdown.querySelector('.dropdown-menu');
-      if (menu) {
-        menu.classList.remove('show');
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu.show').forEach(menu => {
+          menu.classList.remove('show');
+          setTimeout(() => {
+            menu.style.display = 'none';
+          }, 300);
+        });
+        document.querySelectorAll('.dropdown-toggle.show').forEach(toggle => {
+          toggle.classList.remove('show');
+        });
       }
     });
   });

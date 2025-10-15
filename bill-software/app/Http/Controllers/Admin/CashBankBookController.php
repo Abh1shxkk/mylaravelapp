@@ -52,15 +52,43 @@ class CashBankBookController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'transaction_date' => 'required|date',
-            'transaction_type' => 'required|string|in:Cash,Bank',
-            'particulars' => 'required|string|max:255',
-            'voucher_no' => 'nullable|string|max:50',
-            'debit' => 'nullable|numeric',
-            'credit' => 'nullable|numeric',
-            'balance' => 'nullable|numeric',
-            'description' => 'nullable|string',
+            // Basic Information
+            'name' => 'required|string|max:255',
+            'alter_code' => 'nullable|string|max:255',
+            'under' => 'nullable|string|max:255',
+            'opening_balance' => 'nullable|numeric',
+            'opening_balance_type' => 'nullable|string|in:D,C',
+            'credit_card' => 'nullable|string|in:Y,N,W',
+            'bank_charges' => 'nullable|numeric',
+            'flag' => 'nullable|string|max:255',
+            
+            // Contact Information
+            'address' => 'nullable|string',
+            'address1' => 'nullable|string',
+            'telephone' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'fax' => 'nullable|string|max:255',
+            'birth_day' => 'nullable|date',
+            'anniversary_day' => 'nullable|date',
+            'contact_person_1' => 'nullable|string|max:255',
+            'contact_person_2' => 'nullable|string|max:255',
+            'mobile_1' => 'nullable|string|max:255',
+            'mobile_2' => 'nullable|string|max:255',
+            
+            // Account Details
+            'account_no' => 'nullable|string|max:255',
+            'report_no' => 'nullable|string|max:255',
+            
+            // GST & Settings
+            'input_gst_purchase' => 'nullable|boolean',
+            'output_gst_income' => 'nullable|boolean',
+            'cheque_clearance_method' => 'nullable|string|in:P,I',
+            'receipts' => 'nullable|string|in:S,I',
         ]);
+
+        // Handle boolean fields
+        $validated['input_gst_purchase'] = $request->has('input_gst_purchase');
+        $validated['output_gst_income'] = $request->has('output_gst_income');
 
         CashBankBook::create($validated);
 
@@ -90,15 +118,43 @@ class CashBankBookController extends Controller
     public function update(Request $request, CashBankBook $cashBankBook)
     {
         $validated = $request->validate([
-            'transaction_date' => 'required|date',
-            'transaction_type' => 'required|string|in:Cash,Bank',
-            'particulars' => 'required|string|max:255',
-            'voucher_no' => 'nullable|string|max:50',
-            'debit' => 'nullable|numeric',
-            'credit' => 'nullable|numeric',
-            'balance' => 'nullable|numeric',
-            'description' => 'nullable|string',
+            // Basic Information
+            'name' => 'required|string|max:255',
+            'alter_code' => 'nullable|string|max:255',
+            'under' => 'nullable|string|max:255',
+            'opening_balance' => 'nullable|numeric',
+            'opening_balance_type' => 'nullable|string|in:D,C',
+            'credit_card' => 'nullable|string|in:Y,N,W',
+            'bank_charges' => 'nullable|numeric',
+            'flag' => 'nullable|string|max:255',
+            
+            // Contact Information
+            'address' => 'nullable|string',
+            'address1' => 'nullable|string',
+            'telephone' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'fax' => 'nullable|string|max:255',
+            'birth_day' => 'nullable|date',
+            'anniversary_day' => 'nullable|date',
+            'contact_person_1' => 'nullable|string|max:255',
+            'contact_person_2' => 'nullable|string|max:255',
+            'mobile_1' => 'nullable|string|max:255',
+            'mobile_2' => 'nullable|string|max:255',
+            
+            // Account Details
+            'account_no' => 'nullable|string|max:255',
+            'report_no' => 'nullable|string|max:255',
+            
+            // GST & Settings
+            'input_gst_purchase' => 'nullable|boolean',
+            'output_gst_income' => 'nullable|boolean',
+            'cheque_clearance_method' => 'nullable|string|in:P,I',
+            'receipts' => 'nullable|string|in:S,I',
         ]);
+
+        // Handle boolean fields
+        $validated['input_gst_purchase'] = $request->has('input_gst_purchase');
+        $validated['output_gst_income'] = $request->has('output_gst_income');
 
         $cashBankBook->update($validated);
 
