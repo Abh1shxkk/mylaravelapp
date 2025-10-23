@@ -9,7 +9,59 @@ use Illuminate\Http\Request;
 
 class ItemController extends Controller
 {
-    public function index(){ $search = request('search'); $status = request('status'); $dateFrom = request('date_from'); $dateTo = request('date_to'); $items = Item::query()->when($search, function($query) use ($search){ $query->where(function($q) use ($search){ $q->where('name','like',"%{$search}%")->orWhere('code','like',"%{$search}%")->orWhere('Barcode','like',"%{$search}%"); }); })->when($status!==null && $status!=='', function($query) use ($status){ $query->where('status', $status==='active'?1:0); })->when($dateFrom, function($query) use ($dateFrom){ $query->whereDate('created_at','>=',$dateFrom); })->when($dateTo, function($query) use ($dateTo){ $query->whereDate('created_at','<=',$dateTo); })->orderByDesc('id')->paginate(10)->withQueryString(); return view('admin.items.index', compact('items','search','status','dateFrom','dateTo')); }
+    public function index()
+    {
+        $search = request('search');
+        $searchField = request('search_field', 'all');
+        $status = request('status');
+        $dateFrom = request('date_from');
+        $dateTo = request('date_to');
+
+        $items = Item::query()
+            ->with('company') // Eager load company relationship
+            ->when($search && trim($search) !== '', function ($query) use ($search, $searchField) {
+                $search = trim($search);
+                
+                if ($searchField === 'all') {
+                    // Search across all fields
+                    $query->where(function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('code', 'like', "%{$search}%")
+                            ->orWhere('bar_code', 'like', "%{$search}%")
+                            ->orWhere('location', 'like', "%{$search}%")
+                            ->orWhere('packing', 'like', "%{$search}%")
+                            ->orWhere('mrp', 'like', "%{$search}%")
+                            ->orWhere('hsn_code', 'like', "%{$search}%")
+                            ->orWhere('mfg_by', 'like', "%{$search}%");
+                    });
+                } else {
+                    // Search in specific field - ensure field name is valid
+                    $validFields = ['name', 'bar_code', 'location', 'packing', 'mrp', 'code', 'hsn_code'];
+                    if (in_array($searchField, $validFields)) {
+                        $query->where($searchField, 'like', "%{$search}%");
+                    }
+                }
+            })
+            ->when($status !== null && $status !== '', function ($query) use ($status) {
+                $query->where('status', $status === 'active' ? 1 : 0);
+            })
+            ->when($dateFrom, function ($query) use ($dateFrom) {
+                $query->whereDate('created_at', '>=', $dateFrom);
+            })
+            ->when($dateTo, function ($query) use ($dateTo) {
+                $query->whereDate('created_at', '<=', $dateTo);
+            })
+            ->orderByDesc('id')
+            ->paginate(10)
+            ->withQueryString();
+
+        // AJAX request - return same view
+        if (request()->ajax()) {
+            return view('admin.items.index', compact('items', 'search', 'searchField', 'status', 'dateFrom', 'dateTo'));
+        }
+
+        return view('admin.items.index', compact('items', 'search', 'searchField', 'status', 'dateFrom', 'dateTo'));
+    }
     public function create()
     {
         $companies = Company::where('is_deleted', '!=', 1)->get();

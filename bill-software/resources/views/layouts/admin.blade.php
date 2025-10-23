@@ -858,6 +858,72 @@
 
                     </div>
                 </div>
+
+                <div class="mt-2">
+                    <a class="nav-link text-white d-flex align-items-center px-2" href="/admin/all-ledger">
+                        <i class="bi bi-journal-check me-2"></i><span class="label">All Ledger</span>
+                    </a>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuGeneralLedger" style="background:transparent;">
+                        <i class="bi bi-journal-text me-2"></i> <span class="label">General Ledger</span>
+                    </button>
+                    <div class="collapse" id="menuGeneralLedger">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.general-ledger.create') }}">
+                            <span class="label">Add Account</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.general-ledger.index') }}">
+                            <span class="label">All Accounts</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuCashBank" style="background:transparent;">
+                        <i class="bi bi-cash-stack me-2"></i> <span class="label">Cash / Bank Books</span>
+                    </button>
+                    <div class="collapse" id="menuCashBank">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.cash-bank-books.create') }}">
+                            <span class="label">Add Transaction</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.cash-bank-books.index') }}">
+                            <span class="label">All Transactions</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuSaleLedger" style="background:transparent;">
+                        <i class="bi bi-cart-check me-2"></i> <span class="label">Sale Ledger</span>
+                    </button>
+                    <div class="collapse" id="menuSaleLedger">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.sale-ledger.create') }}">
+                            <span class="label">Add Sale Entry</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.sale-ledger.index') }}">
+                            <span class="label">All Sale Entries</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuPurchaseLedger" style="background:transparent;">
+                        <i class="bi bi-bag-check me-2"></i> <span class="label">Purchase Ledger</span>
+                    </button>
+                    <div class="collapse" id="menuPurchaseLedger">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.purchase-ledger.create') }}">
+                            <span class="label">Add Purchase Entry</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.purchase-ledger.index') }}">
+                            <span class="label">All Purchase Entries</span>
+                        </a>
+                    </div>
+                </div>
             </nav>
 
             <div class="profile">

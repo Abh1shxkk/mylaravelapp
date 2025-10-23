@@ -14,18 +14,34 @@ class CustomerController extends Controller
     public function index()
     {
         $search = request('search');
+        $searchField = request('search_field', 'all');
         $status = request('status'); // 'active' | 'inactive'
         $dateFrom = request('date_from');
         $dateTo = request('date_to');
 
         $customers = Customer::query()
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('code', 'like', "%{$search}%")
-                      ->orWhere('city', 'like', "%{$search}%")
-                      ->orWhere('mobile', 'like', "%{$search}%");
-                });
+            ->when($search && trim($search) !== '', function ($query) use ($search, $searchField) {
+                $search = trim($search);
+                
+                if ($searchField === 'all') {
+                    // Search across all fields
+                    $query->where(function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                          ->orWhere('code', 'like', "%{$search}%")
+                          ->orWhere('mobile', 'like', "%{$search}%")
+                          ->orWhere('telephone_office', 'like', "%{$search}%")
+                          ->orWhere('address', 'like', "%{$search}%")
+                          ->orWhere('dl_number', 'like', "%{$search}%")
+                          ->orWhere('gst_name', 'like', "%{$search}%")
+                          ->orWhere('city', 'like', "%{$search}%");
+                    });
+                } else {
+                    // Search in specific field
+                    $validFields = ['name', 'code', 'mobile', 'telephone_office', 'address', 'dl_number', 'gst_name'];
+                    if (in_array($searchField, $validFields)) {
+                        $query->where($searchField, 'like', "%{$search}%");
+                    }
+                }
             })
             ->when($status !== null && $status !== '', function ($query) use ($status) {
                 $query->where('status', $status === 'active' ? 1 : 0);
@@ -40,7 +56,12 @@ class CustomerController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.customers.index', compact('customers', 'search', 'status', 'dateFrom', 'dateTo'));
+        // AJAX request handling
+        if (request()->ajax()) {
+            return view('admin.customers.index', compact('customers', 'search', 'searchField', 'status', 'dateFrom', 'dateTo'));
+        }
+
+        return view('admin.customers.index', compact('customers', 'search', 'searchField', 'status', 'dateFrom', 'dateTo'));
     }
 
     public function create()
@@ -62,26 +83,24 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
-        // Validate required and unique fields
+        // Validate required fields only
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:customers,email',
-            'address' => 'required|string',
-            'mobile' => 'required|string|max:255|unique:customers,mobile',
-            // Optional phones should also be unique if provided
-            'telephone_office' => 'nullable|string|max:255|unique:customers,telephone_office',
-            'telephone_residence' => 'nullable|string|max:255|unique:customers,telephone_residence',
-            'pan_number' => 'required|string|max:255|unique:customers,pan_number',
-            'gst_name' => 'required|string|max:255|unique:customers,gst_name',
+            'email' => 'nullable|email|max:255',
+            'mobile' => 'nullable|string|max:255',
+            'pan_number' => 'nullable|string|max:255',
+            'gst_name' => 'nullable|string|max:255',
         ]);
 
-        // Get all data and merge validated fields
-        $data = array_merge($request->all(), $validated);
-        $data['status'] = $request->boolean('status');
-        $data['invoice_export'] = $request->boolean('invoice_export');
-        $data['order_required'] = $request->boolean('order_required');
+        // Prepare data for insertion
+        $data = $request->except(['_token', '_method']);
+        
+        // Set timestamps
+        $data['created_date'] = now();
+        $data['modified_date'] = now();
+        
         Customer::create($data);
-        return redirect()->route('admin.customers.index')->with('success','Customer created');
+        return redirect()->route('admin.customers.index')->with('success', 'Customer created successfully');
     }
 
     public function show(Customer $customer)
@@ -111,12 +130,14 @@ class CustomerController extends Controller
 
     public function update(Request $request, Customer $customer)
     {
-        $data = $request->all();
-        $data['status'] = $request->boolean('status');
-        $data['invoice_export'] = $request->boolean('invoice_export');
-        $data['order_required'] = $request->boolean('order_required');
+        // Prepare data for update
+        $data = $request->except(['_token', '_method']);
+        
+        // Update timestamp
+        $data['modified_date'] = now();
+        
         $customer->update($data);
-        return redirect()->route('admin.customers.index')->with('success','Customer updated');
+        return redirect()->route('admin.customers.index')->with('success', 'Customer updated successfully');
     }
 
     public function destroy(Customer $customer)

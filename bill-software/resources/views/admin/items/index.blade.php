@@ -7,50 +7,50 @@
 
   </div>
 </div>
-
 <div class="card shadow-sm border-0 rounded">
   <div class="card mb-4">
     <div class="card-body">
 <form method="GET" action="{{ route('admin.items.index') }}" class="row g-3" id="item-filter-form">
         <div class="col-md-3">
-          <label for="search" class="form-label">Search</label>
-<input type="text" class="form-control" id="item-search" name="search" value="{{ request('search') }}" placeholder="Name, code, barcode..." autocomplete="off">
-        </div>
-        <div class="col-md-2">
-          <label for="status" class="form-label">Status</label>
-          <select class="form-select" id="status" name="status">
-            <option value="">All</option>
-            <option value="active" {{ request('status')==='active' ? 'selected' : '' }}>Active</option>
-            <option value="inactive" {{ request('status')==='inactive' ? 'selected' : '' }}>Inactive</option>
+          <label for="search_field" class="form-label">Search By</label>
+          <select class="form-select" id="search_field" name="search_field">
+            <option value="all" {{ request('search_field', 'all') == 'all' ? 'selected' : '' }}>All Fields</option>
+            <option value="name" {{ request('search_field') == 'name' ? 'selected' : '' }}>1. Split Name</option>
+            <option value="bar_code" {{ request('search_field') == 'bar_code' ? 'selected' : '' }}>2. BarCode</option>
+            <option value="location" {{ request('search_field') == 'location' ? 'selected' : '' }}>3. Location</option>
+            <option value="packing" {{ request('search_field') == 'packing' ? 'selected' : '' }}>4. Pack</option>
+            <option value="mrp" {{ request('search_field') == 'mrp' ? 'selected' : '' }}>5. Mrp</option>
+            <option value="code" {{ request('search_field') == 'code' ? 'selected' : '' }}>6. BtCode</option>
+            <option value="hsn_code" {{ request('search_field') == 'hsn_code' ? 'selected' : '' }}>7. HSN</option>
           </select>
         </div>
-        
-        <div class="col-md-2">
-          <label for="page-jump" class="form-label">Jump to Page</label>
+        <div class="col-md-7">
+          <label for="search" class="form-label">Search</label>
           <div class="input-group">
-            <input type="number" class="form-control" id="page-jump" min="1" max="{{ $items->lastPage() }}" placeholder="Page #" autocomplete="off">
-            <button type="button" class="btn btn-primary" id="page-jump-btn" title="Go to page">
-              <i class="bi bi-arrow-right-circle"></i>
+            <input type="text" class="form-control" id="item-search" name="search" value="{{ request('search') }}" placeholder="Type to search..." autocomplete="off">
+            <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
+              <i class="bi bi-x-circle"></i>
             </button>
           </div>
-          <small class="text-muted">Total: {{ $items->lastPage() }} pages</small>
         </div>
-       
       </form>
     </div>
   </div>
-  <div class="table-responsive">
+  <div class="table-responsive" id="item-table-wrapper" style="position: relative; min-height: 400px;">
+    <div id="search-loading" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 999; align-items: center; justify-content: center;">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
     <table class="table table-hover align-middle mb-0">
       <thead class="table-light">
         <tr>
           <th>#</th>
-          <th>Code</th>
           <th>Name</th>
+          <th>HSN Code</th>
           <th>Pack</th>
-          <th>Unit</th>
-          <th>MRP</th>
-          <th>S. Rate</th>
-          <th>Status</th>
+          <th>Company</th>
+          <th>Qty</th>
           <th class="text-end">Actions</th>
         </tr>
       </thead>
@@ -58,13 +58,14 @@
         @forelse($items as $item)
           <tr>
             <td>{{ ($items->currentPage() - 1) * $items->perPage() + $loop->iteration }}</td>
-            <td>{{ $item->code }}</td>
             <td>{{ $item->name }}</td>
-            <td>{{ $item->Pack }}</td>
-            <td>{{ $item->Unit }}</td>
-            <td>₹{{ number_format($item->Mrp, 2) }}</td>
-            <td>₹{{ number_format($item->Srate, 2) }}</td>
-            <td><span class="badge {{ $item->status ? 'bg-success':'bg-secondary' }}">{{ $item->status ? 'Active':'Inactive' }}</span></td>
+            <td>{{ $item->hsn_code ?? '-' }}</td>
+            <td>{{ $item->packing ?? '-' }}</td>
+            <td>{{ $item->company->short_name ?? '-' }}</td>
+            <td>
+              <span class="badge bg-light text-dark">{{ $item->unit ?? '1' }}</span>
+              <small class="text-muted">{{ $item->unit_type ?? 'Unit' }}</small>
+            </td>
             <td class="text-end">
               <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.items.show',$item) }}" title="View"><i class="bi bi-eye"></i></a>
               <a class="btn btn-sm btn-outline-secondary" href="{{ route('admin.items.edit',$item) }}" title="Edit"><i class="bi bi-pencil"></i></a>
@@ -75,7 +76,7 @@
             </td>
           </tr>
         @empty
-          <tr><td colspan="9" class="text-center text-muted">No items found</td></tr>
+          <tr><td colspan="7" class="text-center text-muted">No items found</td></tr>
         @endforelse
       </tbody>
     </table>
@@ -103,24 +104,33 @@
 document.addEventListener('DOMContentLoaded', function(){
   const tbody = document.getElementById('item-table-body');
   const searchInput = document.getElementById('item-search');
-  const statusSelect = document.getElementById('status');
+  const searchFieldSelect = document.getElementById('search_field');
+  const clearSearchBtn = document.getElementById('clear-search');
   const filterForm = document.getElementById('item-filter-form');
   
   let searchTimeout;
   let isLoading = false;
   let observer = null;
+  let isSearching = false;
 
   // Real-time search implementation
   function performSearch() {
+    if(isSearching) return;
+    isSearching = true;
+    
     const formData = new FormData(filterForm);
     const params = new URLSearchParams(formData);
     
-    const footerSpinner = document.getElementById('item-spinner');
-    const footerLoadText = document.getElementById('item-load-text');
-    let spinnerTimer = setTimeout(() => {
-      footerSpinner && footerSpinner.classList.remove('d-none');
-      footerLoadText && (footerLoadText.textContent = 'Loading...');
-    }, 250);
+    // Show loading spinner
+    const loadingSpinner = document.getElementById('search-loading');
+    if(loadingSpinner) {
+      loadingSpinner.style.display = 'flex';
+    }
+    
+    // Add visual feedback
+    if(searchInput) {
+      searchInput.style.opacity = '0.6';
+    }
     
     fetch(`{{ route('admin.items.index') }}?${params.toString()}`, {
       headers: {
@@ -142,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if(realRows.length) {
         realRows.forEach(tr => tbody.appendChild(tr));
       } else {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No items found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No items found</td></tr>';
       }
       
       // Update pagination info and reinitialize infinite scroll
@@ -155,10 +165,22 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     })
     .catch(error => {
-      tbody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">Error loading data</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>';
     })
     .finally(() => {
-      typeof spinnerTimer !== 'undefined' && clearTimeout(spinnerTimer);
+      isSearching = false;
+      
+      // Hide loading spinner
+      const loadingSpinner = document.getElementById('search-loading');
+      if(loadingSpinner) {
+        loadingSpinner.style.display = 'none';
+      }
+      
+      // Restore search input opacity
+      if(searchInput) {
+        searchInput.style.opacity = '1';
+      }
+      
       const s = document.getElementById('item-spinner');
       const t = document.getElementById('item-load-text');
       s && s.classList.add('d-none');
@@ -170,13 +192,26 @@ document.addEventListener('DOMContentLoaded', function(){
   if(searchInput) {
     searchInput.addEventListener('keyup', function() {
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(performSearch, 500);
+      searchTimeout = setTimeout(performSearch, 300);
     });
   }
 
-  // Status filter real-time - Use jQuery for Select2 compatibility
-  if(statusSelect) {
-    $(statusSelect).on('change', performSearch);
+  // Clear search button
+  if(clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', function() {
+      if(searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+        performSearch();
+      }
+    });
+  }
+
+  // Trigger search when search field dropdown changes
+  if(searchFieldSelect) {
+    searchFieldSelect.addEventListener('change', function() {
+      performSearch();
+    });
   }
 
   // Toast notification helper
@@ -249,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if(realRows.length) {
         realRows.forEach(tr => tbody.appendChild(tr));
       } else {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No items found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No items found</td></tr>';
       }
       
       // Update pagination info and footer

@@ -57,34 +57,47 @@
     <div class="card-body">
 <form method="GET" action="{{ route('admin.customers.index') }}" class="row g-3" id="customer-filter-form">
         <div class="col-md-3">
-          <label for="search" class="form-label">Search</label>
-<input type="text" class="form-control" id="customer-search" name="search" value="{{ request('search') }}" placeholder="Name, code, city, mobile..." autocomplete="off">
-        </div>
-        <div class="col-md-2">
-          <label for="status" class="form-label">Status</label>
-          <select class="form-select" id="status" name="status">
-            <option value="">All</option>
-            <option value="active" {{ request('status')==='active' ? 'selected' : '' }}>Active</option>
-            <option value="inactive" {{ request('status')==='inactive' ? 'selected' : '' }}>Inactive</option>
+          <label for="search_field" class="form-label">Search By</label>
+          <select class="form-select" id="search_field" name="search_field">
+            <option value="all" {{ request('search_field', 'all') == 'all' ? 'selected' : '' }}>All Fields</option>
+            <option value="name" {{ request('search_field') == 'name' ? 'selected' : '' }}>1. Split Name</option>
+            <option value="code" {{ request('search_field') == 'code' ? 'selected' : '' }}>2. Alter Code</option>
+            <option value="mobile" {{ request('search_field') == 'mobile' ? 'selected' : '' }}>3. Mobile</option>
+            <option value="telephone_office" {{ request('search_field') == 'telephone_office' ? 'selected' : '' }}>4. Tel.</option>
+            <option value="address" {{ request('search_field') == 'address' ? 'selected' : '' }}>5. Address</option>
+            <option value="dl_number" {{ request('search_field') == 'dl_number' ? 'selected' : '' }}>6. DL No.</option>
+            <option value="gst_name" {{ request('search_field') == 'gst_name' ? 'selected' : '' }}>7. GSTIN</option>
           </select>
         </div>
-        
-        
-       
+        <div class="col-md-9">
+          <label for="search" class="form-label">Search</label>
+          <div class="input-group">
+            <input type="text" class="form-control" id="customer-search" name="search" value="{{ request('search') }}" placeholder="Type to search..." autocomplete="off">
+            <button class="btn btn-outline-secondary" type="button" id="clear-search" title="Clear search">
+              <i class="bi bi-x-circle"></i>
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   </div>
-  <div class="table-responsive" id="customer-table-wrapper">
+  <div class="table-responsive" id="customer-table-wrapper" style="position: relative;">
+    <div id="search-loading" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); z-index: 999; align-items: center; justify-content: center;">
+      <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
     <table class="table align-middle mb-0">
       <thead class="table-light">
         <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Code</th>
-          <th>City</th>
-          <th>Mobile</th>
-          <th>Status</th>
-          <th class="text-end">Actions</th>
+          <th style="width: 5%;">#</th>
+          <th style="width: 20%;">Name</th>
+          <th style="width: 10%;">Code</th>
+          <th style="width: 10%;">Status</th>
+          <th style="width: 8%;">Flag</th>
+          <th style="width: 15%;">City</th>
+          <th style="width: 12%;">Mobile</th>
+          <th style="width: 20%;" class="text-end">Actions</th>
         </tr>
       </thead>
       <tbody id="customer-table-body">
@@ -93,13 +106,10 @@
             <td>{{ ($customers->currentPage() - 1) * $customers->perPage() + $loop->iteration }}</td>
             <td>{{ $customer->name }}</td>
             <td>{{ $customer->code ?? '-' }}</td>
+            <td>{{ $customer->status ?? '-' }}</td>
+            <td>{{ $customer->flag ?? '-' }}</td>
             <td>{{ $customer->city ?? '-' }}</td>
             <td>{{ $customer->mobile ?? '-' }}</td>
-            <td>
-              <span class="badge {{ $customer->status ? 'bg-success' : 'bg-secondary' }}">
-                {{ $customer->status ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
             <td class="text-end">
               <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.customers.show',$customer) }}" title="View">
                 <i class="bi bi-eye"></i>
@@ -117,7 +127,7 @@
           </tr>
         @empty
           <tr>
-            <td colspan="7" class="text-center text-muted py-4">
+            <td colspan="8" class="text-center text-muted py-4">
               <i class="bi bi-inbox fs-1 d-block mb-2"></i>
               No customers yet
             </td>
@@ -150,25 +160,33 @@
 document.addEventListener('DOMContentLoaded', function(){
   const tbody = document.getElementById('customer-table-body');
   const searchInput = document.getElementById('customer-search');
-  const statusSelect = document.getElementById('status');
+  const clearSearchBtn = document.getElementById('clear-search');
+  const searchFieldSelect = document.getElementById('search_field');
   const filterForm = document.getElementById('customer-filter-form');
   
   let searchTimeout;
   let isLoading = false;
+  let isSearching = false;
   let observer = null;
 
   // Real-time search implementation
   function performSearch() {
+    if(isSearching) return;
+    isSearching = true;
+    
     const formData = new FormData(filterForm);
     const params = new URLSearchParams(formData);
     
-    // Delayed footer spinner (avoid instant flash)
-    const footerSpinner = document.getElementById('customer-spinner');
-    const footerLoadText = document.getElementById('customer-load-text');
-    let spinnerTimer = setTimeout(() => {
-      footerSpinner && footerSpinner.classList.remove('d-none');
-      footerLoadText && (footerLoadText.textContent = 'Loading...');
-    }, 250);
+    // Show loading spinner
+    const loadingSpinner = document.getElementById('search-loading');
+    if(loadingSpinner) {
+      loadingSpinner.style.display = 'flex';
+    }
+    
+    // Add visual feedback
+    if(searchInput) {
+      searchInput.style.opacity = '0.6';
+    }
     
     fetch(`{{ route('admin.customers.index') }}?${params.toString()}`, {
       headers: {
@@ -190,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if(realRows.length) {
         realRows.forEach(tr => tbody.appendChild(tr));
       } else {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4">No customers found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No customers found</td></tr>';
       }
       
       // Update pagination info and reinitialize infinite scroll
@@ -198,20 +216,35 @@ document.addEventListener('DOMContentLoaded', function(){
       const currentFooter = document.querySelector('.card-footer');
       if(newFooter && currentFooter) {
         currentFooter.innerHTML = newFooter.innerHTML;
-        // Reinitialize infinite scroll after updating footer
-        initInfiniteScroll();
       }
+      
+      // Re-query sentinel after footer update
+      const updatedSentinel = document.getElementById('customer-sentinel');
+      if(updatedSentinel) {
+        const newSentinel = doc.querySelector('#customer-sentinel');
+        if(newSentinel && newSentinel.getAttribute('data-next-url')) {
+          updatedSentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
+        }
+      }
+      
+      // Re-setup infinite scroll observer
+      setupInfiniteScroll();
     })
     .catch(error => {
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Error loading data</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error loading data</td></tr>';
     })
     .finally(() => {
-      // Hide spinner and clear delayed timer
-      typeof spinnerTimer !== 'undefined' && clearTimeout(spinnerTimer);
-      const s = document.getElementById('customer-spinner');
-      const t = document.getElementById('customer-load-text');
-      s && s.classList.add('d-none');
-      t && (t.textContent = 'Scroll for more');
+      isSearching = false;
+      
+      // Hide loading spinner
+      const loadingSpinner = document.getElementById('search-loading');
+      if(loadingSpinner) {
+        loadingSpinner.style.display = 'none';
+      }
+      
+      if(searchInput) {
+        searchInput.style.opacity = '1';
+      }
     });
   }
 // GLOBAL FUNCTION for smooth scroll to top
@@ -253,40 +286,58 @@ window.scrollToTopNow = scrollToTopNow;
       }
     });
   }
-  // Search input with debounce
+  // Search input with debounce (reduced to 300ms for faster response)
   if(searchInput) {
     searchInput.addEventListener('keyup', function() {
       clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(performSearch, 500);
+      searchTimeout = setTimeout(performSearch, 300);
     });
   }
 
-  // Status filter real-time - Use jQuery for Select2 compatibility
-  if(statusSelect) {
-    $(statusSelect).on('change', performSearch);
+  // Clear search button
+  if(clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', function() {
+      if(searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+        performSearch();
+      }
+    });
   }
 
-  // Infinite scroll functionality
-  function initInfiniteScroll() {
+  // Trigger search when search field dropdown changes
+  if(searchFieldSelect) {
+    searchFieldSelect.addEventListener('change', function() {
+      performSearch();
+    });
+  }
+
+  // Function to setup infinite scroll observer
+  function setupInfiniteScroll() {
+    const currentSentinel = document.getElementById('customer-sentinel');
+    if(!currentSentinel || !tbody) return;
+    
     // Disconnect previous observer if exists
     if(observer) {
       observer.disconnect();
     }
-
-    const sentinel = document.getElementById('customer-sentinel');
-    const spinner = document.getElementById('customer-spinner');
-    const loadText = document.getElementById('customer-load-text');
     
-    if(!sentinel || !tbody) return;
+    // Get the scrolling container (.content div)
+    const contentDiv = document.querySelector('.content');
     
     isLoading = false;
     
     async function loadMore(){
       if(isLoading) return;
-      const nextUrl = sentinel.getAttribute('data-next-url');
+      const currentSentinel = document.getElementById('customer-sentinel');
+      if(!currentSentinel) return;
+      
+      const nextUrl = currentSentinel.getAttribute('data-next-url');
       if(!nextUrl) return;
       
       isLoading = true;
+      const spinner = document.getElementById('customer-spinner');
+      const loadText = document.getElementById('customer-load-text');
       spinner && spinner.classList.remove('d-none');
       loadText && (loadText.textContent = 'Loading...');
       
@@ -311,13 +362,13 @@ window.scrollToTopNow = scrollToTopNow;
         
         const newSentinel = doc.querySelector('#customer-sentinel');
         if(newSentinel){
-          sentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
+          currentSentinel.setAttribute('data-next-url', newSentinel.getAttribute('data-next-url'));
           spinner && spinner.classList.add('d-none');
           loadText && (loadText.textContent = 'Scroll for more');
           isLoading = false;
         } else {
-          observer.disconnect();
-          sentinel.remove();
+          observer && observer.disconnect();
+          currentSentinel.remove();
           spinner && spinner.remove();
           loadText && loadText.remove();
         }
@@ -328,19 +379,24 @@ window.scrollToTopNow = scrollToTopNow;
       }
     }
     
+    // Create new observer with correct root (scrolling container)
     observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if(entry.isIntersecting && !isLoading){
           loadMore();
         }
       });
-    }, { rootMargin: '300px' });
+    }, { 
+      root: contentDiv, // Watch scrolling within .content div
+      threshold: 0.1,
+      rootMargin: '100px' // Trigger 100px before sentinel is visible
+    });
     
-    observer.observe(sentinel);
+    observer.observe(currentSentinel);
   }
 
-  // Initialize on page load
-  initInfiniteScroll();
+  // Initial setup of infinite scroll
+  setupInfiniteScroll();
 
   // Auto-submit on filter change (REMOVE THIS if you want only real-time)
   const filterInputs = document.querySelectorAll('input[name="date_from"], input[name="date_to"]');

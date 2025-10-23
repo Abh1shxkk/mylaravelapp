@@ -8,6 +8,11 @@ use App\Http\Controllers\Admin\ItemController;
 use App\Http\Controllers\Admin\SupplierController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Admin\HsnCodeController;
+use App\Http\Controllers\Admin\GeneralLedgerController;
+use App\Http\Controllers\Admin\CashBankBookController;
+use App\Http\Controllers\Admin\SaleLedgerController;
+use App\Http\Controllers\Admin\PurchaseLedgerController;
+use App\Http\Controllers\Admin\AllLedgerController;
 use App\Http\Controllers\ProfileController;
 
 // Auth routes
@@ -31,6 +36,14 @@ Route::middleware(['admin'])->group(function () {
         Route::resource('suppliers', SupplierController::class);
         Route::resource('invoices', InvoiceController::class);
         Route::resource('hsn-codes', HsnCodeController::class);
+        
+        // Ledger Routes
+        Route::get('all-ledger', [AllLedgerController::class, 'index'])->name('all-ledger.index');
+        Route::resource('general-ledger', GeneralLedgerController::class);
+        Route::resource('cash-bank-books', CashBankBookController::class);
+        Route::resource('sale-ledger', SaleLedgerController::class);
+        Route::resource('purchase-ledger', PurchaseLedgerController::class);
+        
         Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
         Route::get('/api/countries', [CustomerController::class, 'getCountries'])->name('api.countries');
         Route::get('/api/states/{country}', [CustomerController::class, 'getStates'])->name('api.states');
