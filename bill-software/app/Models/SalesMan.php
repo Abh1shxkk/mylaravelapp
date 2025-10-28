@@ -13,10 +13,15 @@ class SalesMan extends Model
         'name',
         'email',
         'mobile',
+        'telephone',
         'address',
-        'designation',
-        'target_amount',
-        'commission_percent',
+        'city',
+        'pin',
+        'sales_type',
+        'delivery_type',
+        'area_mgr_code',
+        'area_mgr_name',
+        'monthly_target',
         'status',
         'is_deleted',
         'created_date',
@@ -24,9 +29,7 @@ class SalesMan extends Model
     ];
 
     protected $casts = [
-        'target_amount' => 'decimal:2',
-        'commission_percent' => 'decimal:2',
-        'status' => 'integer',
+        'monthly_target' => 'decimal:2',
         'is_deleted' => 'integer',
         'created_date' => 'datetime',
         'modified_date' => 'datetime'

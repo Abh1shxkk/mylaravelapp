@@ -7,21 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class Area extends Model
 {
     protected $fillable = [
-        'code',
         'name',
-        'description',
-        'state_code',
-        'region',
+        'alter_code',
         'status',
-        'is_deleted',
-        'created_date',
-        'modified_date'
+        'is_deleted'
     ];
 
     protected $casts = [
-        'status' => 'integer',
-        'is_deleted' => 'integer',
-        'created_date' => 'datetime',
-        'modified_date' => 'datetime'
+        'status' => 'string'
     ];
+
+    // Scope to exclude deleted records
+    public function scopeActive($query)
+    {
+        return $query->where('is_deleted', '!=', 1);
+    }
 }

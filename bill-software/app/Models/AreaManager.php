@@ -7,25 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class AreaManager extends Model
 {
     protected $fillable = [
-        'code',
         'name',
-        'email',
-        'mobile',
+        'code',
         'address',
-        'designation',
-        'reporting_to',
-        'target_amount',
+        'telephone',
+        'mobile',
+        'email',
         'status',
-        'is_deleted',
-        'created_date',
-        'modified_date'
+        'reg_mgr'
     ];
 
     protected $casts = [
-        'target_amount' => 'decimal:2',
-        'status' => 'integer',
-        'is_deleted' => 'integer',
-        'created_date' => 'datetime',
-        'modified_date' => 'datetime'
+        //
     ];
 }

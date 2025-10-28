@@ -121,20 +121,8 @@
           </ul>
 
         </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
-            aria-expanded="false">Help</a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Online Supports</a></li>
-            <li><a class="dropdown-item" href="#">Online Complaint</a></li>
-            <li><a class="dropdown-item" href="#">About Us</a></li>
-            <li><a class="dropdown-item" href="#">Download Latest Version</a></li>
-          </ul>
-
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Exit</a>
-        </li>
+        
+        
       </ul>
       <ul class="navbar-nav ms-auto">
         <li class="nav-item d-none d-md-block">

@@ -6,16 +6,145 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title">Edit Area Manager</h3>
-                    <a href="{{ route('admin.area-managers.index') }}" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Back to List
-                    </a>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Edit Area Manager</h2>
+                <a href="{{ route('admin.area-managers.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left me-2"></i>Back to Area Managers
+                </a>
+            </div>
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Area Manager Information</h5>
                 </div>
                 <div class="card-body">
-                    <!-- Form content will be added later -->
-                    <p class="text-muted">Area Manager edit form will be implemented here.</p>
+                    <form action="{{ route('admin.area-managers.update', $areaManager) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                                           id="name" name="name" value="{{ old('name', $areaManager->name) }}" 
+                                           placeholder="Enter area manager name" required>
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="code" class="form-label">Code</label>
+                                    <input type="text" class="form-control @error('code') is-invalid @enderror" 
+                                           id="code" name="code" value="{{ old('code', $areaManager->code) }}" 
+                                           placeholder="Enter code">
+                                    @error('code')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <textarea class="form-control @error('address') is-invalid @enderror" 
+                                              id="address" name="address" rows="3" 
+                                              placeholder="Enter address">{{ old('address', $areaManager->address) }}</textarea>
+                                    @error('address')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="telephone" class="form-label">Telephone</label>
+                                    <input type="text" class="form-control @error('telephone') is-invalid @enderror" 
+                                           id="telephone" name="telephone" value="{{ old('telephone', $areaManager->telephone) }}" 
+                                           placeholder="Enter telephone number">
+                                    @error('telephone')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="mobile" class="form-label">Mobile</label>
+                                    <input type="text" class="form-control @error('mobile') is-invalid @enderror" 
+                                           id="mobile" name="mobile" value="{{ old('mobile', $areaManager->mobile) }}" 
+                                           placeholder="Enter mobile number">
+                                    @error('mobile')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">E-Mail</label>
+                                    <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                                           id="email" name="email" value="{{ old('email', $areaManager->email) }}" 
+                                           placeholder="Enter email address">
+                                    @error('email')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <input type="text" class="form-control @error('status') is-invalid @enderror" 
+                                           id="status" name="status" value="{{ old('status', $areaManager->status) }}" 
+                                           placeholder="Enter status">
+                                    @error('status')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="reg_mgr" class="form-label">Reg.mgr.</label>
+                                    <input type="text" class="form-control @error('reg_mgr') is-invalid @enderror" 
+                                           id="reg_mgr" name="reg_mgr" value="{{ old('reg_mgr', $areaManager->reg_mgr) }}" 
+                                           placeholder="Enter regional manager">
+                                    @error('reg_mgr')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-lg me-2"></i>Update Area Manager
+                            </button>
+                            <a href="{{ route('admin.area-managers.index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

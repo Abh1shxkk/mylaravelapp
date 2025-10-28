@@ -3,16 +3,54 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AreaManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AreaManagerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = AreaManager::query();
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $searchField = $request->get('search_field', 'all');
+            
+            if ($searchField === 'all') {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%")
+                      ->orWhere('address', 'like', "%{$search}%")
+                      ->orWhere('telephone', 'like', "%{$search}%")
+                      ->orWhere('mobile', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('status', 'like', "%{$search}%")
+                      ->orWhere('reg_mgr', 'like', "%{$search}%");
+                });
+            } else {
+                $query->where($searchField, 'like', "%{$search}%");
+            }
+        }
+
+        // Status filter
+        if ($request->filled('status_filter')) {
+            $query->where('status', $request->get('status_filter'));
+        }
+
+        $areaManagers = $query->orderBy('name')->paginate(10);
+
+        // For AJAX requests, return rendered HTML
+        if ($request->ajax()) {
+            return view('admin.area-managers.index', compact('areaManagers'))->render();
+        }
+
+        return view('admin.area-managers.index', compact('areaManagers'));
     }
 
     /**
@@ -20,7 +58,7 @@ class AreaManagerController extends Controller
      */
     public function create()
     {
-        //
+        return view('admin.area-managers.create');
     }
 
     /**
@@ -28,38 +66,147 @@ class AreaManagerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'address' => 'nullable|string',
+            'telephone' => 'nullable|string|max:50',
+            'mobile' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'status' => 'nullable|string|max:100',
+            'reg_mgr' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            AreaManager::create([
+                'name' => $request->name,
+                'code' => $request->code,
+                'address' => $request->address,
+                'telephone' => $request->telephone,
+                'mobile' => $request->mobile,
+                'email' => $request->email,
+                'status' => $request->status,
+                'reg_mgr' => $request->reg_mgr,
+            ]);
+
+            return redirect()->route('admin.area-managers.index')
+                           ->with('success', 'Area Manager created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                           ->withInput()
+                           ->with('error', 'Error creating area manager: ' . $e->getMessage());
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(AreaManager $areaManager)
     {
-        //
+        if (request()->ajax()) {
+            return response()->json([
+                'id' => $areaManager->id,
+                'name' => $areaManager->name,
+                'code' => $areaManager->code,
+                'address' => $areaManager->address,
+                'telephone' => $areaManager->telephone,
+                'mobile' => $areaManager->mobile,
+                'email' => $areaManager->email,
+                'status' => $areaManager->status,
+                'reg_mgr' => $areaManager->reg_mgr,
+                'created_at' => $areaManager->created_at ? $areaManager->created_at->format('M d, Y h:i A') : null,
+                'updated_at' => $areaManager->updated_at ? $areaManager->updated_at->format('M d, Y h:i A') : null,
+            ]);
+        }
+
+        return redirect()->route('admin.area-managers.index');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(AreaManager $areaManager)
     {
-        //
+        return view('admin.area-managers.edit', compact('areaManager'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, AreaManager $areaManager)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'address' => 'nullable|string',
+            'telephone' => 'nullable|string|max:50',
+            'mobile' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'status' => 'nullable|string|max:100',
+            'reg_mgr' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $areaManager->update([
+                'name' => $request->name,
+                'code' => $request->code,
+                'address' => $request->address,
+                'telephone' => $request->telephone,
+                'mobile' => $request->mobile,
+                'email' => $request->email,
+                'status' => $request->status,
+                'reg_mgr' => $request->reg_mgr,
+            ]);
+
+            return redirect()->route('admin.area-managers.index')
+                           ->with('success', 'Area Manager updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                           ->withInput()
+                           ->with('error', 'Error updating area manager: ' . $e->getMessage());
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(AreaManager $areaManager)
     {
-        //
+        try {
+            // Log the delete attempt
+            Log::info('Attempting to permanently delete area manager: ' . $areaManager->id . ' - ' . $areaManager->name);
+            
+            // Store name before deletion for log
+            $areaManagerName = $areaManager->name;
+            
+            // Permanently delete from database
+            $areaManager->delete();
+            
+            // Log successful deletion
+            Log::info('Area Manager permanently deleted: ' . $areaManager->id . ' - ' . $areaManagerName);
+
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Area Manager deleted successfully!'
+                ]);
+            }
+
+            return redirect()->route('admin.area-managers.index')
+                           ->with('success', 'Area Manager deleted successfully!');
+                           
+        } catch (\Exception $e) {
+            Log::error('Error deleting area manager: ' . $e->getMessage());
+            
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error deleting area manager: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                           ->with('error', 'Error deleting area manager: ' . $e->getMessage());
+        }
     }
 }

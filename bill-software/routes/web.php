@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\StateController;
 use App\Http\Controllers\Admin\AreaManagerController;
 use App\Http\Controllers\Admin\RegionalManagerController;
 use App\Http\Controllers\Admin\MarketingManagerController;
+use App\Http\Controllers\Admin\GeneralManagerController;
 use App\Http\Controllers\Admin\DivisionalManagerController;
 use App\Http\Controllers\Admin\CountryManagerController;
 use App\Http\Controllers\ProfileController;
@@ -56,12 +57,13 @@ Route::middleware(['admin'])->group(function () {
         
         // Sales & Management Routes
         Route::resource('sales-men', SalesManController::class);
-        Route::resource('areas', AreaController::class);
-        Route::resource('routes', RouteController::class);
-        Route::resource('states', StateController::class);
+        Route::resource('areas', AreaController::class)->except(['show']);
+        Route::resource('routes', RouteController::class)->except(['show']);
+        Route::resource('states', StateController::class)->except(['show']);
         Route::resource('area-managers', AreaManagerController::class);
         Route::resource('regional-managers', RegionalManagerController::class);
         Route::resource('marketing-managers', MarketingManagerController::class);
+        Route::resource('general-managers', GeneralManagerController::class);
         Route::resource('divisional-managers', DivisionalManagerController::class);
         Route::resource('country-managers', CountryManagerController::class);
         

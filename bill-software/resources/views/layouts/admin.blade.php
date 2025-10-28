@@ -47,7 +47,7 @@
             will-change: transform, width;
             width: 260px;
             grid-area: sidebar;
-            z-index: 10;
+            z-index: 1030;
             display: flex;
             flex-direction: column;
         }
@@ -64,7 +64,7 @@
 
         .app-header {
             grid-area: header;
-            z-index: 10;
+            z-index: 1030;
             position: relative;
         }
 
@@ -1075,6 +1075,21 @@
                         </a>
                         <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.marketing-managers.index') }}">
                             <span class="label">All Marketing Managers</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuGeneralManagers" style="background:transparent;">
+                        <i class="bi bi-person-badge me-2"></i> <span class="label">Gen.mgr</span>
+                    </button>
+                    <div class="collapse" id="menuGeneralManagers">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.general-managers.create') }}">
+                            <span class="label">Add General Manager</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.general-managers.index') }}">
+                            <span class="label">All General Managers</span>
                         </a>
                     </div>
                 </div>

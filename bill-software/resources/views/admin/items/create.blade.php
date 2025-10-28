@@ -675,62 +675,62 @@
         </div>
     </div>
 
-    <!-- HSN Code Selection Modal -->
-    <div class="modal fade" id="hsnCodeModal" tabindex="-1" aria-labelledby="hsnCodeModalLabel" aria-hidden="true">
-<div class="modal-dialog modal-dialog-centered" style="max-width: 800px; width: 90%;">            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="hsnCodeModalLabel">
-                        <i class="bi bi-upc-scan me-2"></i>Select HSN Code
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- HSN Code Selection Modal - Right Sliding -->
+    <div id="hsnCodeModal" class="hsn-modal">
+        <div class="hsn-modal-content">
+            <div class="hsn-modal-header">
+                <h5 class="hsn-modal-title">
+                    <i class="bi bi-upc-scan me-2"></i>Select HSN Code
+                </h5>
+                <button type="button" class="btn-close-modal" onclick="closeHsnModal()" title="Close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="hsn-modal-body" id="hsnModalBody">
+                <!-- Search Box -->
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-primary text-white py-2">
+                        <h6 class="mb-0"><i class="bi bi-search me-2"></i>Search HSN Codes</h6>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="hsn_modal_search" 
+                                   placeholder="Search HSN code or name..." autocomplete="off">
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-body">
-                   
-                    
-                    <!-- Search Box -->
-                    <div class="mb-3">
-                        <input type="text" class="form-control" id="hsn_modal_search" placeholder="Search HSN code or name...">
+                
+                <!-- Loading Spinner -->
+                <div id="hsn_modal_loading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    
-                    <!-- Loading Spinner -->
-                    <div id="hsn_modal_loading" class="text-center py-4">
-                        <div class="spinner-border text-danger" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Loading HSN codes...</p>
+                    <div class="mt-2">Loading HSN codes...</div>
+                </div>
+                
+                <!-- HSN Codes List -->
+                <div id="hsn_modal_table_container" style="display: none;">
+                    <div id="hsn_codes_list">
+                        <!-- HSN codes will be populated here -->
                     </div>
-                    
-                    
-                    
-                    <!-- HSN Codes Table -->
-                    <div id="hsn_modal_table_container" style="display: none;">
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-hover table-sm">
-                                <thead class="table-light sticky-top">
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>HSN Code</th>
-                                        <th>CGST %</th>
-                                        <th>SGST %</th>
-                                        <th>IGST %</th>
-                                        <th>Total GST %</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="hsn_modal_tbody">
-                                    <!-- Rows will be populated via JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <div id="hsn_modal_no_results" class="text-center py-4 text-muted" style="display: none;">
-                            <i class="bi bi-search fs-1"></i>
-                            <p class="mt-2">No HSN codes found</p>
-                        </div>
+                    <div id="hsn_modal_no_results" class="text-center py-4 text-muted" style="display: none;">
+                        <i class="bi bi-search fs-1"></i>
+                        <p class="mt-2">No HSN codes found</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <div id="hsnModalBackdrop" class="hsn-modal-backdrop"></div>
+
+    <!-- HSN Modal Scroll to Top Button -->
+    <button id="hsnScrollToTop" type="button" title="Scroll to top" onclick="scrollHsnModalToTop()" style="display: none;">
+        <i class="bi bi-arrow-up"></i>
+    </button>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -740,69 +740,17 @@
             let hsnCodesData = [];
             const hsnModal = document.getElementById('hsnCodeModal');
             const hsnModalSearch = document.getElementById('hsn_modal_search');
-            const hsnModalTbody = document.getElementById('hsn_modal_tbody');
             const hsnModalLoading = document.getElementById('hsn_modal_loading');
             const hsnModalTableContainer = document.getElementById('hsn_modal_table_container');
             const hsnModalNoResults = document.getElementById('hsn_modal_no_results');
+            const hsnCodesList = document.getElementById('hsn_codes_list');
             const hsnCodeInput = document.getElementById('hsn_code_input');
-            
-            // Load HSN codes when modal is opened
-            hsnModal.addEventListener('show.bs.modal', function(e) {
-                console.log('Modal opening...');
-                if (hsnCodesData.length === 0) {
-                    loadHsnCodes();
-                }
-                // AGGRESSIVE DEBUGGING AND FIXING
-                setTimeout(() => {
-                    console.log('=== DEBUGGING MODAL CLICK ISSUES ===');
-                    
-                    // Remove ALL potentially blocking elements
-                    const elementsToRemove = [
-                        '#scrollToTop',
-                        '.sidebar-backdrop',
-                        '[id*="backdrop"]',
-                        '[class*="backdrop"]',
-                        '[style*="position: fixed"]',
-                        '[style*="position: absolute"]'
-                    ];
-                    
-                    elementsToRemove.forEach(selector => {
-                        const elements = document.querySelectorAll(selector);
-                        elements.forEach(el => {
-                            if (!el.closest('.modal') && el.id !== 'hsnCodeModal' && el.id !== 'testModal') {
-                                el.remove();
-                                console.log('REMOVED element:', selector, el);
-                            }
-                        });
-                    });
-                    
-                    // Force modal to front
-                    hsnModal.style.zIndex = '2147483647'; // Maximum z-index
-                    hsnModal.style.position = 'fixed';
-                    hsnModal.style.pointerEvents = 'auto';
-                    
-                    // Add click detection to modal
-                    hsnModal.addEventListener('click', function(e) {
-                        console.log('Modal clicked at:', e.clientX, e.clientY);
-                        console.log('Target element:', e.target);
-                        console.log('Current target:', e.currentTarget);
-                    });
-                    
-                    console.log('Aggressive fix applied - modal z-index:', hsnModal.style.zIndex);
-                }, 100);
-            });
-            
-            // Modal closed - no need to restore scroll button since we removed it
-            hsnModal.addEventListener('hidden.bs.modal', function(e) {
-                console.log('Modal closed');
-            });
             
             // Make HSN input clickable to open modal
             hsnCodeInput.addEventListener('click', function(e) {
                 console.log('HSN input clicked');
                 e.preventDefault();
-                const modal = new bootstrap.Modal(hsnModal);
-                modal.show();
+                openHsnModal();
             });
             
             // Also make the search button work
@@ -812,21 +760,182 @@
                     console.log('HSN search button clicked');
                     e.preventDefault();
                     e.stopPropagation();
-                    
-                    // Try multiple ways to open modal
-                    try {
-                        const modal = new bootstrap.Modal(hsnModal, {
-                            backdrop: true,
-                            keyboard: true,
-                            focus: true
-                        });
-                        modal.show();
-                        console.log('Modal show() called successfully');
-                    } catch (error) {
-                        console.error('Error opening modal:', error);
-                        alert('Error opening modal: ' + error.message);
-                    }
+                    openHsnModal();
                 });
+            }
+
+            // Open HSN Modal Function
+            function openHsnModal() {
+                const backdrop = document.getElementById('hsnModalBackdrop');
+                const mainScrollBtn = document.getElementById('scrollToTop');
+                const modalScrollBtn = document.getElementById('hsnScrollToTop');
+
+                backdrop.style.display = 'block';
+                hsnModal.style.display = 'block';
+
+                // Completely hide main scroll button with all possible methods
+                if (mainScrollBtn) {
+                    mainScrollBtn.style.display = 'none !important';
+                    mainScrollBtn.style.opacity = '0';
+                    mainScrollBtn.style.visibility = 'hidden';
+                    mainScrollBtn.style.pointerEvents = 'none';
+                    mainScrollBtn.classList.add('d-none');
+                    mainScrollBtn.classList.remove('show');
+                    console.log('Main scroll button hidden');
+                }
+                
+                // Initialize modal scroll button
+                if (modalScrollBtn) {
+                    modalScrollBtn.style.display = 'flex';
+                    modalScrollBtn.style.opacity = '0';
+                    modalScrollBtn.style.visibility = 'hidden';
+                    modalScrollBtn.style.pointerEvents = 'auto';
+                    modalScrollBtn.classList.remove('show');
+                    modalScrollBtn.classList.remove('d-none');
+                    console.log('Modal scroll button initialized');
+                }
+                
+                // Setup modal scroll functionality after a delay to ensure modal is rendered
+                setTimeout(() => {
+                    setupModalScrollToTop();
+                }, 100);
+
+                setTimeout(() => {
+                    backdrop.classList.add('show');
+                    hsnModal.classList.add('show');
+                }, 10);
+
+                // Load HSN codes if not loaded
+                if (hsnCodesData.length === 0) {
+                    loadHsnCodes();
+                }
+            }
+
+            // Close HSN Modal Function
+            window.closeHsnModal = function() {
+                const backdrop = document.getElementById('hsnModalBackdrop');
+                const mainScrollBtn = document.getElementById('scrollToTop');
+                const modalScrollBtn = document.getElementById('hsnScrollToTop');
+
+                // Completely hide modal scroll button
+                if (modalScrollBtn) {
+                    modalScrollBtn.style.display = 'none';
+                    modalScrollBtn.style.opacity = '0';
+                    modalScrollBtn.style.visibility = 'hidden';
+                    modalScrollBtn.style.pointerEvents = 'none';
+                    modalScrollBtn.classList.add('d-none');
+                    modalScrollBtn.classList.remove('show');
+                    console.log('Modal scroll button hidden');
+                }
+                
+                // Restore main scroll button completely
+                if (mainScrollBtn) {
+                    mainScrollBtn.style.display = '';
+                    mainScrollBtn.style.opacity = '';
+                    mainScrollBtn.style.visibility = '';
+                    mainScrollBtn.style.pointerEvents = '';
+                    mainScrollBtn.classList.remove('d-none');
+                    // Check if main page is scrolled to show the button
+                    if (window.pageYOffset > 200) {
+                        mainScrollBtn.classList.add('show');
+                        mainScrollBtn.style.opacity = '1';
+                        mainScrollBtn.style.visibility = 'visible';
+                    }
+                    console.log('Main scroll button restored');
+                }
+
+                // Remove show classes for slide-out animation
+                hsnModal.classList.remove('show');
+                backdrop.classList.remove('show');
+
+                // Hide modal after animation
+                setTimeout(() => {
+                    hsnModal.style.display = 'none';
+                    backdrop.style.display = 'none';
+                }, 300);
+            }
+
+            // Setup Modal Scroll to Top functionality
+            function setupModalScrollToTop() {
+                const modalBody = document.getElementById('hsnModalBody');
+                const modalScrollBtn = document.getElementById('hsnScrollToTop');
+
+                if (!modalBody || !modalScrollBtn) {
+                    console.log('Modal body or scroll button not found');
+                    return;
+                }
+
+                console.log('Setting up modal scroll functionality');
+
+                // Remove any existing scroll listeners to prevent duplicates
+                modalBody.removeEventListener('scroll', handleModalScroll);
+                
+                // Show/hide modal scroll button based on scroll position
+                function handleModalScroll() {
+                    console.log('Modal scroll detected, scrollTop:', modalBody.scrollTop);
+                    
+                    // Ensure main scroll button stays hidden
+                    const mainScrollBtn = document.getElementById('scrollToTop');
+                    if (mainScrollBtn) {
+                        mainScrollBtn.style.display = 'none !important';
+                        mainScrollBtn.classList.add('d-none');
+                    }
+                    
+                    if (modalBody.scrollTop > 50) {
+                        modalScrollBtn.style.display = 'flex';
+                        modalScrollBtn.style.opacity = '1';
+                        modalScrollBtn.style.visibility = 'visible';
+                        modalScrollBtn.style.pointerEvents = 'auto';
+                        modalScrollBtn.classList.add('show');
+                        modalScrollBtn.classList.remove('d-none');
+                        console.log('Showing modal scroll button');
+                    } else {
+                        modalScrollBtn.classList.remove('show');
+                        modalScrollBtn.style.opacity = '0';
+                        modalScrollBtn.style.visibility = 'hidden';
+                        setTimeout(() => {
+                            if (!modalScrollBtn.classList.contains('show')) {
+                                modalScrollBtn.style.display = 'flex';
+                                modalScrollBtn.style.opacity = '0';
+                            }
+                        }, 300);
+                        console.log('Hiding modal scroll button');
+                    }
+                }
+
+                modalBody.addEventListener('scroll', handleModalScroll);
+                
+                // Initial check in case modal is already scrolled
+                setTimeout(() => {
+                    handleModalScroll();
+                }, 500);
+            }
+
+            // Scroll HSN Modal to Top function
+            window.scrollHsnModalToTop = function() {
+                console.log('Scroll to top button clicked');
+                const modalBody = document.getElementById('hsnModalBody');
+                const modalScrollBtn = document.getElementById('hsnScrollToTop');
+                
+                if (modalBody) {
+                    console.log('Scrolling modal to top, current scrollTop:', modalBody.scrollTop);
+                    modalBody.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Hide button immediately after clicking
+                    if (modalScrollBtn) {
+                        modalScrollBtn.classList.remove('show');
+                        modalScrollBtn.style.opacity = '0';
+                        modalScrollBtn.style.visibility = 'hidden';
+                        setTimeout(() => {
+                            modalScrollBtn.style.display = 'none';
+                        }, 300);
+                    }
+                } else {
+                    console.log('Modal body not found');
+                }
             }
             
             // Simple test modal function
@@ -911,85 +1020,88 @@
                 });
             }
             
-            // Render HSN codes in table
+            // Render HSN codes in organized card layout (matching sales man modal pattern)
             function renderHsnCodes(codes) {
-                hsnModalTbody.innerHTML = '';
+                hsnCodesList.innerHTML = '';
                 
                 if (codes.length === 0) {
-                    hsnModalTableContainer.querySelector('.table-responsive').style.display = 'none';
+                    hsnModalTableContainer.style.display = 'none';
                     hsnModalNoResults.style.display = 'block';
                     return;
                 }
                 
-                hsnModalTableContainer.querySelector('.table-responsive').style.display = 'block';
+                hsnModalTableContainer.style.display = 'block';
                 hsnModalNoResults.style.display = 'none';
                 
                 codes.forEach((code, index) => {
-                    const row = document.createElement('tr');
-                    row.style.cursor = 'pointer';
-                    row.style.pointerEvents = 'auto';
-                    row.style.position = 'relative';
-                    row.style.zIndex = 'auto';
-                    row.setAttribute('data-hsn-code', code.hsn_code);
-                    row.setAttribute('data-index', index);
+                    const card = document.createElement('div');
+                    card.className = 'card border-0 shadow-sm mb-2 hsn-code-card';
+                    card.style.cursor = 'pointer';
+                    card.setAttribute('data-hsn-code', code.hsn_code);
+                    card.setAttribute('data-index', index);
                     
-                    row.innerHTML = `
-                        <td><strong>${code.name || '-'}</strong></td>
-                        <td>${code.hsn_code || '-'}</td>
-                        <td>${parseFloat(code.cgst_percent || 0).toFixed(2)}%</td>
-                        <td>${parseFloat(code.sgst_percent || 0).toFixed(2)}%</td>
-                        <td>${parseFloat(code.igst_percent || 0).toFixed(2)}%</td>
-                        <td><strong>${parseFloat(code.total_gst_percent || 0).toFixed(2)}%</strong></td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-primary select-hsn-btn" 
-                                    style="pointer-events: auto; position: relative; z-index: auto;"
-                                    data-hsn-code="${code.hsn_code}" data-index="${index}">
-                                <i class="bi bi-check-circle"></i> Select
-                            </button>
-                        </td>
+                    card.innerHTML = `
+                        <div class="card-body py-2 px-3">
+                            <div class="row align-items-center g-2">
+                                <div class="col-md-3">
+                                    <div class="fw-semibold text-success">${code.name || 'Unnamed HSN Code'}</div>
+                                    <small class="text-muted">HSN: ${code.hsn_code || '-'}</small>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <small class="text-muted d-block">CGST</small>
+                                    <span class="badge bg-light text-dark">${parseFloat(code.cgst_percent || 0).toFixed(1)}%</span>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <small class="text-muted d-block">SGST</small>
+                                    <span class="badge bg-light text-dark">${parseFloat(code.sgst_percent || 0).toFixed(1)}%</span>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <small class="text-muted d-block">IGST</small>
+                                    <span class="badge bg-light text-dark">${parseFloat(code.igst_percent || 0).toFixed(1)}%</span>
+                                </div>
+                                <div class="col-md-2 text-center">
+                                    <small class="text-muted d-block">Total</small>
+                                    <span class="badge bg-primary">${parseFloat(code.total_gst_percent || 0).toFixed(1)}%</span>
+                                </div>
+                                <div class="col-md-1 text-end">
+                                    <button type="button" class="btn btn-sm btn-success select-hsn-btn" 
+                                            data-hsn-code="${code.hsn_code}" data-index="${index}" title="Select this HSN">
+                                        <i class="bi bi-check"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     `;
                     
-                    // Add click event to select button with more debugging
-                    const selectBtn = row.querySelector('.select-hsn-btn');
+                    // Add hover effect
+                    card.addEventListener('mouseenter', function() {
+                        this.classList.add('border-success');
+                        this.style.transform = 'translateY(-1px)';
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        this.classList.remove('border-success');
+                        this.style.transform = '';
+                    });
+                    
+                    // Add click event to select button
+                    const selectBtn = card.querySelector('.select-hsn-btn');
                     selectBtn.addEventListener('click', function(e) {
-                        console.log('=== BUTTON CLICK DEBUG ===');
-                        console.log('Event:', e);
-                        console.log('Target:', e.target);
-                        console.log('Button element:', this);
-                        console.log('HSN Code:', code.hsn_code);
-                        console.log('Code object:', code);
-                        
                         e.preventDefault();
                         e.stopPropagation();
                         selectHsnCode(code);
                     });
                     
-                    // Add mouseenter/mouseleave for debugging
-                    selectBtn.addEventListener('mouseenter', function() {
-                        console.log('Button hover - HSN:', code.hsn_code);
-                        this.style.backgroundColor = '#0b5ed7';
-                    });
-                    
-                    selectBtn.addEventListener('mouseleave', function() {
-                        this.style.backgroundColor = '';
-                    });
-                    
-                    // Also make row clickable with debugging
-                    row.addEventListener('click', function(e) {
-                        console.log('=== ROW CLICK DEBUG ===');
-                        console.log('Event:', e);
-                        console.log('Target:', e.target);
-                        console.log('Row element:', this);
-                        
+                    // Also make card clickable
+                    card.addEventListener('click', function(e) {
                         if (!e.target.closest('.select-hsn-btn')) {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('Row clicked for:', code.hsn_code);
                             selectHsnCode(code);
                         }
                     });
                     
-                    hsnModalTbody.appendChild(row);
+                    hsnCodesList.appendChild(card);
                 });
             }
             
@@ -1003,19 +1115,8 @@
                 document.getElementById('sgst_percent').value = parseFloat(code.sgst_percent || 0).toFixed(2);
                 document.getElementById('igst_percent').value = parseFloat(code.igst_percent || 0).toFixed(2);
                 
-                // Close modal
-                const modalInstance = bootstrap.Modal.getInstance(hsnModal);
-                if (modalInstance) {
-                    modalInstance.hide();
-                } else {
-                    // Fallback method
-                    hsnModal.style.display = 'none';
-                    document.body.classList.remove('modal-open');
-                    const backdrop = document.querySelector('.modal-backdrop');
-                    if (backdrop) {
-                        backdrop.remove();
-                    }
-                }
+                // Close modal using our custom function
+                closeHsnModal();
                 
                 // Show success feedback
                 const hsnInput = document.getElementById('hsn_code_input');
@@ -1078,6 +1179,295 @@
                     console.error('Company select not found!');
                 }
             }, 500); // Wait 500ms for Select2 to initialize
+
+            // Close modal when clicking backdrop
+            document.addEventListener('click', function (e) {
+                if (e.target && e.target.id === 'hsnModalBackdrop') {
+                    closeHsnModal();
+                }
+            });
+
+            // Close modal with Escape key
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    const modal = document.getElementById('hsnCodeModal');
+                    if (modal && modal.classList.contains('show')) {
+                        closeHsnModal();
+                    }
+                }
+            });
         });
     </script>
+
+    <style>
+        /* Ensure header and sidebar stay above modal backdrop */
+        .navbar, .sidebar {
+            z-index: 999999 !important;
+            position: relative !important;
+        }
+
+        /* Prevent modal backdrop from affecting header */
+        .navbar {
+            background: white !important;
+        }
+
+        /* Hide main scroll button when modal is open */
+        .hsn-modal.show ~ #scrollToTop,
+        .hsn-modal.show + #scrollToTop {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* Force hide main scroll button with class */
+        #scrollToTop.d-none {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* HSN Modal Styles - Matching Sales Man Modal */
+        .hsn-modal {
+            display: none;
+            position: fixed;
+            top: 70px;
+            right: 0;
+            width: 800px;
+            height: calc(100vh - 100px);
+            max-height: calc(100vh - 140px);
+            z-index: 999999 !important;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .hsn-modal.show {
+            transform: translateX(0);
+        }
+
+        .hsn-modal-content {
+            background: white;
+            height: 100%;
+            box-shadow: -2px 0 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hsn-modal-header {
+            padding: 1rem 1.25rem;
+            border-bottom: 2px solid #dee2e6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .hsn-modal-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* Close Button in Header */
+        .btn-close-modal {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .btn-close-modal:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .hsn-modal-body {
+            padding: 0.75rem;
+            overflow-y: auto;
+            flex: 1;
+            background: #f8f9fa;
+        }
+
+        .hsn-modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 999998 !important;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .hsn-modal-backdrop.show {
+            opacity: 0.7;
+        }
+
+        /* HSN Code Cards */
+        .hsn-code-card {
+            transition: all 0.2s ease;
+            border: 1px solid #e9ecef !important;
+        }
+
+        .hsn-code-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        .hsn-code-card.border-success {
+            border-color: #198754 !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hsn-modal {
+                width: 100%;
+            }
+            
+            .hsn-modal-backdrop {
+                left: 0; /* Full width on mobile */
+                width: 100vw;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hsn-modal-body {
+                padding: 0.75rem;
+            }
+
+            .hsn-modal-header {
+                padding: 0.75rem 1rem;
+            }
+        }
+
+        /* Card styling in modal - Compact for better UX */
+        .hsn-modal .card {
+            margin-bottom: 0.5rem;
+            border-radius: 0.375rem;
+            overflow: hidden;
+        }
+
+        .hsn-modal .card:last-child {
+            margin-bottom: 0;
+        }
+
+        .hsn-modal .card-header {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+            font-weight: 600;
+        }
+
+        .hsn-modal .card-header h6 {
+            font-size: 0.85rem;
+            margin: 0;
+        }
+
+        .hsn-modal .card-header .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .hsn-modal .card-body {
+            padding: 0.75rem;
+            background: white;
+        }
+
+        .hsn-modal .card-body small {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 600;
+        }
+
+        .hsn-modal .fw-semibold {
+            font-size: 0.8rem;
+            margin-bottom: 0.25rem;
+            color: #2c3e50;
+        }
+
+        .hsn-modal .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.4rem;
+        }
+
+        /* Smooth scrollbar for modal */
+        .hsn-modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .hsn-modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .hsn-modal-body::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .hsn-modal-body::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* HSN Modal Scroll to Top Button */
+        #hsnScrollToTop {
+            position: fixed !important;
+            bottom: 30px !important;
+            right: 30px !important;
+            z-index: 99999999 !important;
+            border-radius: 50% !important;
+            width: 50px !important;
+            height: 50px !important;
+            background: #198754 !important;
+            color: #fff !important;
+            border: none !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            padding: 0 !important;
+            pointer-events: auto !important;
+        }
+
+        #hsnScrollToTop:hover {
+            transform: translateY(-3px) !important;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) !important;
+            background: #157347 !important;
+        }
+
+        #hsnScrollToTop:active {
+            transform: translateY(-1px) !important;
+        }
+
+        #hsnScrollToTop i {
+            font-size: 22px !important;
+        }
+
+        #hsnScrollToTop.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        /* Ensure modal scroll button appears above everything */
+        .hsn-modal.show ~ #hsnScrollToTop {
+            z-index: 99999999 !important;
+        }
+    </style>
 @endsection

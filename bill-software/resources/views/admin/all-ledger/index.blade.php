@@ -456,11 +456,17 @@
             const modal = document.getElementById('ledgerDetailsModal');
             const backdrop = document.getElementById('ledgerModalBackdrop');
             const modalBody = document.getElementById('ledgerModalBody');
-            const header = document.getElementById('appHeader');
+            const header = document.querySelector('.navbar');
+            const sidebar = document.querySelector('.sidebar');
 
-            // Reduce header z-index when modal opens
+            // Prevent header and sidebar from being affected by modal
             if (header) {
-                header.style.zIndex = '1';
+                header.style.zIndex = '999999';
+                header.style.position = 'relative';
+            }
+            if (sidebar) {
+                sidebar.style.zIndex = '999999';
+                sidebar.style.position = 'relative';
             }
 
             backdrop.style.display = 'block';
@@ -535,11 +541,17 @@
         function closeLedgerModal() {
             const modal = document.getElementById('ledgerDetailsModal');
             const backdrop = document.getElementById('ledgerModalBackdrop');
-            const header = document.getElementById('appHeader');
+            const header = document.querySelector('.navbar');
+            const sidebar = document.querySelector('.sidebar');
 
-            // Restore header z-index when modal closes
+            // Restore header and sidebar styles when modal closes
             if (header) {
-                header.style.zIndex = '100';
+                header.style.zIndex = '';
+                header.style.position = '';
+            }
+            if (sidebar) {
+                sidebar.style.zIndex = '';
+                sidebar.style.position = '';
             }
 
             // Remove show classes for slide-out animation
@@ -790,6 +802,17 @@
             z-index: 9999 !important;
         }
 
+        /* Ensure header and sidebar stay above modal backdrop */
+        .navbar, .sidebar {
+            z-index: 999999 !important;
+            position: relative !important;
+        }
+
+        /* Prevent modal backdrop from affecting header */
+        .navbar {
+            background: white !important;
+        }
+
         /* Slide-in Modal Styles */
         .ledger-modal {
             display: none;
@@ -865,14 +888,14 @@
            .ledger-modal-backdrop {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 70px; /* Start below header */
+            left: 260px; /* Start after sidebar width */
+            width: calc(100vw - 260px); /* Exclude sidebar width */
+            height: calc(100vh - 70px); /* Exclude header height */
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(5px);
             -webkit-backdrop-filter: blur(5px);
-            z-index: 999998 !important;
+            z-index: 999997 !important; /* Lower than header and sidebar */
             opacity: 0;
             transition: all 0.3s ease;
         }
@@ -885,6 +908,11 @@
         @media (max-width: 768px) {
             .ledger-modal {
                 width: 100%;
+            }
+            
+            .ledger-modal-backdrop {
+                left: 0; /* Full width on mobile */
+                width: 100vw;
             }
         }
 
