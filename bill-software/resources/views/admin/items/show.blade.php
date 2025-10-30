@@ -8,6 +8,24 @@
             <h4 class="mb-0 d-flex align-items-center"><i class="bi bi-box-seam me-2"></i> Item Details - {{ $item->name }}</h4>
         </div>
         <div class="d-flex gap-2">
+            <a href="{{ route('admin.batches.item', $item->id) }}" class="btn btn-info">
+                <i class="bi bi-boxes me-1"></i>Batches (F5)
+            </a>
+            <a href="{{ route('admin.items.stock-ledger-complete', $item->id) }}" class="btn btn-warning">
+                <i class="bi bi-graph-up me-1"></i>Stock Ledger (F10)
+            </a>
+            <a href="{{ route('admin.items.pending-orders', $item->id) }}" class="btn btn-outline-warning">
+                <i class="bi bi-hourglass-split me-1"></i>Pending Order (F7)
+            </a>
+            <a href="{{ route('admin.items.godown-expiry', $item->id) }}" class="btn btn-outline-danger">
+                <i class="bi bi-calendar-x me-1"></i>Godown Expiry
+            </a>
+            <a href="{{ route('admin.items.expiry-ledger', $item->id) }}" class="btn btn-outline-info">
+                <i class="bi bi-file-text me-1"></i>Expiry Ledger (F5)
+            </a>
+            <a href="{{ route('admin.batches.all') }}" class="btn btn-outline-info">
+                <i class="bi bi-collection me-1"></i>All Batches
+            </a>
             <a href="{{ route('admin.items.edit', $item->id) }}" class="btn btn-primary">
                 <i class="bi bi-pencil me-1"></i>Edit Item
             </a>

@@ -15,7 +15,61 @@
                         </a>
                     </div>
                 </div>
+  <!-- Customer Features Section -->
+                <div class="card shadow-sm mt-4 mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Customer Features & Options</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- Left Column -->
+                            <div class="col-md-6">
+                                <h6 class="mb-3 fw-bold">Transaction & Ledger</h6>
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="{{ route('admin.customers.ledger', $customer) }}" class="btn btn-outline-info btn-sm">
+                                        <i class="bi bi-book me-2"></i>Ledger (F10)
+                                    </a>
+                                    <a href="{{ route('admin.customers.dues', $customer) }}" class="btn btn-outline-warning btn-sm">
+                                        <i class="bi bi-list-check me-2"></i>Due List (F5)
+                                    </a>
+                                    <a href="{{ route('admin.customers.expiry-ledger', $customer) }}" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-calendar-x me-2"></i>Expiry Ledger
+                                    </a>
+                                </div>
 
+                                <h6 class="mb-3 fw-bold mt-4">Delivery & Inventory</h6>
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="{{ route('admin.customers.challans', $customer) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-box-seam me-2"></i>Pending Challans
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <h6 class="mb-3 fw-bold">Pricing & Discounts</h6>
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="{{ route('admin.customers.special-rates', $customer) }}" class="btn btn-outline-success btn-sm">
+                                        <i class="bi bi-tag me-2"></i>Special Rates
+                                    </a>
+                                    <a href="{{ route('admin.customers.discounts', $customer) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-percent me-2"></i>Discount (Brk/Exp)
+                                    </a>
+                                    <a href="{{ route('admin.customers.copy-discount', $customer) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-files me-2"></i>Copy Discount
+                                    </a>
+                                </div>
+
+                                <h6 class="mb-3 fw-bold mt-4">Pharmacy & Medical</h6>
+                                <div class="d-flex flex-column gap-2">
+                                    <a href="{{ route('admin.customers.prescriptions', $customer) }}" class="btn btn-outline-info btn-sm">
+                                        <i class="bi bi-prescription me-2"></i>Prescription List
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- Tab Navigation -->
                 <ul class="nav nav-tabs mb-3" id="customerTabs" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -755,6 +809,8 @@
                         </div>
                     </div>
                 </div>
+
+              
 
                 <!-- Form Actions -->
                 <div class="d-flex justify-content-end gap-2 mt-4 mb-4">

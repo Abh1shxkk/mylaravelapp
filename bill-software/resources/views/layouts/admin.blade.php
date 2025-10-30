@@ -1124,6 +1124,81 @@
                     </div>
                 </div>
 
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuPersonalDirectory" style="background:transparent;">
+                        <i class="bi bi-person-lines-fill me-2"></i> <span class="label">Personal Directory</span>
+                    </button>
+                    <div class="collapse" id="menuPersonalDirectory">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.personal-directory.create') }}">
+                            <span class="label">Add Entry</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.personal-directory.index') }}">
+                            <span class="label">All Entries</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuGeneralReminders" style="background:transparent;">
+                        <i class="bi bi-bell me-2"></i> <span class="label">General Reminders</span>
+                    </button>
+                    <div class="collapse" id="menuGeneralReminders">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.general-reminders.create') }}">
+                            <span class="label">Add Reminder</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.general-reminders.index') }}">
+                            <span class="label">All Reminders</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuGeneralNotebook" style="background:transparent;">
+                        <i class="bi bi-journal-text me-2"></i> <span class="label">General NoteBook</span>
+                    </button>
+                    <div class="collapse" id="menuGeneralNotebook">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.general-notebook.create') }}">
+                            <span class="label">Add Note</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.general-notebook.index') }}">
+                            <span class="label">All Notes</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuItemCategory" style="background:transparent;">
+                        <i class="bi bi-tag me-2"></i> <span class="label">Item Category</span>
+                    </button>
+                    <div class="collapse" id="menuItemCategory">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.item-category.create') }}">
+                            <span class="label">Add Category</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.item-category.index') }}">
+                            <span class="label">All Categories</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-2">
+                    <button class="btn btn-sm w-100 text-start text-white d-flex align-items-center px-2"
+                        data-bs-toggle="collapse" data-bs-target="#menuTransportMaster" style="background:transparent;">
+                        <i class="bi bi-truck me-2"></i> <span class="label">Transport Master</span>
+                    </button>
+                    <div class="collapse" id="menuTransportMaster">
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.transport-master.create') }}">
+                            <span class="label">Add Transport</span>
+                        </a>
+                        <a class="nav-link ms-3 d-flex align-items-center" href="{{ route('admin.transport-master.index') }}">
+                            <span class="label">All Transports</span>
+                        </a>
+                    </div>
+                </div>
+
                 </nav>
             </div>
 

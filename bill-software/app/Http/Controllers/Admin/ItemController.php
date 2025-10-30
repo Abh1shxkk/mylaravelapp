@@ -5,6 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Company;
+use App\Models\StockLedger;
+use App\Models\Customer;
+use App\Models\Supplier;
+use App\Models\PendingOrder;
+use App\Models\GodownExpiry;
+use App\Models\ExpiryLedger;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
@@ -169,6 +175,151 @@ class ItemController extends Controller
         return $data;
     }
 
+    /**
+     * View stock ledger for an item (F10) - Basic Version
+     */
+    public function stockLedger(Item $item)
+    {
+        $fromDate = request('from_date');
+        $toDate = request('to_date');
+        $transactionType = request('transaction_type');
+        $referenceType = request('reference_type');
+
+        $ledgers = StockLedger::query()
+            ->where('item_id', $item->id)
+            ->when($fromDate, function ($query) use ($fromDate) {
+                return $query->whereDate('transaction_date', '>=', $fromDate);
+            })
+            ->when($toDate, function ($query) use ($toDate) {
+                return $query->whereDate('transaction_date', '<=', $toDate);
+            })
+            ->when($transactionType, function ($query) use ($transactionType) {
+                return $query->where('transaction_type', $transactionType);
+            })
+            ->when($referenceType, function ($query) use ($referenceType) {
+                return $query->where('reference_type', $referenceType);
+            })
+            ->with('batch', 'createdBy')
+            ->orderByDesc('transaction_date')
+            ->paginate(25)
+            ->withQueryString();
+
+        // Calculate totals
+        $totalInMovements = StockLedger::where('item_id', $item->id)
+            ->whereIn('transaction_type', ['IN', 'RETURN'])
+            ->sum('quantity');
+
+        $totalOutMovements = StockLedger::where('item_id', $item->id)
+            ->whereIn('transaction_type', ['OUT', 'ADJUSTMENT'])
+            ->sum('quantity');
+
+        return view('admin.items.stock-ledger', compact(
+            'item', 'ledgers', 'fromDate', 'toDate', 
+            'transactionType', 'referenceType',
+            'totalInMovements', 'totalOutMovements'
+        ));
+    }
+
+    /**
+     * Get party details via AJAX
+     */
+    public function getPartyDetails($type, $id)
+    {
+        if ($type === 'customer') {
+            $party = Customer::find($id);
+        } else {
+            $party = Supplier::find($id);
+        }
+
+        if (!$party) {
+            return response()->json(['error' => 'Party not found'], 404);
+        }
+
+        return response()->json([
+            'name' => $party->name ?? '',
+            'address' => $party->address ?? '',
+            'city' => $party->city ?? '',
+            'phone' => $party->phone ?? '',
+        ]);
+    }
+
+    /**
+     * View stock ledger for an item (F10) - Complete EasySol Style
+     */
+    public function stockLedgerComplete(Item $item)
+    {
+        $fromDate = request('from_date', now()->startOfMonth()->toDateString());
+        $toDate = request('to_date', now()->toDateString());
+        $partyId = request('party_id');
+        $selectedPartyId = $partyId;
+        $partyName = '';
+        $partyCode = '';
+
+        // Parse party ID (C for customer, S for supplier)
+        $customerId = null;
+        $supplierId = null;
+
+        if ($partyId) {
+            if (str_starts_with($partyId, 'C')) {
+                $customerId = substr($partyId, 1);
+                $customer = Customer::find($customerId);
+                $partyName = $customer->name ?? '';
+                $partyCode = $customer->code ?? '';
+            } elseif (str_starts_with($partyId, 'S')) {
+                $supplierId = substr($partyId, 1);
+                $supplier = Supplier::find($supplierId);
+                $partyName = $supplier->name ?? '';
+                $partyCode = $supplier->code ?? '';
+            }
+        }
+
+        // Get ledger entries
+        $ledgers = StockLedger::query()
+            ->where('item_id', $item->id)
+            ->whereDate('transaction_date', '>=', $fromDate)
+            ->whereDate('transaction_date', '<=', $toDate)
+            ->when($customerId, function ($query) use ($customerId) {
+                return $query->where('customer_id', $customerId);
+            })
+            ->when($supplierId, function ($query) use ($supplierId) {
+                return $query->where('supplier_id', $supplierId);
+            })
+            ->with('batch', 'customer', 'supplier', 'salesman')
+            ->orderBy('transaction_date')
+            ->paginate(20)
+            ->withQueryString();
+
+        // Calculate opening and closing balances
+        $openingBalance = StockLedger::where('item_id', $item->id)
+            ->whereDate('transaction_date', '<', $fromDate)
+            ->when($customerId, function ($query) use ($customerId) {
+                return $query->where('customer_id', $customerId);
+            })
+            ->when($supplierId, function ($query) use ($supplierId) {
+                return $query->where('supplier_id', $supplierId);
+            })
+            ->sum('running_balance');
+
+        $closingBalance = $item->getTotalQuantity();
+
+        // Get all customers and suppliers with only needed columns
+        $customers = Customer::where('is_deleted', 0)
+            ->select('id', 'name', 'code')
+            ->orderBy('name')
+            ->get();
+        $suppliers = Supplier::where('is_deleted', 0)
+            ->select('supplier_id', 'name', 'code')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.items.stock-ledger-complete', compact(
+            'item', 'ledgers', 'fromDate', 'toDate',
+            'partyName', 'partyCode', 'selectedPartyId',
+            'openingBalance', 'closingBalance',
+            'customers', 'suppliers'
+        ));
+    }
+
     private function rules(): array
     {
         return [
@@ -280,6 +431,203 @@ class ItemController extends Controller
             'category_2' => 'nullable|string|max:100',
             'upc' => 'nullable|string|max:100',
         ];
+    }
+
+    /**
+     * View Pending Orders for an item (F7)
+     */
+    public function pendingOrders(Item $item)
+    {
+        $pendingOrders = PendingOrder::where('item_id', $item->id)
+            ->where('status', 'pending')
+            ->with('supplier')
+            ->orderBy('order_date', 'desc')
+            ->paginate(20);
+
+        $suppliers = Supplier::where('is_deleted', 0)
+            ->select('supplier_id', 'name', 'code')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.items.pending-orders', compact(
+            'item',
+            'pendingOrders',
+            'suppliers'
+        ));
+    }
+
+    /**
+     * Store a new pending order
+     */
+    public function storePendingOrder(Request $request, Item $item)
+    {
+        $validated = $request->validate([
+            'supplier_id' => 'required|exists:suppliers,supplier_id',
+            'order_date' => 'required|date',
+            'rate' => 'required|numeric|min:0',
+            'tax_percent' => 'nullable|numeric|min:0|max:100',
+            'discount_percent' => 'nullable|numeric|min:0|max:100',
+            'cost' => 'required|numeric|min:0',
+            'scm_percent' => 'nullable|numeric|min:0|max:100',
+            'quantity' => 'required|integer|min:1',
+            'free_quantity' => 'nullable|integer|min:0',
+            'urgent_flag' => 'nullable|in:Y,N',
+            'scheme_plus' => 'nullable|integer|min:0',
+            'scheme_minus' => 'nullable|integer|min:0',
+            'remarks' => 'nullable|string',
+        ]);
+
+        $validated['item_id'] = $item->id;
+        $validated['status'] = 'pending';
+        $validated['urgent_flag'] = $validated['urgent_flag'] ?? 'N';
+
+        PendingOrder::create($validated);
+
+        return redirect()->route('admin.items.pending-orders', $item)
+            ->with('success', 'Pending order created successfully');
+    }
+
+    /**
+     * Mark pending order as received
+     */
+    public function receivePendingOrder(Request $request, Item $item, PendingOrder $pendingOrder)
+    {
+        $pendingOrder->update(['status' => 'received']);
+
+        return redirect()->route('admin.items.pending-orders', $item)
+            ->with('success', 'Pending order marked as received');
+    }
+
+    /**
+     * Delete pending order
+     */
+    public function deletePendingOrder(Item $item, PendingOrder $pendingOrder)
+    {
+        $pendingOrder->delete();
+
+        return redirect()->route('admin.items.pending-orders', $item)
+            ->with('success', 'Pending order deleted successfully');
+    }
+
+    /**
+     * View Godown Expiry for an item
+     */
+    public function godownExpiry(Item $item)
+    {
+        $expiryRecords = GodownExpiry::where('item_id', $item->id)
+            ->with('batch')
+            ->orderBy('expiry_date', 'asc')
+            ->paginate(20);
+
+        return view('admin.items.godown-expiry', compact(
+            'item',
+            'expiryRecords'
+        ));
+    }
+
+    /**
+     * Store godown expiry record
+     */
+    public function storeGodownExpiry(Request $request, Item $item)
+    {
+        $validated = $request->validate([
+            'batch_id' => 'required|exists:batches,id',
+            'expiry_date' => 'required|date',
+            'quantity' => 'required|integer|min:1',
+            'godown_location' => 'nullable|string|max:255',
+            'remarks' => 'nullable|string',
+        ]);
+
+        $validated['item_id'] = $item->id;
+        $validated['status'] = 'active';
+
+        GodownExpiry::create($validated);
+
+        return redirect()->route('admin.items.godown-expiry', $item)
+            ->with('success', 'Expiry record created successfully');
+    }
+
+    /**
+     * Mark godown expiry as expired
+     */
+    public function markExpired(Item $item, GodownExpiry $godownExpiry)
+    {
+        $godownExpiry->update(['status' => 'expired']);
+
+        return redirect()->route('admin.items.godown-expiry', $item)
+            ->with('success', 'Record marked as expired');
+    }
+
+    /**
+     * Delete godown expiry record
+     */
+    public function deleteGodownExpiry(Item $item, GodownExpiry $godownExpiry)
+    {
+        $godownExpiry->delete();
+
+        return redirect()->route('admin.items.godown-expiry', $item)
+            ->with('success', 'Expiry record deleted successfully');
+    }
+
+    /**
+     * View Expiry Ledger for an item
+     */
+    public function expiryLedger(Item $item)
+    {
+        $fromDate = request('from_date', now()->startOfMonth()->toDateString());
+        $toDate = request('to_date', now()->toDateString());
+
+        $ledgers = ExpiryLedger::where('item_id', $item->id)
+            ->whereDate('transaction_date', '>=', $fromDate)
+            ->whereDate('transaction_date', '<=', $toDate)
+            ->with('batch', 'customer', 'supplier')
+            ->orderBy('transaction_date', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('admin.items.expiry-ledger', compact(
+            'item',
+            'ledgers',
+            'fromDate',
+            'toDate'
+        ));
+    }
+
+    /**
+     * Store expiry ledger entry
+     */
+    public function storeExpiryLedger(Request $request, Item $item)
+    {
+        $validated = $request->validate([
+            'batch_id' => 'required|exists:batches,id',
+            'transaction_date' => 'required|date',
+            'trans_no' => 'nullable|string|max:100',
+            'transaction_type' => 'required|in:IN,OUT,RETURN,ADJUSTMENT',
+            'party_name' => 'required|string|max:255',
+            'quantity' => 'required|integer',
+            'free_quantity' => 'nullable|integer|min:0',
+            'running_balance' => 'required|numeric',
+            'expiry_date' => 'required|date',
+            'remarks' => 'nullable|string',
+        ]);
+
+        $validated['item_id'] = $item->id;
+
+        ExpiryLedger::create($validated);
+
+        return redirect()->route('admin.items.expiry-ledger', $item)
+            ->with('success', 'Expiry ledger entry created successfully');
+    }
+
+    /**
+     * Delete expiry ledger entry
+     */
+    public function deleteExpiryLedger(Item $item, ExpiryLedger $expiryLedger)
+    {
+        $expiryLedger->delete();
+
+        return redirect()->route('admin.items.expiry-ledger', $item)
+            ->with('success', 'Expiry ledger entry deleted successfully');
     }
 }
 

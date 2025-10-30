@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Models\StockLedger;
+use App\Models\Batch;
+use App\Observers\StockLedgerObserver;
+use App\Observers\BatchObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Register observers for automatic data sync
+        StockLedger::observe(StockLedgerObserver::class);
+        Batch::observe(BatchObserver::class);
     }
 }

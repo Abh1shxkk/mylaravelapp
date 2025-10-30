@@ -125,13 +125,18 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="c_mgr" class="form-label">C.mgr</label>
-                                    <input type="text" class="form-control @error('c_mgr') is-invalid @enderror" 
-                                           id="c_mgr" name="c_mgr" value="{{ old('c_mgr', $divisionalManager->c_mgr) }}" 
-                                           placeholder="Enter country manager">
-                                    @error('c_mgr')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <label for="c_mgr" class="form-label">C.mgr <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control @error('c_mgr') is-invalid @enderror" 
+                                               id="c_mgr" name="c_mgr" value="{{ old('c_mgr', $divisionalManager->c_mgr) }}" 
+                                               placeholder="Select country manager" readonly>
+                                        <button class="btn btn-outline-primary" type="button" onclick="openCountryManagerModal()">
+                                            <i class="bi bi-search me-2"></i>Select
+                                        </button>
+                                        @error('c_mgr')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -150,4 +155,74 @@
         </div>
     </div>
 </div>
+<!-- Country Manager Modal -->
+<div id="countryManagerModal" class="manager-modal">
+    <div class="manager-modal-content">
+        <div class="manager-modal-header">
+            <h5 class="manager-modal-title"><i class="bi bi-people me-2"></i>Select Country Manager</h5>
+            <button type="button" class="btn-close-modal" onclick="closeCountryManagerModal()"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="manager-modal-body" id="countryManagerModalBody"></div>
+    </div>
+</div>
+<div id="countryManagerModalBackdrop" class="manager-modal-backdrop"></div>
+<script>
+function openCountryManagerModal() {
+    const modal = document.getElementById('countryManagerModal');
+    const backdrop = document.getElementById('countryManagerModalBackdrop');
+    const modalBody = document.getElementById('countryManagerModalBody');
+    backdrop.style.display = 'block';
+    setTimeout(() => { backdrop.classList.add('show'); modal.classList.add('show'); }, 10);
+    modalBody.innerHTML = `<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+    fetch('{{ route("admin.country-managers.index") }}?modal=true', {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => populateCountryManagerModal(data))
+        .catch(error => { console.error('Error:', error); modalBody.innerHTML = `<div class="alert alert-danger m-3"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load country managers.</div>`; });
+}
+function populateCountryManagerModal(managers) {
+    const modalBody = document.getElementById('countryManagerModalBody');
+    if (!managers || managers.length === 0) {
+        modalBody.innerHTML = `<div class="text-center py-5"><i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i><p class="text-muted mt-3">No country managers found</p><a href="{{ route('admin.country-managers.create') }}" class="btn btn-sm btn-primary mt-2"><i class="bi bi-plus-lg me-2"></i>Add New</a></div>`;
+        return;
+    }
+    let html = '<div class="row g-2">';
+    managers.forEach(manager => {
+        html += `<div class="col-12"><div class="manager-card p-3" onclick="selectCountryManager('${manager.name} (${manager.code})', '${manager.id}')"><div class="d-flex justify-content-between align-items-start"><div><h6 class="mb-1 fw-600">${manager.name}</h6><small class="text-muted">Code: ${manager.code}</small></div><i class="bi bi-chevron-right text-primary"></i></div><div class="mt-2 small text-muted"><div><i class="bi bi-telephone me-2"></i>${manager.mobile || 'N/A'}</div><div><i class="bi bi-envelope me-2"></i>${manager.email || 'N/A'}</div></div></div></div>`;
+    });
+    html += '</div>';
+    modalBody.innerHTML = html;
+}
+function selectCountryManager(name, id) { document.getElementById('c_mgr').value = name; closeCountryManagerModal(); }
+function closeCountryManagerModal() {
+    const modal = document.getElementById('countryManagerModal');
+    const backdrop = document.getElementById('countryManagerModalBackdrop');
+    modal.classList.remove('show'); backdrop.classList.remove('show');
+    setTimeout(() => { backdrop.style.display = 'none'; }, 300);
+}
+document.addEventListener('click', function (e) { if (e.target && e.target.id === 'countryManagerModalBackdrop') closeCountryManagerModal(); });
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { const modal = document.getElementById('countryManagerModal'); if (modal && modal.classList.contains('show')) closeCountryManagerModal(); } });
+</script>
+<style>
+.manager-modal { position: fixed; top: 70px; right: 0; width: 400px; height: calc(100vh - 70px); z-index: 999999; transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); visibility: hidden; opacity: 0; }
+.manager-modal.show { transform: translateX(0); visibility: visible; opacity: 1; }
+.manager-modal-content { background: white; height: 100%; box-shadow: -2px 0 15px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; }
+.manager-modal-header { padding: 1rem 1.25rem; border-bottom: 2px solid #dee2e6; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.manager-modal-title { margin: 0; font-size: 1.1rem; font-weight: 600; color: #ffffff; }
+.btn-close-modal { background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; cursor: pointer; font-size: 1rem; }
+.btn-close-modal:hover { background: rgba(255, 255, 255, 0.3); transform: rotate(90deg); }
+.manager-modal-body { padding: 1rem; overflow-y: auto; flex: 1; background: #f8f9fa; }
+.manager-modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 999998; opacity: 0; transition: all 0.3s ease; }
+.manager-modal-backdrop.show { opacity: 1; }
+.manager-card { cursor: pointer; transition: all 0.2s ease; border: 1px solid #dee2e6; }
+.manager-card:hover { border-color: #0d6efd; box-shadow: 0 2px 8px rgba(13, 110, 253, 0.15); transform: translateY(-1px); }
+@media (max-width: 768px) { .manager-modal { width: 100%; } }
+</style>
 @endsection

@@ -126,6 +126,54 @@ class Customer extends Model
     'deleted_at'
 ];
 
+    /**
+     * Relationship with Customer Ledger
+     */
+    public function ledgers()
+    {
+        return $this->hasMany(CustomerLedger::class);
+    }
+
+    /**
+     * Relationship with Customer Dues
+     */
+    public function dues()
+    {
+        return $this->hasMany(CustomerDue::class);
+    }
+
+    /**
+     * Relationship with Customer Special Rates
+     */
+    public function specialRates()
+    {
+        return $this->hasMany(CustomerSpecialRate::class);
+    }
+
+    /**
+     * Relationship with Customer Discounts
+     */
+    public function discounts()
+    {
+        return $this->hasMany(CustomerDiscount::class);
+    }
+
+    /**
+     * Relationship with Customer Challans
+     */
+    public function challans()
+    {
+        return $this->hasMany(CustomerChallan::class);
+    }
+
+    /**
+     * Relationship with Customer Prescriptions
+     */
+    public function prescriptions()
+    {
+        return $this->hasMany(CustomerPrescription::class);
+    }
+
 }
 
 

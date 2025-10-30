@@ -47,6 +47,38 @@ class Item extends Model
         return $this->belongsTo(Company::class, 'company_id');
     }
 
+    /**
+     * Relationship with Batches
+     */
+    public function batches()
+    {
+        return $this->hasMany(Batch::class, 'item_id');
+    }
+
+    /**
+     * Relationship with Stock Ledger
+     */
+    public function stockLedgers()
+    {
+        return $this->hasMany(StockLedger::class, 'item_id');
+    }
+
+    /**
+     * Get total quantity from all batches
+     */
+    public function getTotalQuantity()
+    {
+        return $this->batches()->where('is_deleted', 0)->sum('quantity');
+    }
+
+    /**
+     * Get active batches
+     */
+    public function getActiveBatches()
+    {
+        return $this->batches()->where('is_deleted', 0)->where('status', 'active')->get();
+    }
+
     protected $casts = [
         // All fields are now VARCHAR to accept various data formats
         'Expiry' => 'string',
