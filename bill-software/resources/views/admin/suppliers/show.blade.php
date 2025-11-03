@@ -9,9 +9,14 @@
       </h2>
       <div class="text-muted small">Detailed supplier record</div>
     </div>
-    <a href="{{ route('admin.suppliers.index') }}" class="btn btn-outline-secondary btn-sm fw-semibold">
-      <i class="bi bi-arrow-left me-1"></i> Back to Suppliers
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{{ route('admin.suppliers.pending-orders', $supplier) }}" class="btn btn-info btn-sm fw-semibold">
+        <i class="bi bi-cart-check me-1"></i> Pending Orders
+      </a>
+      <a href="{{ route('admin.suppliers.index') }}" class="btn btn-outline-secondary btn-sm fw-semibold">
+        <i class="bi bi-arrow-left me-1"></i> Back to Suppliers
+      </a>
+    </div>
   </div>
 
   <div class="row g-4">

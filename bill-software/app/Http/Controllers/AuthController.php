@@ -11,6 +11,14 @@ class AuthController extends Controller
 {
     public function showLogin()
     {
+        // Redirect if already logged in
+        if (Auth::check()) {
+            $role = auth()->user()->role;
+            return $role === 'admin' 
+                ? redirect('/admin/dashboard') 
+                : redirect('/user/dashboard');
+        }
+        
         return view('auth.login');
     }
 
@@ -34,6 +42,14 @@ class AuthController extends Controller
 
     public function showRegister()
     {
+        // Redirect if already logged in
+        if (Auth::check()) {
+            $role = auth()->user()->role;
+            return $role === 'admin' 
+                ? redirect('/admin/dashboard') 
+                : redirect('/user/dashboard');
+        }
+        
         return view('auth.register');
     }
 

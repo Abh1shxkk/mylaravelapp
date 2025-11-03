@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Supplier;
+use App\Models\PendingOrder;
+use App\Models\Item;
 use App\Helpers\StateHelper;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -274,5 +276,321 @@ class SupplierController extends Controller
     private function convertYNToBoolean($value): bool
     {
         return $value === 'Y';
+    }
+
+    /**
+     * View Pending Orders for a supplier
+     */
+    public function pendingOrders(Supplier $supplier)
+    {
+        $orders = PendingOrder::where('supplier_id', $supplier->supplier_id)
+            ->orderBy('order_date', 'desc')
+            ->paginate(20);
+
+        // Get all items for dropdown
+        $items = Item::where('is_deleted', 0)
+            ->select('id', 'bar_code', 'name', 'packing')
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.suppliers.pending-orders', compact(
+            'supplier',
+            'orders',
+            'items'
+        ));
+    }
+
+    /**
+     * Store a new pending order for supplier
+     */
+    public function storePendingOrder(Request $request, Supplier $supplier)
+    {
+        $validated = $request->validate([
+            'order_no' => 'required|string|max:50',
+            'item_id' => 'required|exists:items,id',
+            'order_date' => 'required|date',
+            'balance_qty' => 'required|numeric|min:0',
+            'order_qty' => 'required|numeric|min:0',
+            'free_qty' => 'required|numeric|min:0',
+        ]);
+
+        // Check if this supplier already has an order for this item
+        $existingOrder = PendingOrder::where('supplier_id', $supplier->supplier_id)
+            ->where('item_id', $validated['item_id'])
+            ->first();
+
+        if ($existingOrder) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Item already added! Please edit the existing order from Item Pending Orders page to update quantity.'
+                ], 422);
+            }
+
+            return redirect()->route('admin.suppliers.pending-orders', $supplier)
+                ->with('error', 'Item already added! Please edit the existing order from Item Pending Orders page to update quantity.');
+        }
+
+        // Check if this item already has orders from OTHER suppliers
+        $otherOrders = PendingOrder::where('item_id', $validated['item_id'])
+            ->where('supplier_id', '!=', $supplier->supplier_id)
+            ->with('supplier')
+            ->get();
+        
+        // If other suppliers have ordered this item and user hasn't confirmed, show confirmation
+        if ($otherOrders->isNotEmpty() && $request->ajax() && !$request->input('force_create')) {
+            $suppliersList = $otherOrders->map(function($order) {
+                return [
+                    'name' => $order->supplier->name ?? 'Unknown',
+                    'order_no' => $order->order_no ?? 'N/A'
+                ];
+            })->unique('name')->values();
+            
+            return response()->json([
+                'success' => false,
+                'requires_confirmation' => true,
+                'message' => 'Order Already Given',
+                'suppliers' => $suppliersList
+            ], 200);
+        }
+        
+        $otherOrderQty = $otherOrders->sum(function($order) {
+            return $order->order_qty + $order->free_qty;
+        });
+
+        // Set supplier_id and calculated other_order
+        $validated['supplier_id'] = $supplier->supplier_id;
+        $validated['other_order'] = $otherOrderQty;
+
+        $order = PendingOrder::create($validated);
+        $order->load('item');
+        
+        // Update other_order for all existing orders of this item (including other suppliers)
+        $this->updateOtherOrderQuantities($validated['item_id']);
+
+        // Check if AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            $totalOrders = PendingOrder::where('supplier_id', $supplier->supplier_id)->count();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Order added successfully',
+                'order' => [
+                    'id' => $order->id,
+                    'index' => $totalOrders,
+                    'order_no' => $order->order_no,
+                    'item_id' => $order->item_id,
+                    'company' => $order->item->company_short_name ?? '---',
+                    'balance_qty' => $order->balance_qty,
+                    'item_code' => $order->item->bar_code ?? '---',
+                    'item_name' => $order->item->name ?? '---',
+                    'pack' => $order->item->packing ?? '---',
+                    'order_qty' => $order->order_qty,
+                    'free_qty' => $order->free_qty,
+                    'other_order' => $order->other_order,
+                    'order_date' => \Carbon\Carbon::parse($order->order_date)->format('d-M-y'),
+                    'order_date_raw' => $order->order_date,
+                    'item_cost' => $order->item->cost ?? 0,
+                ]
+            ]);
+        }
+
+        return redirect()->route('admin.suppliers.pending-orders', $supplier)
+            ->with('success', 'Order added successfully');
+    }
+
+    /**
+     * Update pending order
+     */
+    public function updatePendingOrder(Request $request, Supplier $supplier, PendingOrder $pendingOrder)
+    {
+        $validated = $request->validate([
+            'order_no' => 'required|string|max:50',
+            'item_id' => 'required|exists:items,id',
+            'order_date' => 'required|date',
+            'balance_qty' => 'required|numeric|min:0',
+            'order_qty' => 'required|numeric|min:0',
+            'free_qty' => 'required|numeric|min:0',
+        ]);
+
+        // Update the order
+        $pendingOrder->update($validated);
+        
+        // Recalculate other_order for all orders of this item
+        $this->updateOtherOrderQuantities($validated['item_id']);
+        
+        $pendingOrder->load('item');
+
+        // Check if AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order updated successfully',
+                'order' => [
+                    'id' => $pendingOrder->id,
+                    'order_no' => $pendingOrder->order_no,
+                    'item_id' => $pendingOrder->item_id,
+                    'company' => $pendingOrder->item->company_short_name ?? '---',
+                    'balance_qty' => $pendingOrder->balance_qty,
+                    'item_code' => $pendingOrder->item->bar_code ?? '---',
+                    'item_name' => $pendingOrder->item->name ?? '---',
+                    'pack' => $pendingOrder->item->packing ?? '---',
+                    'order_qty' => $pendingOrder->order_qty,
+                    'free_qty' => $pendingOrder->free_qty,
+                    'other_order' => $pendingOrder->other_order,
+                    'order_date' => \Carbon\Carbon::parse($pendingOrder->order_date)->format('d-M-y'),
+                    'order_date_raw' => $pendingOrder->order_date,
+                    'item_cost' => $pendingOrder->item->cost ?? 0,
+                ]
+            ]);
+        }
+
+        return redirect()->route('admin.suppliers.pending-orders', $supplier)
+            ->with('success', 'Order updated successfully');
+    }
+    
+    /**
+     * Delete pending order
+     */
+    public function deletePendingOrder(Request $request, Supplier $supplier, PendingOrder $pendingOrder)
+    {
+        $itemId = $pendingOrder->item_id;
+        $pendingOrder->delete();
+        
+        // Update other_order for remaining orders of this item
+        $this->updateOtherOrderQuantities($itemId);
+
+        // Check if AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Order deleted successfully'
+            ]);
+        }
+
+        return redirect()->route('admin.suppliers.pending-orders', $supplier)
+            ->with('success', 'Order deleted successfully');
+    }
+    
+    /**
+     * Print pending order by order number
+     */
+    public function printPendingOrder(Request $request, Supplier $supplier, $orderNo)
+    {
+        $orders = PendingOrder::where('supplier_id', $supplier->supplier_id)
+            ->where('order_no', $orderNo)
+            ->with('item')
+            ->get();
+        
+        if ($orders->isEmpty()) {
+            return redirect()->route('admin.suppliers.pending-orders', $supplier)
+                ->with('error', 'No orders found for this order number.');
+        }
+        
+        $withTotal = $request->query('with_total', '1') === '1';
+        
+        return view('admin.suppliers.print-pending-order', compact('supplier', 'orders', 'orderNo', 'withTotal'));
+    }
+    
+    /**
+     * Update other_order quantities for all orders of a specific item
+     * This recalculates the "other suppliers order quantity + free quantity" for each supplier
+     */
+    private function updateOtherOrderQuantities($itemId)
+    {
+        // Get all orders for this item grouped by supplier
+        $orders = PendingOrder::where('item_id', $itemId)->get();
+        
+        foreach ($orders as $order) {
+            // Calculate total (order_qty + free_qty) from OTHER suppliers for this item
+            $otherOrders = PendingOrder::where('item_id', $itemId)
+                ->where('supplier_id', '!=', $order->supplier_id)
+                ->get();
+            
+            $otherOrderQty = $otherOrders->sum(function($otherOrder) {
+                return $otherOrder->order_qty + $otherOrder->free_qty;
+            });
+            
+            // Update the other_order field
+            $order->update(['other_order' => $otherOrderQty]);
+        }
+    }
+    
+    /**
+     * Get pending orders data for supplier (for purchase transaction)
+     */
+    public function getPendingOrdersData(Supplier $supplier)
+    {
+        $orders = PendingOrder::where('supplier_id', $supplier->supplier_id)
+            ->with('item')
+            ->orderBy('order_date', 'desc')
+            ->get();
+        
+        $ordersData = $orders->map(function($order) {
+            $item = null;
+            
+            // Try to get item by relationship
+            if ($order->item) {
+                $item = $order->item;
+            } 
+            // If relationship fails, try direct query
+            else if ($order->item_id) {
+                $item = Item::find($order->item_id);
+            }
+            
+            return [
+                'order_no' => $order->order_no,
+                'item_id' => $order->item_id, // Debug
+                'item_code' => $item ? $item->item_code : '---',
+                'item_name' => $item ? $item->name : '---', // Changed from item_name to name
+                'order_qty' => $order->order_qty ?? 0,
+                'free_qty' => $order->free_qty ?? 0,
+                'order_date' => $order->order_date ? $order->order_date->format('Y-m-d') : '---',
+            ];
+        });
+        
+        return response()->json([
+            'success' => true,
+            'orders' => $ordersData
+        ]);
+    }
+    
+    /**
+     * Get items for specific order number
+     */
+    public function getOrderItems(Supplier $supplier, $orderNo)
+    {
+        $orders = PendingOrder::where('supplier_id', $supplier->supplier_id)
+            ->where('order_no', $orderNo)
+            ->with('item')
+            ->get();
+        
+        $items = $orders->map(function($order) {
+            $item = null;
+            
+            // Try to get item by relationship
+            if ($order->item) {
+                $item = $order->item;
+            } 
+            // If relationship fails, try direct query
+            else if ($order->item_id) {
+                $item = Item::find($order->item_id);
+            }
+            
+            return [
+                'item_code' => $item ? $item->id : '', // Use item ID as code
+                'item_name' => $item ? $item->name : '',
+                'order_qty' => $order->order_qty ?? 0,
+                'free_qty' => $order->free_qty ?? 0,
+                'balance_qty' => $order->balance_qty ?? 0,
+                'pur_rate' => $item ? $item->pur_rate : 0, // Purchase rate from item
+                'mrp' => $item ? $item->mrp : 0, // MRP from item
+            ];
+        });
+        
+        return response()->json([
+            'success' => true,
+            'items' => $items
+        ]);
     }
 }

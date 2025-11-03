@@ -24,6 +24,56 @@
                 <li><a class="dropdown-item" href="{{ route('admin.sale.modification') }}">Modification</a></li>
               </ul>
             </li>
+            
+            <!-- Purchase Submenu -->
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">Purchase</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ route('admin.purchase.transaction') }}">Transaction</a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.purchase.modification') }}">Modification</a></li>
+              </ul>
+            </li>
+            
+            <!-- Sale Return Submenu -->
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">Sales Return</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ route('admin.sale-return.transaction') }}">Transaction <span class="badge bg-secondary ms-1">Ctrl+F3</span></a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.sale-return.modification') }}">Modification <span class="badge bg-secondary ms-1">Shift+Ctrl+F3</span></a></li>
+              </ul>
+            </li>
+            
+            <!-- Breakage/Expiry from customer Submenu -->
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">Breakage/Expiry from customer</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-expiry.transaction') }}">Transaction <span class="badge bg-secondary ms-1">Ctrl+E</span></a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-expiry.modification') }}">Modification <span class="badge bg-secondary ms-1">Shift+Ctrl+E</span></a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-expiry.expiry-date') }}">Expiry Date Modification</a></li>
+              </ul>
+            </li>
+            
+            <!-- Purchase Return Submenu -->
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">Purchase Return</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ route('admin.purchase-return.transaction') }}">Transaction</a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.purchase-return.modification') }}">Modification</a></li>
+              </ul>
+            </li>
+            
+            <!-- Breakage/Expiry to Supplier Submenu -->
+            <li class="dropdown-submenu">
+              <a class="dropdown-item dropdown-toggle" href="#" data-bs-toggle="dropdown">Breakage/Expiry to Supplier</a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-supplier.issued-transaction') }}">Issued - Transaction</a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-supplier.issued-modification') }}">Issued - Modification</a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-supplier.received-transaction') }}">Received - Transaction</a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-supplier.received-modification') }}">Received - Modification</a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-supplier.unused-dump-transaction') }}">Unused Dump - Transaction</a></li>
+                <li><a class="dropdown-item" href="{{ route('admin.breakage-supplier.unused-dump-modification') }}">Unused Dump - Modification</a></li>
+              </ul>
+            </li>
           </ul>
         </li>
       </ul>

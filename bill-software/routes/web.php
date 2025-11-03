@@ -37,6 +37,11 @@ use App\Http\Controllers\Admin\GeneralNotebookController;
 use App\Http\Controllers\Admin\ItemCategoryController;
 use App\Http\Controllers\Admin\TransportMasterController;
 use App\Http\Controllers\Admin\SaleController;
+use App\Http\Controllers\Admin\PurchaseController;
+use App\Http\Controllers\Admin\SaleReturnController;
+use App\Http\Controllers\Admin\PurchaseReturnController;
+use App\Http\Controllers\Admin\BreakageExpiryController;
+use App\Http\Controllers\Admin\BreakageSupplierController;
 use App\Http\Controllers\ProfileController;
 
 // Auth routes
@@ -47,12 +52,19 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::get('/', function () {
+    // Redirect logged-in users to their dashboard
+    if (auth()->check()) {
+        $role = auth()->user()->role;
+        return $role === 'admin' 
+            ? redirect('/admin/dashboard') 
+            : redirect('/user/dashboard');
+    }
     return view('welcome');
 });
 
 // Admin
 Route::middleware(['admin'])->group(function () {
-    Route::view('/admin/dashboard', 'admin.dashboard');
+    Route::view('/admin/dashboard', 'admin.dashboard')->name('admin.dashboard');
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('companies', CompanyController::class);
         Route::resource('customers', CustomerController::class);
@@ -101,7 +113,7 @@ Route::middleware(['admin'])->group(function () {
         Route::get('items/{item}/stock-ledger-complete', [ItemController::class, 'stockLedgerComplete'])->name('items.stock-ledger-complete');
         Route::get('items/{item}/pending-orders', [ItemController::class, 'pendingOrders'])->name('items.pending-orders');
         Route::post('items/{item}/pending-orders', [ItemController::class, 'storePendingOrder'])->name('items.pending-orders.store');
-        Route::patch('items/{item}/pending-orders/{pendingOrder}/receive', [ItemController::class, 'receivePendingOrder'])->name('items.pending-orders.receive');
+        Route::put('items/pending-orders/{pendingOrder}/update-qty', [ItemController::class, 'updatePendingOrderQty'])->name('items.pending-orders.update-qty');
         Route::delete('items/{item}/pending-orders/{pendingOrder}', [ItemController::class, 'deletePendingOrder'])->name('items.pending-orders.delete');
         Route::get('items/{item}/godown-expiry', [ItemController::class, 'godownExpiry'])->name('items.godown-expiry');
         Route::post('items/{item}/godown-expiry', [ItemController::class, 'storeGodownExpiry'])->name('items.godown-expiry.store');
@@ -117,7 +129,15 @@ Route::middleware(['admin'])->group(function () {
         Route::get('batches/expiry/report', [BatchController::class, 'expiryReport'])->name('batches.expiry-report');
         Route::get('api/item-batches/{itemId}', [BatchController::class, 'getItemBatches'])->name('api.item-batches');
         Route::get('api/party-details/{type}/{id}', [ItemController::class, 'getPartyDetails'])->name('api.party-details');
+        Route::get('items/get-by-code/{code}', [ItemController::class, 'getByCode'])->name('items.get-by-code');
         Route::resource('suppliers', SupplierController::class);
+        Route::get('suppliers/{supplier}/pending-orders', [SupplierController::class, 'pendingOrders'])->name('suppliers.pending-orders');
+        Route::post('suppliers/{supplier}/pending-orders', [SupplierController::class, 'storePendingOrder'])->name('suppliers.pending-orders.store');
+        Route::put('suppliers/{supplier}/pending-orders/{pendingOrder}', [SupplierController::class, 'updatePendingOrder'])->name('suppliers.pending-orders.update');
+        Route::delete('suppliers/{supplier}/pending-orders/{pendingOrder}', [SupplierController::class, 'deletePendingOrder'])->name('suppliers.pending-orders.delete');
+        Route::get('suppliers/{supplier}/pending-orders/print/{orderNo}', [SupplierController::class, 'printPendingOrder'])->name('suppliers.pending-orders.print');
+        Route::get('suppliers/{supplier}/pending-orders-data', [SupplierController::class, 'getPendingOrdersData'])->name('suppliers.pending-orders-data');
+        Route::get('suppliers/{supplier}/pending-orders/{orderNo}/items', [SupplierController::class, 'getOrderItems'])->name('suppliers.pending-orders.items');
         Route::resource('invoices', InvoiceController::class);
         Route::resource('hsn-codes', HsnCodeController::class);
         
@@ -153,6 +173,35 @@ Route::middleware(['admin'])->group(function () {
         Route::post('sale/transaction', [SaleController::class, 'store'])->name('sale.store');
         Route::get('sale/get-items', [SaleController::class, 'getItems'])->name('sale.getItems');
         Route::get('sale/modification', [SaleController::class, 'modification'])->name('sale.modification');
+        
+        // Purchase Routes
+        Route::get('purchase/transaction', [PurchaseController::class, 'transaction'])->name('purchase.transaction');
+        Route::post('purchase/transaction', [PurchaseController::class, 'store'])->name('purchase.store');
+        Route::get('purchase/modification', [PurchaseController::class, 'modification'])->name('purchase.modification');
+        Route::get('purchase/{id}', [PurchaseController::class, 'show'])->name('purchase.show');
+        Route::put('purchase/{id}', [PurchaseController::class, 'update'])->name('purchase.update');
+        Route::delete('purchase/{id}', [PurchaseController::class, 'destroy'])->name('purchase.destroy');
+        
+        // Sale Return Routes
+        Route::get('sale-return/transaction', [SaleReturnController::class, 'transaction'])->name('sale-return.transaction');
+        Route::get('sale-return/modification', [SaleReturnController::class, 'modification'])->name('sale-return.modification');
+        
+        // Breakage/Expiry from Customer Routes
+        Route::get('breakage-expiry/transaction', [BreakageExpiryController::class, 'transaction'])->name('breakage-expiry.transaction');
+        Route::get('breakage-expiry/modification', [BreakageExpiryController::class, 'modification'])->name('breakage-expiry.modification');
+        Route::get('breakage-expiry/expiry-date', [BreakageExpiryController::class, 'expiryDate'])->name('breakage-expiry.expiry-date');
+        
+        // Purchase Return Routes
+        Route::get('purchase-return/transaction', [PurchaseReturnController::class, 'transaction'])->name('purchase-return.transaction');
+        Route::get('purchase-return/modification', [PurchaseReturnController::class, 'modification'])->name('purchase-return.modification');
+        
+        // Breakage/Expiry to Supplier Routes
+        Route::get('breakage-supplier/issued-transaction', [BreakageSupplierController::class, 'issuedTransaction'])->name('breakage-supplier.issued-transaction');
+        Route::get('breakage-supplier/issued-modification', [BreakageSupplierController::class, 'issuedModification'])->name('breakage-supplier.issued-modification');
+        Route::get('breakage-supplier/received-transaction', [BreakageSupplierController::class, 'receivedTransaction'])->name('breakage-supplier.received-transaction');
+        Route::get('breakage-supplier/received-modification', [BreakageSupplierController::class, 'receivedModification'])->name('breakage-supplier.received-modification');
+        Route::get('breakage-supplier/unused-dump-transaction', [BreakageSupplierController::class, 'unusedDumpTransaction'])->name('breakage-supplier.unused-dump-transaction');
+        Route::get('breakage-supplier/unused-dump-modification', [BreakageSupplierController::class, 'unusedDumpModification'])->name('breakage-supplier.unused-dump-modification');
         
         Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
         Route::get('/api/countries', [CustomerController::class, 'getCountries'])->name('api.countries');

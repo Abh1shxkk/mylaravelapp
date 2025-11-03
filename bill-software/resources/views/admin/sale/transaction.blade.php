@@ -1,6 +1,65 @@
 @extends('layouts.admin')
 
 @section('content')
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  ul,
+  li {
+    list-style: none;
+  }
+
+  .w-10 {
+    width: 10%;
+  }
+
+  .w-15 {
+    width: 15%;
+  }
+
+  .w-20 {
+    width: 20%;
+  }
+
+  label {
+    font-weight: 600;
+    color: #000;
+  }
+
+  input:focus {
+    box-shadow: none !important;
+  }
+
+  .btn-right {
+    background: #7539FF;
+    color: #fff;
+  }
+
+  .fd-column {
+    flex-direction: column;
+  }
+
+  .ts-box1 {
+    background: #f9f9f9;
+  }
+
+  .ts-tax {
+    margin-top: 15px;
+  }
+
+  .ts-amt {
+    background: #f5f5f5;
+  }
+</style>
+
 <div class="container-fluid p-2" style="background: #e8e8e8;">
   <form id="saleTransactionForm">
     @csrf
@@ -9,59 +68,102 @@
     <div class="card mb-2">
       <div class="card-body p-2">
         <div class="row">
-          <div class="col-md-5">
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Series:</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="series" value="SZ" style="width: 60px; font-size: 11px;">
-            </div>
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Date:</label>
-              <input type="date" class="form-control form-control-sm d-inline-block" name="date" id="saleDate" value="{{ date('Y-m-d') }}" style="width: 120px; font-size: 11px;" onchange="updateDayName()">
-              <input type="text" class="form-control form-control-sm d-inline-block" id="dayName" value="{{ date('l') }}" style="width: 100px; font-size: 11px;" readonly>
-            </div>
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Inv.No:</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="invoice_no" value="{{ $nextInvoiceNo }}" style="width: 80px; font-size: 11px;" readonly>
-            </div>
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Due Date:</label>
-              <input type="date" class="form-control form-control-sm d-inline-block" name="due_date" value="{{ date('Y-m-d') }}" style="width: 120px; font-size: 11px;">
+          <div class="col-md-4">
+            <div class="card p-2">
+              <div class="row">
+                <div class="col-12">
+                  <div class="mb-3 d-flex align-items-center">
+                    <label class="form-label me-2 mb-0">Series:</label>
+                    <input type="text" class="form-control w-15" name="series" value="SZ" style="font-size: 11px;">
+                  </div>
+                  <div class="mb-3 d-flex align-items-center">
+                    <label class="form-label me-2 mb-0">Date:</label>
+                    <input type="date" class="form-control w-50 me-2" name="date" id="saleDate" value="{{ date('Y-m-d') }}" style="font-size: 11px;" onchange="updateDayName()">
+                    <input type="text" class="form-control border-0" id="dayName" value="{{ date('l') }}" style="font-size: 11px;" readonly>
+                  </div>
+                  <div class="mb-3 d-flex align-items-center">
+                    <label class="form-label me-2 mb-0">Inv.No.:</label>
+                    <input type="text" class="form-control w-50" name="invoice_no" value="{{ $nextInvoiceNo }}" style="font-size: 11px;" readonly>
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <label class="form-label me-2 mb-0">Due Date:</label>
+                    <input type="date" class="form-control w-50" name="due_date" value="{{ date('Y-m-d') }}" style="font-size: 11px;">
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div class="col-md-7">
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Name:</label>
-              <select class="form-select form-select-sm d-inline-block" name="customer_id" style="width: 350px; font-size: 11px;" required>
-                <option value="">Select Customer</option>
-                @foreach($customers as $customer)
-                  <option value="{{ $customer->id }}">{{ $customer->name }}</option>
-                @endforeach
-              </select>
-            </div>
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Sales Man:</label>
-              <select class="form-select form-select-sm d-inline-block" name="salesman_id" style="width: 250px; font-size: 11px;">
-                <option value="">Select Sales Man</option>
-                @foreach($salesmen as $salesman)
-                  <option value="{{ $salesman->id }}">{{ $salesman->name }}</option>
-                @endforeach
-              </select>
-            </div>
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Cash:</label>
-              <select class="form-select form-select-sm d-inline-block" name="cash_type" style="width: 50px; font-size: 11px;">
-                <option value="N" selected>N</option>
-                <option value="Y">Y</option>
-              </select>
-            </div>
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">DUE:</label>
-              <input type="text" class="form-control form-control-sm d-inline-block bg-warning" name="due" style="width: 100px; font-size: 11px;" readonly value="0.00">
-              <label class="form-label mb-0 ms-2" style="font-size: 11px; font-weight: bold;">PDC:</label>
-              <input type="text" class="form-control form-control-sm d-inline-block bg-warning" name="pdc" style="width: 100px; font-size: 11px;" readonly value="0.00">
-              <label class="form-label mb-0 ms-2" style="font-size: 11px; font-weight: bold;">TOTAL:</label>
-              <input type="text" class="form-control form-control-sm d-inline-block bg-warning" name="total" style="width: 120px; font-size: 11px;" readonly value="0.00">
+
+          <div class="col-md-8">
+            <div class="card p-2">
+              <div class="row">
+                <div class="col-9">
+                  <div class="row mb-3">
+                    <div class="col-md-3 col-12">
+                      <label class="form-label me-2 mb-0">Name:</label>
+                    </div>
+                    <div class="col-md-9 col-12">
+                      <div class="d-flex align-items-center">
+                        <select class="form-select w-15 me-2" name="customer_id" style="font-size: 11px;" required>
+                          <option value="">Select</option>
+                          @foreach($customers as $customer)
+                            <option value="{{ $customer->id }}">{{ $customer->code ?? '' }}</option>
+                          @endforeach
+                        </select>
+                        <input type="text" class="form-control" id="customerName" style="font-size: 11px;" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-3 col-12">
+                      <label class="form-label me-2 mb-0">Sales Name:</label>
+                    </div>
+                    <div class="col-md-9 col-12">
+                      <div class="d-flex align-items-center">
+                        <select class="form-select w-15 me-2" name="salesman_id" style="font-size: 11px;">
+                          <option value="">Select</option>
+                          @foreach($salesmen as $salesman)
+                            <option value="{{ $salesman->id }}">{{ $salesman->code ?? '' }}</option>
+                          @endforeach
+                        </select>
+                        <input type="text" class="form-control" id="salesmanName" style="font-size: 11px;" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mb-3 d-flex align-items-center justify-content-end">
+                    <label class="form-label me-2 mb-0">Cash:</label>
+                    <select class="form-select w-10" name="cash_type" style="font-size: 11px;">
+                      <option value="N" selected>N</option>
+                      <option value="Y">Y</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="row">
+                    <div class="col-md-10 col-12">
+                      <div class="d-flex align-items-center fd-column">
+                        <div class="me-2 d-flex align-items-center">
+                          <label class="form-label mb-0 me-1">DUE:</label>
+                          <input type="text" class="form-control" name="due" style="font-size: 11px;" readonly value="0.00">
+                        </div>
+                        <div class="d-flex align-items-center me-1">
+                          <label class="form-label mb-0 me-1">PDC:</label>
+                          <input type="text" class="form-control" name="pdc" style="font-size: 11px;" readonly value="0.00">
+                        </div>
+                        <div class="d-flex align-items-center me-1">
+                          <label class="form-label mb-0 me-1">TOTAL:</label>
+                          <input type="text" class="form-control" name="total" style="font-size: 11px;" readonly value="0.00">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-2 col-12">
+                      <div class="d-flex align-items-center me-1">
+                        <input type="text" class="form-control w-10" value="N" style="font-size: 11px;" readonly>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -99,125 +201,290 @@
       </div>
     </div>
 
-    <!-- HSN & Item Details Section -->
+    <!-- HSN Code & Tax Section -->
     <div class="card mb-2">
       <div class="card-body p-2" style="background: #f5f5f5;">
-        <div class="d-flex align-items-center gap-2">
-          <!-- Case -->
-          <div>
-            <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Case</label>
-            <input type="number" class="form-control form-control-sm" id="case_qty" name="case_qty" style="width: 60px; font-size: 11px;" readonly value="0">
-          </div>
-           <div>
-            <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Box</label>
-            <input type="number" class="form-control form-control-sm" id="box_qty" name="box_qty" style="width: 60px; font-size: 11px;" readonly value="0">
-          </div>
-          <!-- HSN Code (Red Background) -->
-          <div class="text-center px-3 py-1" style="background: #dc3545; color: white; font-size: 14px; font-weight: bold; border-radius: 3px;">
-            <span id="hsn_code_display">30049099</span>
-          </div>
-          
-          <!-- GST Details (Red Background) -->
-          <div class="px-3 py-1" style="background: #dc3545; color: white; border-radius: 3px;">
-            <div style="font-size: 11px; line-height: 1.4;">
-              <div><strong>CGST(%):</strong> <span id="cgst_display" style="float: right; margin-left: 10px;">6</span></div>
-              <div><strong>SGST(%):</strong> <span id="sgst_display" style="float: right; margin-left: 10px;">6</span></div>
-              <div><strong>Cess (%):</strong> <span id="cess_display" style="float: right; margin-left: 10px;">0</span></div>
+        <div class="hsnCode border p-3 rounded">
+          <div class="tab-content">
+            <div class="row">
+              <div class="col-md-4 col-12">
+                <div class="row">
+                  <div class="col-12">
+                    <div class="row mb-3">
+                      <div class="col-md-2 col-12">
+                        <label class="form-label me-2 mb-0">Case:</label>
+                      </div>
+                      <div class="col-md-10 col-12">
+                        <div class="d-flex align-items-center">
+                          <input type="text" class="form-control w-25 me-2" id="case_qty" name="case_qty" style="font-size: 11px;" readonly value="0">
+                          <input type="text" class="form-control" style="font-size: 11px;" readonly>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="row mb-3">
+                      <div class="col-md-2 col-12">
+                        <label class="form-label me-2 mb-0">Box:</label>
+                      </div>
+                      <div class="col-md-10 col-12">
+                        <div class="d-flex align-items-center">
+                          <input type="text" class="form-control w-25 me-2" id="box_qty" name="box_qty" style="font-size: 11px;" readonly value="0">
+                          <input type="text" class="form-control" style="font-size: 11px;" readonly>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 col-12">
+                <div class="row">
+                  <div class="col-12">
+                    <div class="d-flex align-items-center fd-column mb-2">
+                      <div class="me-2 d-flex align-items-center">
+                        <label class="form-label mb-0 me-1 text-danger bg-danger-subtle w-100">CGST(%):</label>
+                        <input type="text" class="form-control" id="cgst_display" style="font-size: 11px;" readonly value="0">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="d-flex align-items-center fd-column mb-2">
+                      <div class="me-2 d-flex align-items-center">
+                        <label class="form-label mb-0 me-1 text-danger bg-danger-subtle w-100">SGST(%):</label>
+                        <input type="text" class="form-control" id="sgst_display" style="font-size: 11px;" readonly value="0">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="d-flex align-items-center fd-column mb-2">
+                      <div class="me-2 d-flex align-items-center">
+                        <label class="form-label mb-0 me-2 text-danger bg-danger-subtle w-100">Cess(%):</label>
+                        <input type="text" class="form-control" id="cess_display" style="font-size: 11px;" readonly value="0">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4 col-12">
+                <div class="d-flex align-items-center fd-column mb-3">
+                  <div class="me-2 d-flex align-items-center">
+                    <label class="form-label mb-0 me-1">Tax%</label>
+                    <input type="text" class="form-control" id="tax_percent" name="tax_percent" style="font-size: 11px;" readonly value="0.000">
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <label class="form-label mb-0  me-1">Excise</label>
+                    <input type="text" class="form-control" id="excise" name="excise" style="font-size: 11px;" readonly value="0.00">
+                  </div>
+                </div>
+                <div class="d-flex align-items-center fd-column">
+                  <div class="me-2 d-flex align-items-center">
+                    <label class="form-label mb-0 me-1">TCS</label>
+                    <input type="text" class="form-control" id="tcs" name="tcs" style="font-size: 11px;" value="0.00">
+                  </div>
+                  <div class="d-flex align-items-center">
+                    <label class="form-label mb-0  me-1">SC%</label>
+                    <input type="text" class="form-control" id="sc_percent" name="sc_percent" style="font-size: 11px;" value="0.00">
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <!-- Amount Fields (White Background) -->
-          <div class="px-3 py-1" style="background: white; border: 1px solid #ddd; border-radius: 3px;">
-            <div style="font-size: 11px; line-height: 1.4;">
-              <div><span id="cgst_amount" style="float: right; margin-left: 10px;">7.23</span></div>
-              <div><span id="sgst_amount" style="float: right; margin-left: 10px;">7.23</span></div>
-              <div><span id="cess_amount" style="float: right; margin-left: 10px;">0</span></div>
-            </div>
-          </div>         
-          
-          <!-- TAX % -->
-          <div class="ms-auto">
-            <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">TAX %</label>
-            <input type="number" class="form-control form-control-sm" id="tax_percent" name="tax_percent" style="width: 70px; font-size: 11px;" readonly value="0.000">
-          </div>
-          
-          <!-- Excise -->
-          <div>
-            <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">Excise</label>
-            <input type="number" class="form-control form-control-sm" id="excise" name="excise" style="width: 70px; font-size: 11px;" readonly value="0.00">
-          </div>
-          
-          <!-- TCS -->
-          <div>
-            <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">TCS</label>
-            <input type="number" class="form-control form-control-sm" id="tcs" name="tcs" style="width: 70px; font-size: 11px;" value="0.00">
-          </div>
-          
-          <!-- SC % -->
-          <div>
-            <label class="form-label mb-0" style="font-size: 11px; font-weight: bold;">SC %</label>
-            <input type="number" class="form-control form-control-sm" id="sc_percent" name="sc_percent" style="width: 70px; font-size: 11px;" value="0.00">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Bottom Section -->
+    <!-- Amount Section 1 -->
     <div class="card mb-2">
-      <div class="card-body p-2">
-        <div class="row">
-          <div class="col-md-6">
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 10px; font-weight: bold;">Case</label>
-              <input type="number" class="form-control form-control-sm d-inline-block" name="case" style="width: 70px; font-size: 10px;" readonly value="0">
-              <label class="form-label mb-0 ms-2" style="font-size: 10px; font-weight: bold;">Box</label>
-              <input type="number" class="form-control form-control-sm d-inline-block" name="box" style="width: 70px; font-size: 10px;" readonly value="0">
-              <div class="d-inline-block ms-2 p-2 text-white text-center" style="background: #dc3545; font-size: 9px; width: 100px; vertical-align: top;">
-                <strong>CGST(%):</strong><br>
-                <strong>SGST(%):</strong><br>
-                <strong>Cess (%):</strong>
+      <div class="card-body">
+        <div class="row gx-3 align-items-center">
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">N.T.Amt.</label>
+                <input type="text" class="form-control" name="nt_amt" style="font-size: 11px;" readonly value="0.00">
               </div>
             </div>
-            
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 10px; font-weight: bold;">N.T.Amt.</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="nt_amt" style="width: 80px; font-size: 10px;" readonly value="0.00">
-              <label class="form-label mb-0 ms-1" style="font-size: 10px; font-weight: bold;">SC</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="sc" style="width: 60px; font-size: 10px;" readonly value="0.00">
-              <label class="form-label mb-0 ms-1" style="font-size: 10px; font-weight: bold;">F.T.Amt.</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="ft_amt" style="width: 80px; font-size: 10px;" readonly value="0.00">
-              <label class="form-label mb-0 ms-1" style="font-size: 10px; font-weight: bold;">Dis.</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="dis" style="width: 60px; font-size: 10px;" readonly value="0.00">
-              <label class="form-label mb-0 ms-1" style="font-size: 10px; font-weight: bold;">Scm.</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="scm" style="width: 60px; font-size: 10px;" readonly value="0.00">
-            </div>
-            
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 10px; font-weight: bold;">Scm.%</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="scm_percent" style="width: 80px; font-size: 10px;" readonly value="0.00">
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-25">SC</label>
+                <input type="text" class="form-control" name="sc" style="font-size: 11px;" readonly value="0.00">
+              </div>
             </div>
           </div>
-          
-          <div class="col-md-6">
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 10px; font-weight: bold;">TAX %</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="tax_percent" style="width: 80px; font-size: 10px;" readonly value="0.00">
-              <label class="form-label mb-0 ms-3" style="font-size: 10px; font-weight: bold;">Excise</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="excise" style="width: 80px; font-size: 10px;" readonly value="0.00">
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">F.T.Amt.</label>
+                <input type="text" class="form-control" name="ft_amt" style="font-size: 11px;" readonly value="0.00">
+              </div>
             </div>
-            
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 10px; font-weight: bold;">TCS</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="tcs" style="width: 80px; font-size: 10px;" readonly value="0.00">
-              <label class="form-label mb-0 ms-3" style="font-size: 10px; font-weight: bold;">SC %</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="sc_percent" style="width: 80px; font-size: 10px;" readonly value="0.00">
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Dis</label>
+                <input type="text" class="form-control" name="dis" style="font-size: 11px;" readonly value="0.00">
+              </div>
             </div>
-            
-            <div class="mb-1">
-              <label class="form-label mb-0" style="font-size: 10px; font-weight: bold;">Tax</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="tax" style="width: 100px; font-size: 10px; background: #ffcccc;" readonly value="0.00">
-              <label class="form-label mb-0 ms-3" style="font-size: 10px; font-weight: bold;">Net</label>
-              <input type="text" class="form-control form-control-sm d-inline-block" name="net" style="width: 100px; font-size: 10px; background: #ffcccc;" readonly value="0.00">
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Scm.</label>
+                <input type="text" class="form-control" name="scm" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-25">Tax</label>
+                <input type="text" class="form-control" name="tax" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Net</label>
+                <input type="text" class="form-control" name="net" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Scm.%</label>
+                <input type="text" class="form-control" name="scm_percent" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amount Section 2 -->
+    <div class="card mb-2">
+      <div class="card-body">
+        <div class="row gx-3 align-items-center">
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Packing</label>
+                <input type="text" class="form-control" name="packing" style="font-size: 11px;" value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">N.T.Amt.</label>
+                <input type="text" class="form-control" name="nt_amt_2" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Scm. %</label>
+                <input type="text" class="form-control" name="scm_percent_2" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Sub.Tot.</label>
+                <input type="text" class="form-control" name="sub_total" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Comp</label>
+                <input type="text" class="form-control" name="comp" style="font-size: 11px;" value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Srino</label>
+                <input type="text" class="form-control" name="srino" style="font-size: 11px;" value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Unit</label>
+                <input type="text" class="form-control" name="unit" style="font-size: 11px;" value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">SC Amt.</label>
+                <input type="text" class="form-control" name="sc_amt" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Scm.Amt.</label>
+                <input type="text" class="form-control" name="scm_amt" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Tax Amt.</label>
+                <input type="text" class="form-control" name="tax_amt" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">SCM.</label>
+                <div class="d-flex align-items-center">
+                  <input type="number" class="form-control" name="scm_1" style="font-size: 11px;" value="0">
+                  <label class="form-label mx-1 mb-0 fs-4 fw-bold">+</label>
+                  <input type="number" class="form-control" name="scm_2" style="font-size: 11px;" value="0">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Cl. Qty</label>
+                <input type="text" class="form-control" name="cl_qty" style="font-size: 11px;" value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Dis. Amt.</label>
+                <input type="text" class="form-control" name="dis_amt" style="font-size: 11px;" readonly value="0.00">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Net Amt.</label>
+                <input type="text" class="form-control" name="net_amt" style="font-size: 11px;" readonly value="0.00">
+              </div>
             </div>
           </div>
         </div>
@@ -264,6 +531,30 @@ document.addEventListener('DOMContentLoaded', function() {
     addItemBtn.addEventListener('click', function(e) {
       e.preventDefault();
       addNewRow();
+    });
+  }
+
+  // Customer name auto-population
+  const customerSelect = document.querySelector('select[name="customer_id"]');
+  const customerNameInput = document.getElementById('customerName');
+  
+  if (customerSelect && customerNameInput) {
+    customerSelect.addEventListener('change', function() {
+      const selectedOption = this.options[this.selectedIndex];
+      const customerName = selectedOption.textContent;
+      customerNameInput.value = customerName || '';
+    });
+  }
+
+  // Salesman name auto-population
+  const salesmanSelect = document.querySelector('select[name="salesman_id"]');
+  const salesmanNameInput = document.getElementById('salesmanName');
+  
+  if (salesmanSelect && salesmanNameInput) {
+    salesmanSelect.addEventListener('change', function() {
+      const selectedOption = this.options[this.selectedIndex];
+      const salesmanName = selectedOption.textContent;
+      salesmanNameInput.value = salesmanName || '';
     });
   }
 });

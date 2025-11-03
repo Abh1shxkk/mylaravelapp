@@ -242,6 +242,45 @@ class ItemController extends Controller
             'phone' => $party->phone ?? '',
         ]);
     }
+    
+    /**
+     * Get item by code for purchase transaction
+     */
+    public function getByCode($code)
+    {
+        // Try to find by ID (exact match only)
+        $item = Item::where('id', $code)->first();
+        
+        // If not found by ID, try bar_code
+        if (!$item) {
+            $item = Item::where('bar_code', $code)->first();
+        }
+        
+        if ($item) {
+            return response()->json([
+                'success' => true,
+                'item' => [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'packing' => $item->packing,
+                    'case_qty' => $item->case_qty ?? 0,
+                    'box_qty' => $item->box_qty ?? 0,
+                    'mrp' => $item->mrp ?? 0,
+                    'pur_rate' => $item->pur_rate ?? 0,
+                    's_rate' => $item->s_rate ?? 0,
+                    'ws_rate' => $item->ws_rate ?? 0,
+                    'spl_rate' => $item->spl_rate ?? 0,
+                    'hsn_code' => $item->hsn_code ?? '',
+                    'cgst_percent' => $item->cgst_percent ?? 0,
+                    'sgst_percent' => $item->sgst_percent ?? 0,
+                    'cess_percent' => $item->cess_percent ?? 0,
+                    'fixed_dis_percent' => $item->fixed_dis_percent ?? 0,
+                ]
+            ]);
+        }
+        
+        return response()->json(['success' => false]);
+    }
 
     /**
      * View stock ledger for an item (F10) - Complete EasySol Style
@@ -439,7 +478,6 @@ class ItemController extends Controller
     public function pendingOrders(Item $item)
     {
         $pendingOrders = PendingOrder::where('item_id', $item->id)
-            ->where('status', 'pending')
             ->with('supplier')
             ->orderBy('order_date', 'desc')
             ->paginate(20);
@@ -462,40 +500,70 @@ class ItemController extends Controller
     public function storePendingOrder(Request $request, Item $item)
     {
         $validated = $request->validate([
-            'supplier_id' => 'required|exists:suppliers,supplier_id',
-            'order_date' => 'required|date',
-            'rate' => 'required|numeric|min:0',
+            'supplier_id' => 'nullable|exists:suppliers,supplier_id',
+            'order_date' => 'nullable|date',
+            'rate' => 'nullable|numeric|min:0',
             'tax_percent' => 'nullable|numeric|min:0|max:100',
             'discount_percent' => 'nullable|numeric|min:0|max:100',
-            'cost' => 'required|numeric|min:0',
+            'cost' => 'nullable|numeric|min:0',
             'scm_percent' => 'nullable|numeric|min:0|max:100',
-            'quantity' => 'required|integer|min:1',
-            'free_quantity' => 'nullable|integer|min:0',
-            'urgent_flag' => 'nullable|in:Y,N',
-            'scheme_plus' => 'nullable|integer|min:0',
-            'scheme_minus' => 'nullable|integer|min:0',
-            'remarks' => 'nullable|string',
+            'quantity' => 'nullable|numeric|min:0',
         ]);
 
-        $validated['item_id'] = $item->id;
-        $validated['status'] = 'pending';
-        $validated['urgent_flag'] = $validated['urgent_flag'] ?? 'N';
+        // Set defaults for null values
+        $validated['supplier_id'] = $validated['supplier_id'] ?? null;
+        $validated['order_date'] = $validated['order_date'] ?? now()->toDateString();
+        $validated['quantity'] = $validated['quantity'] ?? 0;
+        $validated['rate'] = $validated['rate'] ?? 0;
+        $validated['cost'] = $validated['cost'] ?? 0;
+        $validated['tax_percent'] = $validated['tax_percent'] ?? 0;
+        $validated['discount_percent'] = $validated['discount_percent'] ?? 0;
+        $validated['scm_percent'] = $validated['scm_percent'] ?? 0;
 
-        PendingOrder::create($validated);
+        // Get supplier details
+        $supplier = null;
+        if ($validated['supplier_id']) {
+            $supplier = Supplier::where('supplier_id', $validated['supplier_id'])->first();
+        }
+
+        // Prepare data
+        $data = array_merge($validated, [
+            'item_id' => $item->id,
+            'supplier_name' => $supplier->name ?? '',
+            'supplier_code' => $supplier->code ?? '',
+        ]);
+
+        PendingOrder::create($data);
 
         return redirect()->route('admin.items.pending-orders', $item)
-            ->with('success', 'Pending order created successfully');
+            ->with('success', 'Pending Order created successfully');
     }
 
-    /**
-     * Mark pending order as received
-     */
-    public function receivePendingOrder(Request $request, Item $item, PendingOrder $pendingOrder)
-    {
-        $pendingOrder->update(['status' => 'received']);
 
-        return redirect()->route('admin.items.pending-orders', $item)
-            ->with('success', 'Pending order marked as received');
+    /**
+     * Update pending order quantity
+     */
+    public function updatePendingOrderQty(Request $request, PendingOrder $pendingOrder)
+    {
+        $validated = $request->validate([
+            'order_qty' => 'required|numeric|min:0',
+            'free_qty' => 'required|numeric|min:0',
+        ]);
+
+        $pendingOrder->update([
+            'order_qty' => $validated['order_qty'],
+            'free_qty' => $validated['free_qty'],
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Quantity updated successfully',
+            'order' => [
+                'id' => $pendingOrder->id,
+                'order_qty' => $pendingOrder->order_qty,
+                'free_qty' => $pendingOrder->free_qty,
+            ]
+        ]);
     }
 
     /**
@@ -506,7 +574,7 @@ class ItemController extends Controller
         $pendingOrder->delete();
 
         return redirect()->route('admin.items.pending-orders', $item)
-            ->with('success', 'Pending order deleted successfully');
+            ->with('success', 'Pending Order deleted successfully');
     }
 
     /**

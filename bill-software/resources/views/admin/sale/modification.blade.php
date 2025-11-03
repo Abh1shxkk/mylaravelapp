@@ -1,268 +1,506 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="container-fluid">
-  <div class="card shadow-sm">
-    <div class="card-header bg-warning text-dark">
-      <h5 class="mb-0">Sale Modification</h5>
-    </div>
-    <div class="card-body">
-      <!-- Search Section -->
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body">
-              <h6 class="card-title">Search Invoice</h6>
-              <div class="row mb-2">
-                <label class="col-sm-4 col-form-label">Invoice No:</label>
-                <div class="col-sm-8">
-                  <input type="text" class="form-control" id="searchInvoiceNo" placeholder="Enter Invoice Number">
-                </div>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .w-10 { width: 10%; }
+  .w-15 { width: 15%; }
+  .w-20 { width: 20%; }
+  .w-25 { width: 25%; }
+  .w-50 { width: 50%; }
+
+  label {
+    font-weight: 600;
+    color: #000;
+  }
+
+  input:focus {
+    box-shadow: none !important;
+  }
+
+  .fd-column {
+    flex-direction: column;
+  }
+
+  .ts-amt {
+    background: #f5f5f5;
+  }
+</style>
+
+<div class="container-fluid p-2" style="background: #e8e8e8;">
+  <form id="saleModificationForm">
+    @csrf
+    <!-- Top Section -->
+    <div class="card mb-2">
+      <div class="card-body p-2">
+        <div class="row">
+          <div class="col-md-4">
+            <div class="card p-2">
+              <div class="mb-3 d-flex align-items-center">
+                <label class="form-label me-2 mb-0">Series:</label>
+                <input type="text" class="form-control w-15" name="series" style="font-size: 11px;" readonly>
               </div>
-              <div class="row mb-2">
-                <label class="col-sm-4 col-form-label">Date Range:</label>
-                <div class="col-sm-4">
-                  <input type="date" class="form-control" id="searchFromDate">
-                </div>
-                <div class="col-sm-4">
-                  <input type="date" class="form-control" id="searchToDate">
-                </div>
+              <div class="mb-3 d-flex align-items-center">
+                <label class="form-label me-2 mb-0">Date:</label>
+                <input type="date" class="form-control w-50 me-2" name="date" id="modDate" style="font-size: 11px;" onchange="updateDayName()">
+                <input type="text" class="form-control border-0" id="dayName" style="font-size: 11px;" readonly>
               </div>
+              <div class="mb-3 d-flex align-items-center">
+                <label class="form-label me-2 mb-0">Inv.No.:</label>
+                <input type="text" class="form-control w-50" name="invoice_no" style="font-size: 11px;" readonly>
+              </div>
+              <div class="d-flex align-items-center">
+                <label class="form-label me-2 mb-0">Due Date:</label>
+                <input type="date" class="form-control w-50" name="due_date" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-8">
+            <div class="card p-2">
               <div class="row">
-                <div class="col-sm-12 text-end">
-                  <button type="button" class="btn btn-primary" onclick="searchInvoice()">
-                    <i class="bi bi-search"></i> Search
-                  </button>
+                <div class="col-9">
+                  <div class="row mb-3">
+                    <div class="col-md-3"><label class="form-label me-2 mb-0">Name:</label></div>
+                    <div class="col-md-9">
+                      <div class="d-flex align-items-center">
+                        <input type="text" class="form-control w-15 me-2" style="font-size: 11px;" readonly>
+                        <input type="text" class="form-control" id="customerName" style="font-size: 11px;" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-3"><label class="form-label me-2 mb-0">Sales Name:</label></div>
+                    <div class="col-md-9">
+                      <div class="d-flex align-items-center">
+                        <input type="text" class="form-control w-15 me-2" style="font-size: 11px;" readonly>
+                        <input type="text" class="form-control" id="salesmanName" style="font-size: 11px;" readonly>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mb-3 d-flex align-items-center justify-content-end">
+                    <label class="form-label me-2 mb-0">Cash:</label>
+                    <input type="text" class="form-control w-10" name="cash_type" value="N" style="font-size: 11px;" readonly>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="mb-3 d-flex align-items-center justify-content-end">
+                    <label class="form-label me-2 mb-0">Fixed Dis:</label>
+                    <input type="text" class="form-control w-10" name="fixed_dis" value="N" style="font-size: 11px;">
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        
-        <div class="col-md-6">
-          <div class="card">
-            <div class="card-body">
-              <h6 class="card-title">Recent Invoices</h6>
-              <div class="list-group" id="recentInvoicesList">
-                <a href="#" class="list-group-item list-group-item-action">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">Invoice #7205</h6>
-                    <small>23/10/2025</small>
-                  </div>
-                  <p class="mb-1">Customer Name - ₹15,000</p>
-                </a>
-                <a href="#" class="list-group-item list-group-item-action">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">Invoice #7204</h6>
-                    <small>22/10/2025</small>
-                  </div>
-                  <p class="mb-1">Customer Name - ₹12,500</p>
-                </a>
-                <a href="#" class="list-group-item list-group-item-action">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">Invoice #7203</h6>
-                    <small>21/10/2025</small>
-                  </div>
-                  <p class="mb-1">Customer Name - ₹18,750</p>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Modification Form (Hidden by default) -->
-      <div id="modificationForm" style="display: none;">
-        <hr>
-        <form id="saleModificationForm">
-          @csrf
-          <input type="hidden" name="invoice_id" id="invoiceId">
-          
-          <!-- Top Section -->
-          <div class="row mb-3">
-            <!-- Left Column -->
-            <div class="col-md-6">
-              <div class="row mb-2">
-                <label class="col-sm-3 col-form-label fw-bold">Series:</label>
-                <div class="col-sm-4">
-                  <input type="text" class="form-control form-control-sm" name="series" id="series" readonly>
-                </div>
-              </div>
-              
-              <div class="row mb-2">
-                <label class="col-sm-3 col-form-label fw-bold">Date:</label>
-                <div class="col-sm-4">
-                  <input type="date" class="form-control form-control-sm" name="date" id="date" required>
-                </div>
-                <div class="col-sm-5">
-                  <input type="text" class="form-control form-control-sm" id="dayName" readonly>
-                </div>
-              </div>
-              
-              <div class="row mb-2">
-                <label class="col-sm-3 col-form-label fw-bold">Inv.No:</label>
-                <div class="col-sm-4">
-                  <input type="text" class="form-control form-control-sm" name="invoice_no" id="invoiceNo" readonly>
-                </div>
-              </div>
-              
-              <div class="row mb-2">
-                <label class="col-sm-3 col-form-label fw-bold">Due Date:</label>
-                <div class="col-sm-4">
-                  <input type="date" class="form-control form-control-sm" name="due_date" id="dueDate">
-                </div>
-              </div>
-            </div>
-            
-            <!-- Right Column -->
-            <div class="col-md-6">
-              <div class="row mb-2">
-                <label class="col-sm-3 col-form-label fw-bold">Name:</label>
-                <div class="col-sm-9">
-                  <select class="form-select form-select-sm" name="customer_id" id="customerId" required>
-                    <option value="">Select Customer</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div class="row mb-2">
-                <label class="col-sm-3 col-form-label fw-bold">Sales Man:</label>
-                <div class="col-sm-9">
-                  <select class="form-select form-select-sm" name="salesman_id" id="salesmanId">
-                    <option value="">Select Sales Man</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div class="row mb-2">
-                <div class="col-sm-4">
-                  <label class="form-label fw-bold">Total:</label>
-                  <input type="text" class="form-control form-control-sm bg-info" name="total" id="total" readonly>
-                </div>
-                <div class="col-sm-4">
-                  <label class="form-label fw-bold">Status:</label>
-                  <select class="form-select form-select-sm" name="status" id="status">
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Items Table -->
-          <div class="table-responsive mb-3">
-            <table class="table table-bordered table-sm" id="modifyItemsTable">
-              <thead class="table-warning">
-                <tr>
-                  <th style="width: 80px;">Code</th>
-                  <th style="width: 200px;">Item Name</th>
-                  <th style="width: 100px;">Batch</th>
-                  <th style="width: 80px;">Qty.</th>
-                  <th style="width: 100px;">Rate</th>
-                  <th style="width: 60px;">Dis.%</th>
-                  <th style="width: 100px;">Amount</th>
-                  <th style="width: 50px;">Action</th>
-                </tr>
-              </thead>
-              <tbody id="modifyItemsTableBody">
-                <!-- Items will be loaded here -->
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="row">
-            <div class="col-12">
-              <div class="btn-group" role="group">
-                <button type="submit" class="btn btn-success">
-                  <i class="bi bi-check-circle"></i> Update Invoice
-                </button>
-                <button type="button" class="btn btn-danger" onclick="deleteInvoice()">
-                  <i class="bi bi-trash"></i> Delete Invoice
-                </button>
-                <button type="button" class="btn btn-secondary" onclick="cancelModification()">
-                  <i class="bi bi-x-circle"></i> Cancel
-                </button>
-                <button type="button" class="btn btn-info" onclick="printInvoice()">
-                  <i class="bi bi-printer"></i> Print
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
       </div>
     </div>
-  </div>
+
+    <!-- Items Table -->
+    <div class="card mb-2">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-bordered table-sm mb-0" style="font-size: 10px;">
+            <thead style="background: #b3d9f2;">
+              <tr>
+                <th>Code</th>
+                <th width="300">Item Name</th>
+                <th>Batch</th>
+                <th>Exp.</th>
+                <th>Qty.</th>
+                <th>F.Qty.</th>
+                <th>Sale Rate</th>
+                <th>Dis.%</th>
+                <th>MRP</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody id="itemsTableBody">
+              <tr>
+                <td><input type="text" class="form-control" style="font-size: 10px;" placeholder="001"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;" placeholder="ADSILA ORGANICS PVT. LTD."></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+                <td><input type="text" class="form-control" style="font-size: 10px;"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- HSN/Tax Section -->
+        <div class="ts-tax p-3">
+          <div class="row">
+            <div class="col-md-4 col-12">
+              <div class="row">
+                <div class="col-12">
+                  <div class="row mb-3">
+                    <div class="col-md-2 col-12">
+                      <label class="form-label me-2 mb-0">Case:</label>
+                    </div>
+                    <div class="col-md-10 col-12">
+                      <div class="d-flex align-items-center">
+                        <input type="text" class="form-control w-25 me-2" style="font-size: 11px;">
+                        <input type="text" class="form-control" style="font-size: 11px;">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="row mb-3">
+                    <div class="col-md-2 col-12">
+                      <label class="form-label me-2 mb-0">Box:</label>
+                    </div>
+                    <div class="col-md-10 col-12">
+                      <div class="d-flex align-items-center">
+                        <input type="text" class="form-control w-25 me-2" style="font-size: 11px;">
+                        <input type="text" class="form-control" style="font-size: 11px;">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+              <div class="row">
+                <div class="col-12">
+                  <div class="d-flex align-items-center fd-column mb-2">
+                    <div class="me-2 d-flex align-items-center">
+                      <label class="form-label mb-0 me-1 text-danger bg-danger-subtle w-100">CGST(%):</label>
+                      <input type="text" class="form-control" style="font-size: 11px;">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="d-flex align-items-center fd-column mb-2">
+                    <div class="me-2 d-flex align-items-center">
+                      <label class="form-label mb-0 me-1 text-danger bg-danger-subtle w-100">SGST(%):</label>
+                      <input type="text" class="form-control" style="font-size: 11px;">
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="d-flex align-items-center fd-column mb-2">
+                    <div class="me-2 d-flex align-items-center">
+                      <label class="form-label mb-0 me-2 text-danger bg-danger-subtle w-100">Cess(%):</label>
+                      <input type="text" class="form-control" style="font-size: 11px;">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+              <div class="d-flex align-items-center fd-column mb-3">
+                <div class="me-2 d-flex align-items-center">
+                  <label class="form-label mb-0 me-1">Tax%</label>
+                  <input type="text" class="form-control" style="font-size: 11px;">
+                </div>
+                <div class="d-flex align-items-center">
+                  <label class="form-label mb-0 me-1">Excise</label>
+                  <input type="text" class="form-control" style="font-size: 11px;">
+                </div>
+              </div>
+              <div class="d-flex align-items-center fd-column">
+                <div class="me-2 d-flex align-items-center">
+                  <label class="form-label mb-0 me-1">TCS</label>
+                  <input type="text" class="form-control" style="font-size: 11px;">
+                </div>
+                <div class="d-flex align-items-center">
+                  <label class="form-label mb-0 me-1">SC%</label>
+                  <input type="text" class="form-control" style="font-size: 11px;">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amount Section 1 -->
+    <div class="card mb-2">
+      <div class="card-body ts-amt">
+        <div class="row gx-3 align-items-center">
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">N.T.Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-25">SC</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">F.T.Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Dis</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Scm.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-25">Tax</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Net</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Scm.%</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amount Section 2 -->
+    <div class="card mb-2">
+      <div class="card-body ts-amt">
+        <div class="row gx-3 align-items-center">
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Packing</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">N.T.Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Scm. %</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Sub.Tot.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Comp</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Srino</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Unit</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">SC Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Scm.Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Tax Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">SCM.</label>
+                <div class="d-flex align-items-center">
+                  <input type="number" class="form-control" style="font-size: 11px;" value="0">
+                  <label class="form-label mx-1 mb-0 fs-4 fw-bold">+</label>
+                  <input type="number" class="form-control" style="font-size: 11px;" value="0">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Cl. Qty</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Dis. Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Net Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">COST + GST</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Lctn</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">HS Amt.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-50">Vol.</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4">
+            <div class="d-flex align-items-center fd-column mb-2">
+              <div class="me-2 d-flex align-items-center">
+                <label class="form-label mb-0 me-1 w-75">Batch Code</label>
+                <input type="text" class="form-control" style="font-size: 11px;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card">
+      <div class="card-body p-2">
+        <button type="submit" class="btn btn-primary btn-sm">Update (End)</button>
+        <button type="button" class="btn btn-secondary btn-sm">Cancel</button>
+        <button type="button" class="btn btn-info btn-sm">View On Screen</button>
+        <button type="button" class="btn btn-warning btn-sm">Print</button>
+      </div>
+    </div>
+  </form>
 </div>
 
 <script>
-function searchInvoice() {
-  const invoiceNo = document.getElementById('searchInvoiceNo').value;
-  
-  if (!invoiceNo) {
-    alert('Please enter an invoice number');
-    return;
-  }
-  
-  // Simulate loading invoice data
-  loadInvoiceData(invoiceNo);
-}
-
-function loadInvoiceData(invoiceNo) {
-  // Show modification form
-  document.getElementById('modificationForm').style.display = 'block';
-  
-  // Populate form with dummy data (replace with actual API call)
-  document.getElementById('invoiceId').value = '1';
-  document.getElementById('series').value = 'SZ';
-  document.getElementById('date').value = '2025-10-23';
-  document.getElementById('dayName').value = 'Wednesday';
-  document.getElementById('invoiceNo').value = invoiceNo;
-  document.getElementById('dueDate').value = '2025-10-23';
-  document.getElementById('total').value = '15000.00';
-  
-  // Load items (dummy data)
-  const itemsTableBody = document.getElementById('modifyItemsTableBody');
-  itemsTableBody.innerHTML = `
-    <tr>
-      <td><input type="text" class="form-control form-control-sm" value="ITM001" readonly></td>
-      <td><input type="text" class="form-control form-control-sm" value="Sample Item 1" readonly></td>
-      <td><input type="text" class="form-control form-control-sm" value="BATCH001"></td>
-      <td><input type="number" class="form-control form-control-sm" value="10"></td>
-      <td><input type="number" class="form-control form-control-sm" value="100.00" step="0.01"></td>
-      <td><input type="number" class="form-control form-control-sm" value="5" step="0.01"></td>
-      <td><input type="number" class="form-control form-control-sm" value="950.00" readonly></td>
-      <td>
-        <button type="button" class="btn btn-sm btn-danger">
-          <i class="bi bi-trash"></i>
-        </button>
-      </td>
-    </tr>
-  `;
-}
-
-function deleteInvoice() {
-  if (confirm('Are you sure you want to delete this invoice?')) {
-    alert('Invoice deleted successfully!');
-    cancelModification();
+function updateDayName() {
+  const dateInput = document.getElementById('modDate');
+  const dayNameInput = document.getElementById('dayName');
+  if (dateInput.value) {
+    const date = new Date(dateInput.value);
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    dayNameInput.value = days[date.getDay()];
   }
 }
 
-function cancelModification() {
-  document.getElementById('modificationForm').style.display = 'none';
-  document.getElementById('searchInvoiceNo').value = '';
-}
-
-function printInvoice() {
-  alert('Print functionality will be implemented');
-}
-
-// Form submission
 document.getElementById('saleModificationForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  alert('Invoice updated successfully!');
+  alert('Sale Modification updated successfully!');
 });
 </script>
 @endsection
