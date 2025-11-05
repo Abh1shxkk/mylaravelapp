@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\ItemCategoryController;
 use App\Http\Controllers\Admin\TransportMasterController;
 use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Admin\PurchaseController;
+use App\Http\Controllers\Admin\PurchaseTransactionController;
 use App\Http\Controllers\Admin\SaleReturnController;
 use App\Http\Controllers\Admin\PurchaseReturnController;
 use App\Http\Controllers\Admin\BreakageExpiryController;
@@ -108,6 +109,10 @@ Route::middleware(['admin'])->group(function () {
         Route::post('customers/{customer}/copy-discount', [CustomerCopyDiscountController::class, 'store'])->name('customers.copy-discount.store');
         Route::get('api/customer-discounts/{customerId}', [CustomerCopyDiscountController::class, 'getCustomerDiscounts'])->name('api.customer-discounts');
         
+        // Item routes - MUST be before resource route
+        Route::get('items/all', [ItemController::class, 'getAllItems'])->name('items.all');
+        Route::get('items/get-by-code/{code}', [ItemController::class, 'getByCode'])->name('items.get-by-code');
+        
         Route::resource('items', ItemController::class);
         Route::get('items/{item}/stock-ledger', [ItemController::class, 'stockLedger'])->name('items.stock-ledger');
         Route::get('items/{item}/stock-ledger-complete', [ItemController::class, 'stockLedgerComplete'])->name('items.stock-ledger-complete');
@@ -129,7 +134,6 @@ Route::middleware(['admin'])->group(function () {
         Route::get('batches/expiry/report', [BatchController::class, 'expiryReport'])->name('batches.expiry-report');
         Route::get('api/item-batches/{itemId}', [BatchController::class, 'getItemBatches'])->name('api.item-batches');
         Route::get('api/party-details/{type}/{id}', [ItemController::class, 'getPartyDetails'])->name('api.party-details');
-        Route::get('items/get-by-code/{code}', [ItemController::class, 'getByCode'])->name('items.get-by-code');
         Route::resource('suppliers', SupplierController::class);
         Route::get('suppliers/{supplier}/pending-orders', [SupplierController::class, 'pendingOrders'])->name('suppliers.pending-orders');
         Route::post('suppliers/{supplier}/pending-orders', [SupplierController::class, 'storePendingOrder'])->name('suppliers.pending-orders.store');
@@ -174,13 +178,26 @@ Route::middleware(['admin'])->group(function () {
         Route::get('sale/get-items', [SaleController::class, 'getItems'])->name('sale.getItems');
         Route::get('sale/modification', [SaleController::class, 'modification'])->name('sale.modification');
         
-        // Purchase Routes
-        Route::get('purchase/transaction', [PurchaseController::class, 'transaction'])->name('purchase.transaction');
-        Route::post('purchase/transaction', [PurchaseController::class, 'store'])->name('purchase.store');
-        Route::get('purchase/modification', [PurchaseController::class, 'modification'])->name('purchase.modification');
+        // Purchase Transaction Routes (Consolidated - All using PurchaseTransactionController)
+        Route::get('purchase/transaction', [PurchaseTransactionController::class, 'transaction'])->name('purchase.transaction');
+        Route::get('purchase/modification', [PurchaseTransactionController::class, 'modification'])->name('purchase.modification');
+        Route::get('purchase/invoice-list', [PurchaseTransactionController::class, 'getInvoiceList'])->name('purchase.invoice-list');
+        Route::get('purchase/fetch-bill/{trnNo}', [PurchaseTransactionController::class, 'fetchBill'])->name('purchase.fetch-bill');
+        Route::get('purchase/supplier/{supplierId}/name', [PurchaseTransactionController::class, 'getSupplierName'])->name('purchase.supplier-name');
+        
+        // Purchase Transaction CRUD Routes
+        Route::post('purchase/transaction/store', [PurchaseTransactionController::class, 'store'])->name('purchase.transaction.store');
+        Route::get('purchase/transactions', [PurchaseTransactionController::class, 'index'])->name('purchase.transactions.index');
+        Route::get('purchase/transactions/{id}', [PurchaseTransactionController::class, 'show'])->name('purchase.transactions.show');
+        Route::get('purchase/transactions/{id}/edit', [PurchaseTransactionController::class, 'edit'])->name('purchase.transactions.edit');
+        Route::put('purchase/transactions/{id}', [PurchaseTransactionController::class, 'update'])->name('purchase.transactions.update');
+        Route::delete('purchase/transactions/{id}', [PurchaseTransactionController::class, 'destroy'])->name('purchase.transactions.destroy');
+        
+        // Legacy Purchase Routes (Old Purchase model - kept for backward compatibility)
         Route::get('purchase/{id}', [PurchaseController::class, 'show'])->name('purchase.show');
         Route::put('purchase/{id}', [PurchaseController::class, 'update'])->name('purchase.update');
         Route::delete('purchase/{id}', [PurchaseController::class, 'destroy'])->name('purchase.destroy');
+        Route::post('purchase/transaction', [PurchaseController::class, 'store'])->name('purchase.store'); // Legacy format support
         
         // Sale Return Routes
         Route::get('sale-return/transaction', [SaleReturnController::class, 'transaction'])->name('sale-return.transaction');

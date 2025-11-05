@@ -283,6 +283,29 @@ class ItemController extends Controller
     }
 
     /**
+     * Get all items for insert modal in purchase transaction
+     */
+    public function getAllItems()
+    {
+        try {
+            $items = Item::select('id as code', 'name', 'mrp', 's_rate')
+                ->where('is_deleted', '!=', 1)
+                ->orderBy('name', 'asc')
+                ->get();
+            
+            return response()->json([
+                'success' => true,
+                'items' => $items
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * View stock ledger for an item (F10) - Complete EasySol Style
      */
     public function stockLedgerComplete(Item $item)
