@@ -4,105 +4,30 @@
 
 @section('content')
 <style>
-    :root {
-        --sidebar-bg: #243444;
-        --sidebar-text: #e9ecef;
-        --sidebar-hover: #2c3e50;
+    /* Scoped styles - only affect content area, not sidebar */
+    .content {
         --primary: #0d6efd;
         --card-shadow: 0 2px 8px rgba(0,0,0,0.08);
         --border-radius: 8px;
     }
 
-    body {
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-        background-color: #f8f9fa;
-        line-height: 1.5;
-        margin: 0;
-        padding: 0;
-    }
-
-    .dashboard-container {
-        display: flex;
-        min-height: 100vh;
-    }
-
-    /* Sidebar Styles */
-    .sidebar {
-        background-color: var(--sidebar-bg);
-        color: var(--sidebar-text);
-        width: 250px;
-        transition: all 0.3s;
-        flex-shrink: 0;
-    }
-
-    .sidebar-header {
-        padding: 1.5rem 1rem;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .sidebar-nav {
-        padding: 1rem 0;
-    }
-
-    .sidebar-nav .nav-item {
-        margin-bottom: 0.25rem;
-    }
-
-    .sidebar-nav .nav-link {
-        color: var(--sidebar-text);
-        padding: 0.75rem 1rem;
-        border-radius: 0;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-    }
-
-    .sidebar-nav .nav-link:hover, 
-    .sidebar-nav .nav-link.active {
-        background-color: var(--sidebar-hover);
-        color: white;
-    }
-
-    .sidebar-nav .nav-link i {
-        margin-right: 0.75rem;
-        font-size: 1.1rem;
-        width: 20px;
-        text-align: center;
-    }
-
-    /* Main Content */
-    .main-content {
-        flex: 1;
-        padding: 1.5rem;
-        overflow-x: auto;
-    }
-
-    /* Card Styles */
-    .card {
+    /* Card Styles - scoped to content */
+    .content .card {
         border: none;
         border-radius: var(--border-radius);
         box-shadow: var(--card-shadow);
         margin-bottom: 1.5rem;
     }
 
-    .card-header {
+    .content .card-header {
         background-color: white;
         border-bottom: 1px solid rgba(0,0,0,0.08);
         padding: 1rem 1.25rem;
         font-weight: 600;
     }
 
-    .card-body {
+    .content .card-body {
         padding: 1.25rem;
-    }
-
-    /* Page Header */
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1.5rem;
     }
 
     .page-title {
@@ -374,36 +299,17 @@
         vertical-align: middle;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-        .dashboard-container {
-            flex-direction: column;
-        }
-        
-        .sidebar {
-            width: 100%;
-            height: auto;
-        }
-        
-        .main-content {
-            padding: 1rem;
-        }
-    }
 </style>
 
-<div class="dashboard-container">
-    
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0 d-flex align-items-center"><i class="bi bi-cart-plus me-2"></i> Purchase Transaction</h4>
+        <div class="text-muted small">Create new purchase transaction</div>
+    </div>
+</div>
 
-    <!-- Main Content -->
-    <div class="main-content">
-       
-
-        <!-- Original Content with Improved Layout -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Transaction Details</h5>
-            </div>
-            <div class="card-body compact-form">
+<div class="card shadow-sm border-0 rounded">
+    <div class="card-body">
                 <form id="purchaseForm" method="POST" autocomplete="off" onsubmit="return false;">
                     @csrf
                     
@@ -799,8 +705,6 @@
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -996,12 +900,35 @@ let currentSelectedRow = null;
 document.addEventListener('DOMContentLoaded', function() {
     const sRateField = document.getElementById('calc_s_rate');
     if (sRateField) {
+        // Save s_rate when user changes it (input/change event)
+        sRateField.addEventListener('input', function(e) {
+            if (currentActiveRow !== null && currentActiveRow !== undefined) {
+                const sRateValue = parseFloat(e.target.value) || 0;
+                // Initialize rowGstData if it doesn't exist
+                if (!rowGstData[currentActiveRow]) {
+                    rowGstData[currentActiveRow] = {};
+                }
+                // Save s_rate for this row
+                rowGstData[currentActiveRow].s_rate = sRateValue;
+                console.log(`S.Rate saved for row ${currentActiveRow}:`, sRateValue);
+            }
+        });
+        
         sRateField.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
                 console.log('S.Rate Enter pressed');
                 console.log('currentActiveRow:', currentActiveRow);
                 console.log('isRowSelected before:', isRowSelected);
+                
+                // Save s_rate before calculating GST
+                if (currentActiveRow !== null && currentActiveRow !== undefined) {
+                    const sRateValue = parseFloat(e.target.value) || 0;
+                    if (!rowGstData[currentActiveRow]) {
+                        rowGstData[currentActiveRow] = {};
+                    }
+                    rowGstData[currentActiveRow].s_rate = sRateValue;
+                }
                 
                 // Calculate and save GST amounts for current row before moving
                 calculateAndSaveGstForRow(currentActiveRow);
@@ -1240,12 +1167,49 @@ function populateCalculationSectionForRow(item, rowIndex) {
     
     // Populate rate fields
     document.getElementById('calc_sc_percent').value = parseFloat(item.fixed_dis_percent || 0).toFixed(3);
-    document.getElementById('calc_spl_rate').value = parseFloat(item.spl_rate || 0).toFixed(2);
-    document.getElementById('calc_ws_rate').value = parseFloat(item.ws_rate || 0).toFixed(2);
     document.getElementById('calc_tax_percent').value = (parseFloat(item.cgst_percent || 0) + parseFloat(item.sgst_percent || 0)).toFixed(3);
     document.getElementById('calc_excise').value = '0.00';
-    document.getElementById('calc_mrp').value = parseFloat(item.mrp || 0).toFixed(2);
-    document.getElementById('calc_s_rate').value = parseFloat(item.s_rate || 0).toFixed(2);
+    
+    // Initialize rowGstData if needed
+    if (!rowGstData[rowIndex]) {
+        rowGstData[rowIndex] = {};
+    }
+    
+    // Handle S Rate - Priority: rowGstData > item.s_rate
+    let sRateValue = parseFloat(item.s_rate || 0);
+    if (rowGstData[rowIndex].s_rate !== undefined && rowGstData[rowIndex].s_rate !== null) {
+        sRateValue = parseFloat(rowGstData[rowIndex].s_rate) || 0;
+    } else {
+        rowGstData[rowIndex].s_rate = sRateValue;
+    }
+    document.getElementById('calc_s_rate').value = sRateValue.toFixed(2);
+    
+    // Handle WS Rate - Priority: rowGstData > item.ws_rate
+    let wsRateValue = parseFloat(item.ws_rate || 0);
+    if (rowGstData[rowIndex].ws_rate !== undefined && rowGstData[rowIndex].ws_rate !== null) {
+        wsRateValue = parseFloat(rowGstData[rowIndex].ws_rate) || 0;
+    } else {
+        rowGstData[rowIndex].ws_rate = wsRateValue;
+    }
+    document.getElementById('calc_ws_rate').value = wsRateValue.toFixed(2);
+    
+    // Handle SPL Rate - Priority: rowGstData > item.spl_rate
+    let splRateValue = parseFloat(item.spl_rate || 0);
+    if (rowGstData[rowIndex].spl_rate !== undefined && rowGstData[rowIndex].spl_rate !== null) {
+        splRateValue = parseFloat(rowGstData[rowIndex].spl_rate) || 0;
+    } else {
+        rowGstData[rowIndex].spl_rate = splRateValue;
+    }
+    document.getElementById('calc_spl_rate').value = splRateValue.toFixed(2);
+    
+    // Handle MRP - Priority: rowGstData > item.mrp > row value
+    let mrpValue = parseFloat(item.mrp || 0);
+    if (rowGstData[rowIndex].mrp !== undefined && rowGstData[rowIndex].mrp !== null) {
+        mrpValue = parseFloat(rowGstData[rowIndex].mrp) || 0;
+    } else {
+        rowGstData[rowIndex].mrp = mrpValue;
+    }
+    document.getElementById('calc_mrp').value = mrpValue.toFixed(2);
     
     // Check if this row has saved GST calculations
     if (rowGstData[rowIndex] && rowGstData[rowIndex].calculated) {
@@ -1310,6 +1274,12 @@ function calculateAndSaveGstForRow(rowIndex) {
                 const cost = qty > 0 ? (amount / qty).toFixed(2) : '0.00';
                 const costGst = qty > 0 ? (netAmount / qty).toFixed(2) : '0.00';
                 
+                // CRITICAL: Preserve existing rates before updating rowGstData
+                const existingSRate = rowGstData[rowIndex]?.s_rate;
+                const existingWsRate = rowGstData[rowIndex]?.ws_rate;
+                const existingSplRate = rowGstData[rowIndex]?.spl_rate;
+                const existingMrp = rowGstData[rowIndex]?.mrp;
+                
                 // Save calculated amounts for this row
                 rowGstData[rowIndex] = {
                     calculated: true,
@@ -1323,10 +1293,15 @@ function calculateAndSaveGstForRow(rowIndex) {
                     sgstPercent: sgstPercent,
                     cessPercent: cessPercent,
                     cost: cost,
-                    costGst: costGst
+                    costGst: costGst,
+                    // Preserve rates from before (user entered or from saved transaction)
+                    s_rate: existingSRate !== undefined && existingSRate !== null ? existingSRate : 0,
+                    ws_rate: existingWsRate !== undefined && existingWsRate !== null ? existingWsRate : 0,
+                    spl_rate: existingSplRate !== undefined && existingSplRate !== null ? existingSplRate : 0,
+                    mrp: existingMrp !== undefined && existingMrp !== null ? existingMrp : 0
                 };
                 
-                console.log(`✅ GST calculated and saved for row ${rowIndex}:`, rowGstData[rowIndex]);
+                console.log(`✅ GST calculated and saved for row ${rowIndex}. S.Rate preserved:`, rowGstData[rowIndex].s_rate, rowGstData[rowIndex]);
                 
                 // Update display immediately if this is the current active row
                 if (currentActiveRow === rowIndex) {
@@ -1663,12 +1638,40 @@ document.getElementById('saveMrpDetailsBtn').addEventListener('click', function(
     const rows = document.querySelectorAll('#itemsTableBody tr');
     const currentRow = rows[currentActiveRow];
     
-    // Update current row with MRP and Purchase Rate
-    const mrp = document.getElementById('mrp_value').value || 0;
-    const purRate = document.getElementById('mrp_pur_rate').value || 0;
+    // Get values from modal
+    const mrp = parseFloat(document.getElementById('mrp_value').value) || 0;
+    const purRate = parseFloat(document.getElementById('mrp_pur_rate').value) || 0;
+    const saleRate = parseFloat(document.getElementById('mrp_sale_rate').value) || 0;
+    const wsRate = parseFloat(document.getElementById('mrp_ws_rate').value) || 0;
+    const splRate = parseFloat(document.getElementById('mrp_spl_rate').value) || 0;
     
-    currentRow.querySelector('input[name*="[mrp]"]').value = mrp;
-    currentRow.querySelector('input[name*="[pur_rate]"]').value = purRate;
+    // Update current row with MRP and Purchase Rate
+    currentRow.querySelector('input[name*="[mrp]"]').value = mrp.toFixed(2);
+    currentRow.querySelector('input[name*="[pur_rate]"]').value = purRate.toFixed(2);
+    
+    // Initialize rowGstData for this row if not exists
+    if (!rowGstData[currentActiveRow]) {
+        rowGstData[currentActiveRow] = {};
+    }
+    
+    // Save rates to rowGstData so they can be used in calculation section and saved to DB
+    rowGstData[currentActiveRow].s_rate = saleRate;
+    rowGstData[currentActiveRow].ws_rate = wsRate;
+    rowGstData[currentActiveRow].spl_rate = splRate;
+    rowGstData[currentActiveRow].mrp = mrp;
+    
+    console.log('MRP Modal - Rates saved for row', currentActiveRow, {
+        s_rate: saleRate,
+        ws_rate: wsRate,
+        spl_rate: splRate,
+        mrp: mrp
+    });
+    
+    // Update calculation section immediately
+    document.getElementById('calc_s_rate').value = saleRate.toFixed(2);
+    document.getElementById('calc_ws_rate').value = wsRate.toFixed(2);
+    document.getElementById('calc_spl_rate').value = splRate.toFixed(2);
+    document.getElementById('calc_mrp').value = mrp.toFixed(2);
     
     // Recalculate amount
     const qty = parseFloat(currentRow.querySelector('input[name*="[qty]"]').value) || 0;
@@ -2386,6 +2389,11 @@ function savePurchase() {
                 dis_percent: parseFloat(row.querySelector(`input[name="items[${index}][dis_percent]"]`)?.value) || 0,
                 mrp: parseFloat(row.querySelector(`input[name="items[${index}][mrp]"]`)?.value) || 0,
                 amount: parseFloat(row.querySelector(`input[name="items[${index}][amount]"]`)?.value) || 0,
+                
+                // Rates from rowGstData (user-modified via MRP modal or from item master)
+                s_rate: (calculatedData.s_rate !== undefined && calculatedData.s_rate !== null) ? parseFloat(calculatedData.s_rate) : 0,
+                ws_rate: (calculatedData.ws_rate !== undefined && calculatedData.ws_rate !== null) ? parseFloat(calculatedData.ws_rate) : 0,
+                spl_rate: (calculatedData.spl_rate !== undefined && calculatedData.spl_rate !== null) ? parseFloat(calculatedData.spl_rate) : 0,
                 
                 // Calculated GST data
                 cgst_percent: calculatedData.cgstPercent || 0,

@@ -45,15 +45,10 @@
         font-size: 11px;
         padding: 2px 4px;
     }
-    .tax-section {
-        background: #FFE4E1;
-        padding: 8px;
-        border: 1px solid #000;
-    }
-    .summary-section {
-        background: #FFF8DC;
-        border: 1px solid #000;
-        padding: 6px;
+    .readonly-field {
+        background: #f8f9fa !important;
+        border: 1px solid #dee2e6 !important;
+        cursor: not-allowed;
     }
     .btn-action {
         font-size: 11px;
@@ -196,227 +191,227 @@
             </div>
         </div>
 
-        <!-- Tax Section -->
-        <div class="tax-section mb-2">
-            <div class="row g-2">
-                <div class="col-md-2">
-                    <div class="d-flex align-items-center">
-                        <label class="form-label-sm me-2 text-danger fw-bold">CGST(%):</label>
-                        <input type="number" class="form-control form-control-xs" step="0.01">
+        <!-- Calculation Section -->
+        <div class="bg-white border rounded p-3 mb-2" style="box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div class="d-flex align-items-start gap-3 border rounded p-2" style="font-size: 11px; background: #fafafa;">
+                <!-- HSN Code Block (First) -->
+                <div class="d-flex flex-column gap-2">
+                    <!-- HSN Code -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0" style="min-width: 75px;"><strong>HSN Code:</strong></label>
+                        <input type="text" class="form-control readonly-field text-center" id="calc_hsn_display" readonly style="width: 100px; height: 28px;" value="---">
+                    </div>
+                    
+                    <!-- CGST(%) -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0" style="min-width: 75px;"><strong>CGST(%):</strong></label>
+                        <input type="text" class="form-control readonly-field text-center" id="calc_cgst" readonly style="width: 100px; height: 28px;" value="0">
+                    </div>
+                    
+                    <!-- SGST(%) -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0" style="min-width: 75px;"><strong>SGST(%):</strong></label>
+                        <input type="text" class="form-control readonly-field text-center" id="calc_sgst" readonly style="width: 100px; height: 28px;" value="0">
+                    </div>
+                    
+                    <!-- Cess (%) -->
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0" style="min-width: 75px;"><strong>Cess (%):</strong></label>
+                        <input type="text" class="form-control readonly-field text-center" id="calc_cess" readonly style="width: 100px; height: 28px;" value="0">
                     </div>
                 </div>
-                <div class="col-md-2">
-                    <div class="d-flex align-items-center">
-                        <label class="form-label-sm me-2 text-danger fw-bold">SGST(%):</label>
-                        <input type="number" class="form-control form-control-xs" step="0.01">
+                
+                <!-- Right Side Fields -->
+                <div class="d-flex gap-3">
+                    <!-- Column 1: Tax fields -->
+                    <div class="d-flex flex-column gap-2">
+                        <!-- CGST Amt -->
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="mb-0" style="min-width: 75px;"><strong>CGST Amt:</strong></label>
+                            <div class="border rounded px-2 py-1" style="background: #fff; min-width: 70px; text-align: right; height: 28px; display: flex; align-items: center; justify-content: flex-end;">
+                                <strong id="calc_cgst_amount">0.00</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- SGST Amt -->
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="mb-0" style="min-width: 75px;"><strong>SGST Amt:</strong></label>
+                            <div class="border rounded px-2 py-1" style="background: #fff; min-width: 70px; text-align: right; height: 28px; display: flex; align-items: center; justify-content: flex-end;">
+                                <strong id="calc_sgst_amount">0.00</strong>
+                            </div>
+                        </div>
+                        
+                        <!-- CESS Amt -->
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="mb-0" style="min-width: 75px;"><strong>CESS Amt:</strong></label>
+                            <div class="border rounded px-2 py-1" style="background: #fff; min-width: 70px; text-align: right; height: 28px; display: flex; align-items: center; justify-content: flex-end;">
+                                <strong id="calc_cess_amount">0.00</strong>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="d-flex align-items-center">
-                        <label class="form-label-sm me-2 text-danger fw-bold">Cess (%):</label>
-                        <input type="number" class="form-control form-control-xs" step="0.01">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="d-flex align-items-center">
-                        <label class="form-label-sm me-2">TAX %:</label>
-                        <input type="number" class="form-control form-control-xs" step="0.01">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="d-flex align-items-center">
-                        <label class="form-label-sm me-2">SC %:</label>
-                        <input type="number" class="form-control form-control-xs" step="0.01">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="d-flex align-items-center">
-                        <label class="form-label-sm me-2">Excise:</label>
-                        <input type="number" class="form-control form-control-xs" step="0.01">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <div class="d-flex align-items-center">
-                        <label class="form-label-sm me-2">TSR:</label>
-                        <input type="number" class="form-control form-control-xs" step="0.01">
+                    
+                    <!-- Column 2: Other fields -->
+                    <div class="d-flex flex-column gap-2">
+                        <!-- TAX % -->
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="mb-0" style="min-width: 65px;"><strong>TAX %</strong></label>
+                            <input type="number" class="form-control readonly-field" id="calc_tax_percent" readonly step="0.01" style="width: 80px; height: 28px;" value="0.000">
+                        </div>
+                        
+                        <!-- SC % -->
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="mb-0" style="min-width: 65px;"><strong>SC %</strong></label>
+                            <input type="number" class="form-control readonly-field" id="calc_sc_percent" readonly step="0.01" style="width: 80px; height: 28px;" value="0.00">
+                        </div>
+                        
+                        <!-- Excise -->
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="mb-0" style="min-width: 65px;"><strong>Excise</strong></label>
+                            <input type="number" class="form-control readonly-field" id="calc_excise" readonly step="0.01" style="width: 80px; height: 28px;" value="0.00">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Summary Section -->
-        <div class="row g-2 mb-2">
-            <!-- Left Summary -->
-            <div class="col-md-6">
-                <div class="summary-section">
-                    <div class="row g-1">
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">N.T.Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 40px;">SC</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Scm.%</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 40px;">F.T.Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Dis.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 40px;">Scm.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Tax</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2 text-danger fw-bold" style="width: 40px;">Net</label>
-                                <input type="number" class="form-control form-control-xs bg-danger bg-opacity-10" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="d-flex align-items-center">
-                                <label class="form-label-sm me-2" style="width: 60px;">TCS</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                    </div>
+        <div class="bg-white border rounded p-2 mb-2">
+            <!-- Row 1: 6 fields -->
+            <div class="d-flex align-items-center" style="font-size: 11px; gap: 10px;">
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold; white-space: nowrap;">N.T AMT</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="nt_amt" readonly step="0.01" style="width: 80px; height: 26px; background: #fff3cd;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold;">SC</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="sc_amt" readonly step="0.01" style="width: 80px; height: 26px;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold;">SCM.</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="scm_amt" readonly step="0.01" style="width: 80px; height: 26px;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold;">DIS.</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="dis_amt" readonly step="0.01" style="width: 80px; height: 26px;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold;">LESS</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="less_amt" readonly step="0.01" style="width: 80px; height: 26px;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold;">Tax</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="tax_amt" readonly step="0.01" style="width: 80px; height: 26px;" value="0.00">
                 </div>
             </div>
+            
+            <!-- Row 2: 6 fields -->
+            <div class="d-flex align-items-center mt-2" style="font-size: 11px; gap: 10px;">
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold; white-space: nowrap;">NET AMT.</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="net_amt" readonly step="0.01" style="width: 80px; height: 26px; background: #fff3cd; font-weight: bold;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold;">Scm.%</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="scm_percent" readonly step="0.01" style="width: 80px; height: 26px;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold;">TCS</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="tcs_amt" readonly step="0.01" style="width: 80px; height: 26px; background: #ffcccc;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold; white-space: nowrap;">Dis1 Amt</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="dis1_amt" readonly step="0.01" style="width: 80px; height: 26px; background: #ffcccc;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold;">TOF</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="tof_amt" readonly step="0.01" style="width: 80px; height: 26px;" value="0.00">
+                </div>
+                
+                <div class="d-flex align-items-center" style="gap: 5px;">
+                    <label class="mb-0" style="font-weight: bold; white-space: nowrap;">INV.AMT.</label>
+                    <input type="number" class="form-control form-control-sm readonly-field text-end" id="inv_amt" readonly step="0.01" style="width: 80px; height: 26px; background: #fff3cd; font-weight: bold;" value="0.00">
+                </div>
+            </div>
+        </div>
 
-            <!-- Right Summary -->
-            <div class="col-md-6">
-                <div class="summary-section">
-                    <div class="row g-1">
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Packing</label>
-                                <input type="text" class="form-control form-control-xs">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">N.T.Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Unit</label>
-                                <input type="text" class="form-control form-control-xs">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">SC Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Cl. Qty</label>
-                                <input type="number" class="form-control form-control-xs">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Dis. Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Lctn :</label>
-                                <input type="text" class="form-control form-control-xs">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">HS. Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Scm. %</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Sub.Tot.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Scm.Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Comp :</label>
-                                <input type="text" class="form-control form-control-xs">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Tax Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Srino</label>
-                                <input type="text" class="form-control form-control-xs">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">Net Amt.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center mb-1">
-                                <label class="form-label-sm me-2" style="width: 60px;">SCM.</label>
-                                <input type="text" class="form-control form-control-xs">
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center">
-                                <label class="form-label-sm me-2" style="width: 60px;">Vol.</label>
-                                <input type="number" class="form-control form-control-xs" step="0.01">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Detailed Info Section -->
+        <div class="bg-white border rounded p-2 mb-2">
+            <table style="width: 100%; font-size: 11px; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 3px;"><strong>Unit</strong></td>
+                    <td style="padding: 3px;"><input type="text" class="form-control form-control-sm" id="unit" value="1" style="height: 22px; width: 50px;"></td>
+                    <td style="padding: 3px;"><strong>N.T Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="nt_amt_detail" readonly value="0.00" style="height: 22px; width: 80px;"></td>
+                    <td style="padding: 3px;"><strong>Scm.Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="scm_amt_detail" readonly value="0.00" style="height: 22px; width: 70px;"></td>
+                    <td style="padding: 3px;"><strong>Tax Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="tax_amt_detail" readonly value="0.00" style="height: 22px; width: 70px;"></td>
+                    <td style="padding: 3px;"><strong>Cost</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="cost" readonly value="0.00" style="height: 22px; width: 70px;"></td>
+                    <td style="padding: 3px;"><strong>Srl.No.</strong></td>
+                    <td style="padding: 3px;"><input type="text" class="form-control form-control-sm text-center" id="srl_no1" value="1" style="height: 22px; width: 40px;"></td>
+                    <td style="padding: 3px;"><input type="text" class="form-control form-control-sm text-center" id="srl_no2" value="1" style="height: 22px; width: 40px;"></td>
+                </tr>
+                <tr>
+                    <td style="padding: 3px;"><strong>Lctn</strong></td>
+                    <td style="padding: 3px;"><input type="text" class="form-control form-control-sm" id="lctn" value="" style="height: 22px; width: 50px;"></td>
+                    <td style="padding: 3px;"><strong>SC Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="sc_amt_detail" readonly value="0.00" style="height: 22px; width: 80px;"></td>
+                    <td style="padding: 3px;"><strong>Dis1.Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="dis1_amt_detail" readonly value="0.00" style="height: 22px; width: 70px;"></td>
+                    <td style="padding: 3px;"><strong>Net Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="net_amt_detail" readonly value="0.00" style="height: 22px; width: 70px;"></td>
+                    <td style="padding: 3px;"><strong>Cost+GST</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="cost_gst" readonly value="0.00" style="height: 22px; width: 70px;"></td>
+                    <td style="padding: 3px;"><strong>P.SCM.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-center" id="p_scm1" value="0" style="height: 22px; width: 40px;"></td>
+                    <td style="padding: 3px; text-align: center; font-weight: bold;">+</td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-center" id="p_scm2" value="0" style="height: 22px; width: 40px;"></td>
+                </tr>
+                <tr>
+                    <td style="padding: 3px;"><strong>Cl.Qty</strong></td>
+                    <td style="padding: 3px;"><input type="text" class="form-control form-control-sm" id="cl_qty" value="" style="height: 22px; width: 50px;"></td>
+                    <td style="padding: 3px;"><strong>Dis. Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="dis_amt_detail" readonly value="0.00" style="height: 22px; width: 80px;"></td>
+                    <td style="padding: 3px;"><strong>Less</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="less_detail" readonly value="0.00" style="height: 22px; width: 70px;"></td>
+                    <td style="padding: 3px;"><strong>Comp :</strong></td>
+                    <td style="padding: 3px;"><input type="text" class="form-control form-control-sm" id="comp" value="" style="height: 22px; width: 100px;"></td>
+                    <td style="padding: 3px;"><strong>Vol.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-end" id="vol" value="0" style="height: 22px; width: 50px;"></td>
+                    <td style="padding: 3px;"><strong>S.SCM.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-center" id="s_scm1" value="0" style="height: 22px; width: 40px;"></td>
+                    <td style="padding: 3px; text-align: center; font-weight: bold;">+</td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-center" id="s_scm2" value="0" style="height: 22px; width: 40px;"></td>
+                </tr>
+                <tr>
+                    <td style="padding: 3px;"><strong>Pack</strong></td>
+                    <td style="padding: 3px;"><input type="text" class="form-control form-control-sm" id="pack_detail" value="" style="height: 22px; width: 50px;"></td>
+                    <td style="padding: 3px;"><strong>Hs.Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="hs_amt" readonly value="0.00" style="height: 22px; width: 80px;"></td>
+                    <td style="padding: 3px;"><strong>Gross Amt.</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm readonly-field text-end" id="gross_amt" readonly value="0.00" style="height: 22px; width: 70px;"></td>
+                    <td style="padding: 3px;"><strong>Scm%</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-end" id="scm_percent_detail" value="0.00" style="height: 22px; width: 60px;"></td>
+                    <td style="padding: 3px;"><strong>Dis1.%</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-end" id="dis1_percent" value="0.00" style="height: 22px; width: 60px;"></td>
+                    <td style="padding: 3px;"><strong>%</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-end" id="percent1" value="0.00" style="height: 22px; width: 50px;"></td>
+                    <td style="padding: 3px;"><strong>%</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-end" id="percent2" value="0.00" style="height: 22px; width: 50px;"></td>
+                    <td style="padding: 3px;"><strong>%</strong></td>
+                    <td style="padding: 3px;"><input type="number" class="form-control form-control-sm text-end" id="percent3" value="0.00" style="height: 22px; width: 50px;"></td>
+                </tr>
+            </table>
         </div>
 
         <!-- Action Buttons -->

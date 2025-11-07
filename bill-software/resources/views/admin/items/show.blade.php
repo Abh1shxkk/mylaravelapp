@@ -1,6 +1,52 @@
 @extends('layouts.admin')
 @section('title', 'Item Details')
 @section('content')
+@php
+    // Use latest batch data if available, otherwise fallback to item master
+    $useLatestBatch = isset($latestBatch) && $latestBatch !== null;
+    
+    // Get rates from latest batch or item master
+    $sRate = $useLatestBatch ? ($latestBatch->s_rate ?? 0) : ($item->s_rate ?? 0);
+    $wsRate = $useLatestBatch ? ($latestBatch->ws_rate ?? 0) : ($item->ws_rate ?? 0);
+    $splRate = $useLatestBatch ? ($latestBatch->spl_rate ?? 0) : ($item->spl_rate ?? 0);
+    $purRate = $useLatestBatch ? ($latestBatch->pur_rate ?? 0) : ($item->pur_rate ?? 0);
+    $mrp = $useLatestBatch ? ($latestBatch->mrp ?? 0) : ($item->mrp ?? 0);
+    $cost = $useLatestBatch ? ($latestBatch->cost ?? 0) : ($item->cost ?? 0);
+    
+    // Calculate GST percentage from latest batch or HSN code fields
+    if ($useLatestBatch) {
+        $gstPercent = ($latestBatch->cgst_percent ?? 0) + ($latestBatch->sgst_percent ?? 0) + ($latestBatch->cess_percent ?? 0);
+    } else {
+        $gstPercent = ($item->cgst_percent ?? 0) + ($item->sgst_percent ?? 0) + ($item->cess_percent ?? 0);
+        // If IGST is used instead of CGST+SGST, use IGST
+        if (($item->igst_percent ?? 0) > 0) {
+            $gstPercent = ($item->igst_percent ?? 0) + ($item->cess_percent ?? 0);
+        }
+    }
+    
+    // Calculate F.T. Rates using formula: FT = Rate × (1 + GST/100)
+    $ftRateSRate = $sRate * (1 + ($gstPercent / 100));
+    $ftRateWSRate = $wsRate * (1 + ($gstPercent / 100));
+    $ftRateSPLRate = $splRate * (1 + ($gstPercent / 100));
+    $ftRatePurRate = $purRate * (1 + ($gstPercent / 100));
+    
+    // Calculate Cost + GST
+    $costPlusGst = $cost * (1 + ($gstPercent / 100));
+    
+    // Calculate Margin % and Markup %
+    $marginPercent = 0;
+    $markupPercent = 0;
+    if ($sRate > 0 && $cost > 0) {
+        $marginPercent = (($sRate - $cost) / $sRate) * 100;
+        $markupPercent = (($sRate - $cost) / $cost) * 100;
+    }
+    
+    // Calculate Total Units from purchase transaction items (where batches come from)
+    $totalUnits = $item->purchaseTransactionItems()->sum('qty');
+    $packUnits = $totalUnits; // Pack Units same as Total Units
+    $looseUnits = 0; // Loose Units (can be calculated if needed)
+    $unitsInPack = 1; // Always 1 as per requirement
+@endphp
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -175,13 +221,20 @@
                             <div class="col-md-4">
                                 <div class="detail-item">
                                     <label class="text-muted small mb-1">S. Rate:</label>
-                                    <div class="fw-semibold text-success">₹{{ number_format($item->s_rate ?? 0, 2) }}</div>
+                                    <div class="fw-semibold text-success">₹{{ number_format($sRate, 2) }}</div>
+                                    <div class="fw-semibold text-primary small mt-1">F.T. Rate: ₹{{ number_format($ftRateSRate, 2) }}</div>
+                                    @if($useLatestBatch)
+                                        <div class="text-muted small">From Latest Batch</div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="detail-item">
                                     <label class="text-muted small mb-1">MRP (Net):</label>
-                                    <div class="fw-semibold text-success">₹{{ number_format($item->mrp ?? 0, 2) }}</div>
+                                    <div class="fw-semibold text-success">₹{{ number_format($mrp, 2) }}</div>
+                                    @if($useLatestBatch)
+                                        <div class="text-muted small">From Latest Batch</div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -194,22 +247,30 @@
                                 <div class="detail-item">
                                     <label class="text-muted small mb-1">W.S.Rate:</label>
                                     <div class="fw-semibold text-success">
-                                        ₹{{ number_format($item->ws_rate ?? 0, 2) }}
+                                        ₹{{ number_format($wsRate, 2) }}
                                         <span class="badge {{ $item->ws_net_toggle == 'Y' ? 'bg-success' : 'bg-secondary' }} ms-2 px-2 py-1 rounded-pill">
                                             {{ $item->ws_net_toggle ?? 'Y' }}
                                         </span>
                                     </div>
+                                    <div class="fw-semibold text-primary small mt-1">F.T. Rate: ₹{{ number_format($ftRateWSRate, 2) }} N</div>
+                                    @if($useLatestBatch)
+                                        <div class="text-muted small">From Latest Batch</div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="detail-item">
                                     <label class="text-muted small mb-1">Spl.Rate:</label>
                                     <div class="fw-semibold text-success">
-                                        ₹{{ number_format($item->spl_rate ?? 0, 2) }}
+                                        ₹{{ number_format($splRate, 2) }}
                                         <span class="badge {{ $item->spl_net_toggle == 'Y' ? 'bg-success' : 'bg-secondary' }} ms-2 px-2 py-1 rounded-pill">
                                             {{ $item->spl_net_toggle ?? 'Y' }}
                                         </span>
                                     </div>
+                                    <div class="fw-semibold text-primary small mt-1">F.T. Rate: ₹{{ number_format($ftRateSPLRate, 2) }} N</div>
+                                    @if($useLatestBatch)
+                                        <div class="text-muted small">From Latest Batch</div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -235,13 +296,20 @@
                             <div class="col-md-3">
                                 <div class="detail-item">
                                     <label class="text-muted small mb-1">Pur. Rate:</label>
-                                    <div class="fw-semibold text-warning">₹{{ number_format($item->pur_rate ?? 0, 2) }}</div>
+                                    <div class="fw-semibold text-warning">₹{{ number_format($purRate, 2) }}</div>
+                                    <div class="fw-semibold text-primary small mt-1">F.T. Rate: ₹{{ number_format($ftRatePurRate, 2) }}</div>
+                                    @if($useLatestBatch)
+                                        <div class="text-muted small">From Latest Batch</div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="detail-item">
                                     <label class="text-muted small mb-1">Cost:</label>
-                                    <div class="fw-semibold text-warning">₹{{ number_format($item->cost ?? 0, 2) }}</div>
+                                    <div class="fw-semibold text-warning">₹{{ number_format($cost, 2) }}</div>
+                                    @if($useLatestBatch)
+                                        <div class="text-muted small">From Latest Batch</div>
+                                    @endif
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -298,6 +366,24 @@
                                 <div class="detail-item">
                                     <label class="text-muted small mb-1">Cess (%):</label>
                                     <div class="fw-semibold">{{ number_format($item->cess_percent ?? 0, 2) }}%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <label class="text-muted small mb-1">Cost + GST:</label>
+                                    <div class="fw-semibold text-danger">₹{{ number_format($costPlusGst, 2) }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <label class="text-muted small mb-1">Margin (%):</label>
+                                    <div class="fw-semibold text-danger">{{ number_format($marginPercent, 2) }}%</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <label class="text-muted small mb-1">Markup (%):</label>
+                                    <div class="fw-semibold text-danger">{{ number_format($markupPercent, 2) }}%</div>
                                 </div>
                             </div>
                         </div>
@@ -384,6 +470,10 @@
                         <div class="detail-item">
                             <label class="text-muted small mb-1">VAT(%):</label>
                             <div class="fw-semibold">{{ number_format($item->vat_percent ?? 0, 2) }}%</div>
+                        </div>
+                        <div class="detail-item">
+                            <label class="text-muted small mb-1">GST(%):</label>
+                            <div class="fw-semibold text-primary">{{ number_format($gstPercent, 3) }}%</div>
                         </div>
                         <div class="detail-item">
                             <label class="text-muted small mb-1">Fixed Dis. (Y/N/M):</label>
@@ -509,6 +599,34 @@
                 </div>
             </div>
 
+            <!-- Units Section -->
+            <div class="card shadow-sm border-0 rounded-lg mb-4">
+                <div class="card-body p-4">
+                    <div class="section-header mb-4">
+                        <i class="bi bi-box-seam text-info me-2"></i>
+                        <h5 class="mb-0">Units</h5>
+                    </div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <label class="text-muted small mb-1">Total Units:</label>
+                            <div class="fw-semibold text-purple">{{ number_format($totalUnits, 0) }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <label class="text-muted small mb-1">Pack Units:</label>
+                            <div class="fw-semibold text-purple">{{ number_format($packUnits, 0) }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <label class="text-muted small mb-1">Loose Units:</label>
+                            <div class="fw-semibold text-purple">{{ number_format($looseUnits, 0) }}</div>
+                        </div>
+                        <div class="detail-item">
+                            <label class="text-muted small mb-1">Units In Pack:</label>
+                            <div class="fw-semibold text-purple">{{ number_format($unitsInPack, 0) }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- System Information -->
             <div class="card shadow-sm border-0 rounded-lg">
                 <div class="card-body p-4">
@@ -582,6 +700,10 @@
 
     .card {
         border: none;
+    }
+
+    .text-purple {
+        color: #6f42c1 !important;
     }
 </style>
 @endsection

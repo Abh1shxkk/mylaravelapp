@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\GeneralNotebookController;
 use App\Http\Controllers\Admin\ItemCategoryController;
 use App\Http\Controllers\Admin\TransportMasterController;
 use App\Http\Controllers\Admin\SaleController;
+use App\Http\Controllers\Admin\SaleTransactionController;
 use App\Http\Controllers\Admin\PurchaseController;
 use App\Http\Controllers\Admin\PurchaseTransactionController;
 use App\Http\Controllers\Admin\SaleReturnController;
@@ -174,8 +175,8 @@ Route::middleware(['admin'])->group(function () {
         
         // Sale Routes
         Route::get('sale/transaction', [SaleController::class, 'transaction'])->name('sale.transaction');
-        Route::post('sale/transaction', [SaleController::class, 'store'])->name('sale.store');
-        Route::get('sale/get-items', [SaleController::class, 'getItems'])->name('sale.getItems');
+        Route::post('sale/transaction', [SaleTransactionController::class, 'store'])->name('sale.store');
+        Route::get('sale/get-items', [SaleTransactionController::class, 'getItems'])->name('sale.getItems');
         Route::get('sale/modification', [SaleController::class, 'modification'])->name('sale.modification');
         
         // Purchase Transaction Routes (Consolidated - All using PurchaseTransactionController)

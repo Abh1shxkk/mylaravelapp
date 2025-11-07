@@ -25,6 +25,10 @@ class ItemController extends Controller
 
         $items = Item::query()
             ->with('company') // Eager load company relationship
+            ->addSelect([
+                'total_units' => \App\Models\PurchaseTransactionItem::selectRaw('COALESCE(SUM(qty), 0)')
+                    ->whereColumn('item_id', 'items.id')
+            ])
             ->when($search && trim($search) !== '', function ($query) use ($search, $searchField) {
                 $search = trim($search);
                 
@@ -117,12 +121,29 @@ class ItemController extends Controller
             return redirect()->back()->with('error', 'Error creating item: ' . $e->getMessage())->withInput();
         }
     }
-    public function show(Item $item){ return view('admin.items.show', compact('item')); }
+    public function show(Item $item)
+    {
+        // Load purchase transaction items relationship for calculating total units
+        $item->load('purchaseTransactionItems');
+        
+        // Get latest batch details from purchase_transaction_items (most recent purchase)
+        $latestBatch = \App\Models\PurchaseTransactionItem::where('item_id', $item->id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        return view('admin.items.show', compact('item', 'latestBatch'));
+    }
     
     public function edit(Item $item)
     {
         $companies = Company::where('is_deleted', '!=', 1)->get();
-        return view('admin.items.edit', compact('item', 'companies'));
+        
+        // Get latest batch details to pre-fill rates
+        $latestBatch = \App\Models\PurchaseTransactionItem::where('item_id', $item->id)
+            ->orderBy('created_at', 'desc')
+            ->first();
+        
+        return view('admin.items.edit', compact('item', 'companies', 'latestBatch'));
     }
     public function update(Request $request, Item $item)
     {

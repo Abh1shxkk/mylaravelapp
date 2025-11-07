@@ -308,6 +308,8 @@ class PurchaseTransactionController extends Controller
                     'pur_rate' => $itemData['pur_rate'],
                     'mrp' => $itemData['mrp'] ?? 0,
                     's_rate' => $itemData['s_rate'] ?? 0,
+                    'ws_rate' => $itemData['ws_rate'] ?? 0,
+                    'spl_rate' => $itemData['spl_rate'] ?? 0,
                     'dis_percent' => $itemData['dis_percent'] ?? 0,
                     'amount' => $itemData['amount'],
                     
@@ -330,6 +332,23 @@ class PurchaseTransactionController extends Controller
                     
                     'row_order' => $itemData['row_order'] ?? 0,
                 ]);
+            }
+            
+            // Update Item Master with rates from this purchase (latest batch rates)
+            foreach ($itemsData as $itemData) {
+                $item = Item::find($itemData['item_code']);
+                
+                if ($item) {
+                    // Update rates from purchase transaction
+                    $item->update([
+                        'mrp' => $itemData['mrp'] ?? $item->mrp,
+                        's_rate' => $itemData['s_rate'] ?? $item->s_rate,
+                        'ws_rate' => $itemData['ws_rate'] ?? $item->ws_rate,
+                        'spl_rate' => $itemData['spl_rate'] ?? $item->spl_rate,
+                        'pur_rate' => $itemData['pur_rate'] ?? $item->pur_rate,
+                        'cost' => $itemData['pur_rate'] ?? $item->cost, // Cost = Purchase Rate
+                    ]);
+                }
             }
             
             // Remove pending orders for items that were saved in this transaction
@@ -462,6 +481,8 @@ class PurchaseTransactionController extends Controller
                     'pur_rate' => $itemData['pur_rate'],
                     'mrp' => $itemData['mrp'] ?? 0,
                     's_rate' => $itemData['s_rate'] ?? 0,
+                    'ws_rate' => $itemData['ws_rate'] ?? 0,
+                    'spl_rate' => $itemData['spl_rate'] ?? 0,
                     'dis_percent' => $itemData['dis_percent'] ?? 0,
                     'amount' => $itemData['amount'],
                     
@@ -484,6 +505,23 @@ class PurchaseTransactionController extends Controller
                     
                     'row_order' => $itemData['row_order'] ?? 0,
                 ]);
+            }
+            
+            // Update Item Master with rates from this purchase (latest batch rates)
+            foreach ($itemsData as $itemData) {
+                $item = Item::find($itemData['item_code']);
+                
+                if ($item) {
+                    // Update rates from purchase transaction
+                    $item->update([
+                        'mrp' => $itemData['mrp'] ?? $item->mrp,
+                        's_rate' => $itemData['s_rate'] ?? $item->s_rate,
+                        'ws_rate' => $itemData['ws_rate'] ?? $item->ws_rate,
+                        'spl_rate' => $itemData['spl_rate'] ?? $item->spl_rate,
+                        'pur_rate' => $itemData['pur_rate'] ?? $item->pur_rate,
+                        'cost' => $itemData['pur_rate'] ?? $item->cost, // Cost = Purchase Rate
+                    ]);
+                }
             }
             
             // Remove pending orders for items that were saved in this transaction

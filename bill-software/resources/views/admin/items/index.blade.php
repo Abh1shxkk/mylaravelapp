@@ -63,8 +63,7 @@
             <td>{{ $item->packing ?? '-' }}</td>
             <td>{{ $item->company->short_name ?? '-' }}</td>
             <td>
-              <span class="badge bg-light text-dark">{{ $item->unit ?? '1' }}</span>
-              <small class="text-muted">{{ $item->unit_type ?? 'Unit' }}</small>
+              <span class="badge bg-info text-white">{{ number_format($item->total_units ?? 0, 0) }}</span>
             </td>
             <td class="text-end">
               <a class="btn btn-sm btn-outline-primary" href="{{ route('admin.items.show',$item) }}" title="View"><i class="bi bi-eye"></i></a>

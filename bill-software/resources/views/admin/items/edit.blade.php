@@ -1,6 +1,17 @@
 @extends('layouts.admin')
 @section('title', 'Edit Item')
 @section('content')
+@php
+    // Use latest batch rates if available, otherwise use item rates
+    $useLatestBatch = isset($latestBatch) && $latestBatch !== null;
+    
+    $currentSRate = $useLatestBatch ? $latestBatch->s_rate : $item->s_rate;
+    $currentMrp = $useLatestBatch ? $latestBatch->mrp : $item->mrp;
+    $currentWsRate = $useLatestBatch ? $latestBatch->ws_rate : $item->ws_rate;
+    $currentSplRate = $useLatestBatch ? $latestBatch->spl_rate : $item->spl_rate;
+    $currentPurRate = $useLatestBatch ? $latestBatch->pur_rate : $item->pur_rate;
+    $currentCost = $useLatestBatch ? $latestBatch->cost : $item->cost;
+@endphp
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
@@ -10,6 +21,14 @@
                         <i class="bi bi-arrow-left me-2"></i>Back to Items
                     </a>
                 </div>
+                
+                @if($useLatestBatch)
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Latest Batch Rates Loaded!</strong> Rates are pre-filled from your most recent purchase.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                @endif
 
                 @if(session('error'))
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -187,7 +206,7 @@
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">S. Rate</label>
                                     <input type="number" step="0.01" class="form-control" name="s_rate"
-                                        value="{{ old('s_rate', $item->s_rate ?? '0.00') }}" placeholder="0.00">
+                                        value="{{ old('s_rate', $currentSRate ?? '0.00') }}" placeholder="0.00">
                                 </div>
                             </div>
 
@@ -197,7 +216,7 @@
                                     <label class="form-label">MRP</label>
                                     <div class="input-group">
                                         <input type="number" step="0.01" class="form-control" name="mrp"
-                                            value="{{ old('mrp', $item->mrp ?? '0.00') }}" placeholder="0.00">
+                                            value="{{ old('mrp', $currentMrp ?? '0.00') }}" placeholder="0.00">
                                         <span class="input-group-text" style="background-color: #e3f2fd; color: #1976d2; font-weight: bold;">Net</span>
                                     </div>
                                 </div>
@@ -209,7 +228,7 @@
                                     <label class="form-label">W.S.Rate</label>
                                     <div class="input-group">
                                         <input type="number" step="0.01" class="form-control" name="ws_rate"
-                                            value="{{ old('ws_rate', $item->ws_rate ?? '0.00') }}" placeholder="0.00" style="max-width: 120px;">
+                                            value="{{ old('ws_rate', $currentWsRate ?? '0.00') }}" placeholder="0.00" style="max-width: 120px;">
                                         <select class="form-select" name="ws_net_toggle" style="max-width: 60px;">
                                             <option value="Y" {{ old('ws_net_toggle', $item->ws_net_toggle ?? 'Y') == 'Y' ? 'selected' : '' }}>Y</option>
                                             <option value="N" {{ old('ws_net_toggle', $item->ws_net_toggle) == 'N' ? 'selected' : '' }}>N</option>
@@ -224,7 +243,7 @@
                                     <label class="form-label">Spl.Rate</label>
                                     <div class="input-group">
                                         <input type="number" step="0.01" class="form-control" name="spl_rate"
-                                            value="{{ old('spl_rate', $item->spl_rate ?? '0.00') }}" placeholder="0.00" style="max-width: 120px;">
+                                            value="{{ old('spl_rate', $currentSplRate ?? '0.00') }}" placeholder="0.00" style="max-width: 120px;">
                                         <select class="form-select" name="spl_net_toggle" style="max-width: 60px;">
                                             <option value="Y" {{ old('spl_net_toggle', $item->spl_net_toggle ?? 'Y') == 'Y' ? 'selected' : '' }}>Y</option>
                                             <option value="N" {{ old('spl_net_toggle', $item->spl_net_toggle) == 'N' ? 'selected' : '' }}>N</option>
@@ -269,7 +288,7 @@
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Pur. Rate</label>
                                     <input type="number" step="0.01" class="form-control" name="pur_rate"
-                                        value="{{ old('pur_rate', $item->pur_rate ?? '0.00') }}" placeholder="0.00">
+                                        value="{{ old('pur_rate', $currentPurRate ?? '0.00') }}" placeholder="0.00">
                                 </div>
                             </div>
                             
@@ -278,7 +297,7 @@
                                 <div class="col-md-3 mb-3">
                                     <label class="form-label">Cost</label>
                                     <input type="number" step="0.01" class="form-control" name="cost"
-                                        value="{{ old('cost', $item->cost ?? '0.00') }}" placeholder="0.00">
+                                        value="{{ old('cost', $currentCost ?? '0.00') }}" placeholder="0.00">
                                 </div>
                             </div>
                             

@@ -64,6 +64,14 @@ class Item extends Model
     }
 
     /**
+     * Relationship with Purchase Transaction Items
+     */
+    public function purchaseTransactionItems()
+    {
+        return $this->hasMany(PurchaseTransactionItem::class, 'item_id');
+    }
+
+    /**
      * Get total quantity from all batches
      */
     public function getTotalQuantity()

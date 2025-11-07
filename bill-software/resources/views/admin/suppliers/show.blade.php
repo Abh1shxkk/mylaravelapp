@@ -1,34 +1,29 @@
 @extends('layouts.admin')
 @section('title', 'Supplier Details')
 @section('content')
-<div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="mb-1 fw-bold text-dark d-flex align-items-center">
-        <i class="bi bi-eye me-2"></i> Supplier Details
-      </h2>
-      <div class="text-muted small">Detailed supplier record</div>
-    </div>
-    <div class="d-flex gap-2">
-      <a href="{{ route('admin.suppliers.pending-orders', $supplier) }}" class="btn btn-info btn-sm fw-semibold">
-        <i class="bi bi-cart-check me-1"></i> Pending Orders
-      </a>
-      <a href="{{ route('admin.suppliers.index') }}" class="btn btn-outline-secondary btn-sm fw-semibold">
-        <i class="bi bi-arrow-left me-1"></i> Back to Suppliers
-      </a>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="mb-0 d-flex align-items-center"><i class="bi bi-truck me-2"></i> Supplier Details</h4>
+    <div class="text-muted small">Detailed supplier record</div>
   </div>
+  <div class="d-flex gap-2">
+    <a href="{{ route('admin.suppliers.pending-orders', $supplier) }}" class="btn btn-info btn-sm">
+      <i class="bi bi-cart-check me-1"></i> Pending Orders
+    </a>
+    <a href="{{ route('admin.suppliers.index') }}" class="btn btn-outline-secondary btn-sm">
+      <i class="bi bi-arrow-left me-1"></i> Back to Suppliers
+    </a>
+  </div>
+</div>
 
-  <div class="row g-4">
-    <div class="col-lg-12">
-      <!-- Basic Information Card -->
-      <div class="card border-0 shadow-sm rounded-3 mb-4">
-        <div class="card-header bg-primary text-white border-0 py-3">
-          <h5 class="mb-0 fw-semibold d-flex align-items-center">
-            <i class="bi bi-info-circle me-2"></i> Basic Information
-          </h5>
-        </div>
-        <div class="card-body p-4">
+<div class="card shadow-sm border-0 rounded">
+  <div class="card-body">
+    <!-- Basic Information Card -->
+    <div class="mb-4">
+      <h5 class="mb-3 d-flex align-items-center">
+        <i class="bi bi-info-circle me-2"></i> Basic Information
+      </h5>
+      <div>
           <div class="row g-3">
             <div class="col-md-3">
               <label class="form-label small text-muted mb-1">Name</label>
@@ -75,17 +70,15 @@
               <p class="fw-medium text-dark mb-0">{{ $supplier->flag ?? '-' }}</p>
             </div>
           </div>
-        </div>
       </div>
+    </div>
 
-      <!-- Contact Information Card -->
-      <div class="card border-0 shadow-sm rounded-3 mb-4">
-        <div class="card-header bg-success text-white border-0 py-3">
-          <h5 class="mb-0 fw-semibold d-flex align-items-center">
-            <i class="bi bi-telephone me-2"></i> Contact Information
-          </h5>
-        </div>
-        <div class="card-body p-4">
+    <!-- Contact Information Card -->
+    <div class="mb-4">
+      <h5 class="mb-3 d-flex align-items-center">
+        <i class="bi bi-telephone me-2"></i> Contact Information
+      </h5>
+      <div>
           <div class="row g-3">
             <div class="col-md-3">
               <label class="form-label small text-muted mb-1">E-Mail</label>
@@ -116,17 +109,15 @@
               <p class="fw-medium text-dark mb-0">{{ $supplier->mobile_additional ?? '-' }}</p>
             </div>
           </div>
-        </div>
       </div>
+    </div>
 
-      <!-- License & Registration Information Card -->
-      <div class="card border-0 shadow-sm rounded-3 mb-4">
-        <div class="card-header bg-info text-white border-0 py-3">
-          <h5 class="mb-0 fw-semibold d-flex align-items-center">
-            <i class="bi bi-file-text me-2"></i> License & Registration Information
-          </h5>
-        </div>
-        <div class="card-body p-4">
+    <!-- License & Registration Information Card -->
+    <div class="mb-4">
+      <h5 class="mb-3 d-flex align-items-center">
+        <i class="bi bi-file-text me-2"></i> License & Registration Information
+      </h5>
+      <div>
           <div class="row g-3">
             <div class="col-md-3">
               <label class="form-label small text-muted mb-1">D.L No.</label>
@@ -161,17 +152,15 @@
               <p class="fw-medium text-dark mb-0">{{ $supplier->local_central_flag ?? '-' }}</p>
             </div>
           </div>
-        </div>
       </div>
+    </div>
 
-      <!-- Purchase & Trade Settings Card -->
-      <div class="card border-0 shadow-sm rounded-3 mb-4">
-        <div class="card-header bg-warning text-dark border-0 py-3">
-          <h5 class="mb-0 fw-semibold d-flex align-items-center">
-            <i class="bi bi-cart me-2"></i> Purchase & Trade Settings
-          </h5>
-        </div>
-        <div class="card-body p-4">
+    <!-- Purchase & Trade Settings Card -->
+    <div class="mb-4">
+      <h5 class="mb-3 d-flex align-items-center">
+        <i class="bi bi-cart me-2"></i> Purchase & Trade Settings
+      </h5>
+      <div>
           <div class="row g-3">
             <div class="col-md-3">
               <label class="form-label small text-muted mb-1">Inv. on F.T. Rate</label>
@@ -226,17 +215,15 @@
               <p class="fw-medium text-dark mb-0">{{ $supplier->discount_after_scheme ? 'Y' : 'N' }}</p>
             </div>
           </div>
-        </div>
       </div>
+    </div>
 
-      <!-- Tax & GST Settings Card -->
-      <div class="card border-0 shadow-sm rounded-3 mb-4">
-        <div class="card-header bg-danger text-white border-0 py-3">
-          <h5 class="mb-0 fw-semibold d-flex align-items-center">
-            <i class="bi bi-percent me-2"></i> Tax & GST Settings
-          </h5>
-        </div>
-        <div class="card-body p-4">
+    <!-- Tax & GST Settings Card -->
+    <div class="mb-4">
+      <h5 class="mb-3 d-flex align-items-center">
+        <i class="bi bi-percent me-2"></i> Tax & GST Settings
+      </h5>
+      <div>
           <div class="row g-3">
             <div class="col-md-3">
               <label class="form-label small text-muted mb-1">VAT on Br./Expiry</label>
@@ -275,17 +262,15 @@
               <p class="fw-medium text-dark mb-0">{{ $supplier->tds_tcs_on_bill_amount ? 'Y' : 'N' }}</p>
             </div>
           </div>
-        </div>
       </div>
+    </div>
 
-      <!-- Personal & Banking Information Card -->
-      <div class="card border-0 shadow-sm rounded-3 mb-4">
-        <div class="card-header bg-secondary text-white border-0 py-3">
-          <h5 class="mb-0 fw-semibold d-flex align-items-center">
-            <i class="bi bi-person-badge me-2"></i> Personal & Banking Information
-          </h5>
-        </div>
-        <div class="card-body p-4">
+    <!-- Personal & Banking Information Card -->
+    <div class="mb-4">
+      <h5 class="mb-3 d-flex align-items-center">
+        <i class="bi bi-person-badge me-2"></i> Personal & Banking Information
+      </h5>
+      <div>
           <div class="row g-3">
             <div class="col-md-3">
               <label class="form-label small text-muted mb-1">Direct / Indirect</label>
@@ -328,17 +313,15 @@
               <p class="fw-medium text-dark mb-0">{{ $supplier->registration_date ? \Carbon\Carbon::parse($supplier->registration_date)->format('d-m-Y') : '-' }}</p>
             </div>
           </div>
-        </div>
       </div>
+    </div>
 
-      <!-- Additional Notes Card -->
-      <div class="card border-0 shadow-sm rounded-3 mb-4">
-        <div class="card-header bg-info text-white border-0 py-3">
-          <h5 class="mb-0 fw-semibold d-flex align-items-center">
-            <i class="bi bi-file-text me-2"></i> Additional Notes
-          </h5>
-        </div>
-        <div class="card-body p-4">
+    <!-- Additional Notes Card -->
+    <div class="mb-4">
+      <h5 class="mb-3 d-flex align-items-center">
+        <i class="bi bi-file-text me-2"></i> Additional Notes
+      </h5>
+      <div>
           <div class="row g-3">
             <div class="col-md-6">
               <label class="form-label small text-muted mb-1">Notebook</label>
@@ -349,94 +332,8 @@
               <p class="fw-medium text-dark mb-0" style="white-space: pre-wrap;">{{ $supplier->remarks ?? '-' }}</p>
             </div>
           </div>
-        </div>
       </div>
     </div>
   </div>
-
-  <div class="mt-5 text-end">
-    <a href="{{ route('admin.suppliers.index') }}" class="btn btn-outline-secondary me-2">Close</a>
-    <a href="{{ route('admin.suppliers.edit', $supplier) }}" class="btn btn-primary">Edit Supplier</a>
-  </div>
 </div>
-
-<style>
-body {
-  background-color: #f5f7fa;
-  font-family: 'Inter', sans-serif;
-}
-
-.card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
-}
-
-.card-header {
-  background-color: #f8f9fa !important;
-  border-bottom: none !important;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-  transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-.btn-outline-secondary {
-  border-color: #dee2e6;
-  color: #495057;
-}
-
-.btn-outline-secondary:hover {
-  background-color: #f8f9fa;
-  color: #212529;
-}
-
-.badge {
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.form-label {
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-.fw-medium {
-  font-weight: 500;
-  color: #212529;
-}
-
-@media (max-width: 767.98px) {
-  .container-fluid {
-    padding: 1rem;
-  }
-
-  .card-body {
-    padding: 1.5rem !important;
-  }
-
-  .btn-sm {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.85rem;
-  }
-
-  h2 {
-    font-size: 1.5rem;
-  }
-
-  h5 {
-    font-size: 1.1rem;
-  }
-}
-</style>
 @endsection

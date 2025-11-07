@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 28, 2025 at 06:18 AM
+-- Generation Time: Nov 07, 2025 at 05:27 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -73,7 +73,7 @@ CREATE TABLE `area_managers` (
 INSERT INTO `area_managers` (`id`, `code`, `name`, `email`, `mobile`, `address`, `telephone`, `reg_mgr`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'AM001', 'Rajesh Kumar Sharma', 'rajesh.sharma@company.com', '9876543210', 'Plot No. 45, Sector 12, Noida, Uttar Pradesh', '0120-2345678', 'RM001', 'Active', '2025-10-15 04:19:56', '2025-10-15 04:19:56'),
 (2, 'AM002', 'Priya Patel', 'priya.patel@company.com', '9876543211', 'B-204, Satellite Road, Ahmedabad, Gujarat', '079-26543210', 'RM002', 'Active', '2025-10-15 04:19:56', '2025-10-15 04:19:56'),
-(3, 'AM003', 'Amit Singh', 'amit.singh@company.com', '9876543212', 'Flat 301, Koramangala, Bangalore, Karnataka', '080-25678901', 'RM001', 'Active', '2025-10-15 04:19:56', '2025-10-15 04:19:56'),
+(3, 'AM003', 'Amit Singh', 'amit.singh@company.com', '9876543212', 'Flat 301, Koramangala, Bangalore, Karnataka', '080-25678901', 'Kavitha Reddy (RM008)', 'Active', '2025-10-15 04:19:56', '2025-10-28 07:41:55'),
 (4, 'AM004', 'Sneha Reddy', 'sneha.reddy@company.com', '9876543213', 'House No. 12-3-456, Banjara Hills, Hyderabad, Telangana', '040-23456789', 'RM003', 'Active', '2025-10-15 04:19:56', '2025-10-15 04:19:56'),
 (5, 'AM005', 'Vikram Agarwal', 'vikram.agarwal@company.com', '9876543214', 'C-15, Civil Lines, Jaipur, Rajasthan', '0141-2567890', 'RM002', 'Active', '2025-10-15 04:19:56', '2025-10-15 04:19:56'),
 (6, 'AM006', 'Kavya Nair', 'kavya.nair@company.com', '9876543215', 'TC 25/1234, Pattom, Thiruvananthapuram, Kerala', '0471-2345678', 'RM004', 'Inactive', '2025-10-15 04:19:56', '2025-10-15 04:19:56'),
@@ -81,6 +81,29 @@ INSERT INTO `area_managers` (`id`, `code`, `name`, `email`, `mobile`, `address`,
 (8, 'AM008', 'Meera Iyer', 'meera.iyer@company.com', '9876543217', 'No. 23, T. Nagar, Chennai, Tamil Nadu', '044-24567890', 'RM003', 'Active', '2025-10-15 04:19:56', '2025-10-15 04:19:56'),
 (9, 'AM009', 'Rohit Malhotra', 'rohit.malhotra@company.com', '9876543218', 'SCO 234, Sector 35, Chandigarh', '0172-2678901', 'RM001', 'Active', '2025-10-15 04:19:56', '2025-10-15 04:19:56'),
 (10, 'AM010', 'Anita Desai', 'anita.desai@company.com', '9876543219', 'Flat 502, Bandra West, Mumbai, Maharashtra', '022-26789012', 'RM002', 'Active', '2025-10-15 04:19:56', '2025-10-15 04:19:56');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `batches`
+--
+
+CREATE TABLE `batches` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED NOT NULL,
+  `batch_number` varchar(255) NOT NULL,
+  `manufacturing_date` date DEFAULT NULL,
+  `expiry_date` date DEFAULT NULL,
+  `quantity` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `cost_price` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `selling_price` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `godown` varchar(255) DEFAULT NULL,
+  `status` varchar(255) NOT NULL DEFAULT 'active',
+  `remarks` text DEFAULT NULL,
+  `is_deleted` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -331,14 +354,14 @@ CREATE TABLE `country_managers` (
 --
 
 INSERT INTO `country_managers` (`id`, `code`, `name`, `email`, `mobile`, `address`, `telephone`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'CM001', 'Sameer Verma', 'sameer.verma@company.com', '9876500010', 'Corporate Tower, Connaught Place, New Delhi', '011-24567890', 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
-(2, 'CM002', 'Leena Kapoor', 'leena.kapoor@company.com', '9876500011', 'Business Bay, BKC, Mumbai, Maharashtra', '022-26543210', 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
-(3, 'CM003', 'Arvind Rao', 'arvind.rao@company.com', '9876500012', 'Tech Park, Koramangala, Bengaluru, Karnataka', '080-23456789', 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
-(4, 'CM004', 'Radhika Iyer', 'radhika.iyer@company.com', '9876500013', 'Cyber Towers, HITEC City, Hyderabad, Telangana', '040-24567890', 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
-(5, 'CM005', 'Harshad Patel', 'harshad.patel@company.com', '9876500014', 'Commerce Center, Prahlad Nagar, Ahmedabad, Gujarat', '079-22334455', 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
-(6, 'CM006', 'Neha Singh', 'neha.singh@company.com', '9876500015', 'IT Corridor, Technopark, Thiruvananthapuram, Kerala', '0471-2345678', 'Inactive', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
-(7, 'CM007', 'Suresh Banerjee', 'suresh.banerjee@company.com', '9876500016', 'Salt Lake City, Sector V, Kolkata, West Bengal', '033-22112233', 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
-(8, 'CM008', 'Trisha Nair', 'trisha.nair@company.com', '9876500017', 'OMR IT Expressway, Sholinganallur, Chennai, Tamil Nadu', '044-26667788', 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
+(1, 'CM001', 'Sameer Verma', 'sameer.verma@company.com', '9876500010', 'Corporate Tower, Connaught Place, New Delhi', NULL, 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
+(2, 'CM002', 'Leena Kapoor', 'leena.kapoor@company.com', '9876500011', 'Business Bay, BKC, Mumbai, Maharashtra', NULL, 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
+(3, 'CM003', 'Arvind Rao', 'arvind.rao@company.com', '9876500012', 'Tech Park, Koramangala, Bengaluru, Karnataka', NULL, 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
+(4, 'CM004', 'Radhika Iyer', 'radhika.iyer@company.com', '9876500013', 'Cyber Towers, HITEC City, Hyderabad, Telangana', NULL, 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
+(5, 'CM005', 'Harshad Patel', 'harshad.patel@company.com', '9876500014', 'Commerce Center, Prahlad Nagar, Ahmedabad, Gujarat', NULL, 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
+(6, 'CM006', 'Neha Singh', 'neha.singh@company.com', '9876500015', 'IT Corridor, Technopark, Thiruvananthapuram, Kerala', NULL, 'Inactive', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
+(7, 'CM007', 'Suresh Banerjee', 'suresh.banerjee@company.com', '9876500016', 'Salt Lake City, Sector V, Kolkata, West Bengal', NULL, 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
+(8, 'CM008', 'Trisha Nair', 'trisha.nair@company.com', '9876500017', 'OMR IT Expressway, Sholinganallur, Chennai, Tamil Nadu', NULL, 'Active', '2025-10-27 05:41:05', '2025-10-27 05:41:05'),
 (9, '32', 'sdfsdf', NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:41:35', '2025-10-27 05:41:35'),
 (10, '33', '3333', NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:41:44', '2025-10-27 05:41:44'),
 (11, '3', 'sdfsdf', NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:41:50', '2025-10-27 05:41:50'),
@@ -499,6 +522,149 @@ INSERT INTO `customers` (`id`, `name`, `code`, `tax_registration`, `pin_code`, `
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `customer_challans`
+--
+
+CREATE TABLE `customer_challans` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `challan_date` date NOT NULL,
+  `trans_no` varchar(255) DEFAULT NULL,
+  `amount` decimal(12,2) NOT NULL,
+  `hold` tinyint(1) NOT NULL DEFAULT 0,
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_discounts`
+--
+
+CREATE TABLE `customer_discounts` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `discount_type` enum('Breakage','Expiry') NOT NULL DEFAULT 'Breakage',
+  `discount_percent` decimal(5,2) NOT NULL,
+  `effective_from` date NOT NULL,
+  `effective_to` date DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_dues`
+--
+
+CREATE TABLE `customer_dues` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `trans_no` varchar(255) DEFAULT NULL,
+  `invoice_date` date NOT NULL,
+  `days_from_invoice` int(11) NOT NULL DEFAULT 0,
+  `due_date` date NOT NULL,
+  `days_from_due` int(11) NOT NULL DEFAULT 0,
+  `trans_amount` decimal(12,2) NOT NULL,
+  `debit` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `credit` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `hold` tinyint(1) NOT NULL DEFAULT 0,
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `customer_dues`
+--
+
+INSERT INTO `customer_dues` (`id`, `customer_id`, `trans_no`, `invoice_date`, `days_from_invoice`, `due_date`, `days_from_due`, `trans_amount`, `debit`, `credit`, `hold`, `remarks`, `created_at`, `updated_at`) VALUES
+(1, 21, 'SB/23432', '2025-10-28', 0, '2025-11-27', -30, 2343.00, 2343.00, 0.00, 0, NULL, '2025-10-28 06:17:18', '2025-10-28 06:17:18'),
+(2, 21, 'SB/98897', '2025-10-28', 0, '2025-11-27', -30, 87686.00, 87686.00, 0.00, 0, NULL, '2025-10-28 06:19:04', '2025-10-28 06:19:04'),
+(3, 21, 'SB/6363', '2025-10-28', 1, '2025-11-27', -29, 765567.00, 765567.00, 0.00, 0, NULL, '2025-10-28 06:47:58', '2025-10-28 06:47:58'),
+(4, 21, 'SB/544', '2025-10-28', 1, '2025-11-27', -29, 5464.00, 5464.00, 0.00, 0, NULL, '2025-10-28 06:48:13', '2025-10-28 06:48:13'),
+(5, 21, 'SB/765', '2025-10-28', 1, '2025-11-27', -29, 786.00, 786.00, 0.00, 0, NULL, '2025-10-28 08:08:34', '2025-10-28 08:08:34');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_ledgers`
+--
+
+CREATE TABLE `customer_ledgers` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `transaction_date` date NOT NULL,
+  `trans_no` varchar(255) DEFAULT NULL,
+  `transaction_type` enum('Sale','Return','Payment','Adjustment') NOT NULL DEFAULT 'Sale',
+  `amount` decimal(12,2) NOT NULL,
+  `running_balance` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `customer_ledgers`
+--
+
+INSERT INTO `customer_ledgers` (`id`, `customer_id`, `transaction_date`, `trans_no`, `transaction_type`, `amount`, `running_balance`, `remarks`, `created_at`, `updated_at`) VALUES
+(1, 21, '2025-10-28', 'TXN001', 'Sale', 5000.00, 0.00, 'Test Sale', '2025-10-28 04:18:38', '2025-10-28 04:18:38'),
+(2, 21, '2025-10-28', 'TXN002', 'Payment', 2000.00, 0.00, 'Test Payment', '2025-10-28 04:18:38', '2025-10-28 04:18:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_prescriptions`
+--
+
+CREATE TABLE `customer_prescriptions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `doctor_name` varchar(255) NOT NULL,
+  `patient_name` varchar(255) NOT NULL,
+  `prescription_date` date NOT NULL,
+  `validity_date` date NOT NULL,
+  `details` text DEFAULT NULL,
+  `status` enum('Active','Expired','Cancelled') NOT NULL DEFAULT 'Active',
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `customer_prescriptions`
+--
+
+INSERT INTO `customer_prescriptions` (`id`, `customer_id`, `doctor_name`, `patient_name`, `prescription_date`, `validity_date`, `details`, `status`, `remarks`, `created_at`, `updated_at`) VALUES
+(1, 21, 'Dr. Smith', 'John Doe', '2025-10-28', '2025-11-27', 'Test prescription', 'Active', NULL, '2025-10-28 04:18:38', '2025-10-28 04:18:38');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_special_rates`
+--
+
+CREATE TABLE `customer_special_rates` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED NOT NULL,
+  `special_rate` decimal(10,2) NOT NULL,
+  `effective_from` date NOT NULL,
+  `effective_to` date DEFAULT NULL,
+  `rate_type` enum('Fixed','Percentage') NOT NULL DEFAULT 'Fixed',
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `divisional_managers`
 --
 
@@ -521,16 +687,41 @@ CREATE TABLE `divisional_managers` (
 --
 
 INSERT INTO `divisional_managers` (`id`, `code`, `name`, `email`, `mobile`, `address`, `telephone`, `status`, `c_mgr`, `created_at`, `updated_at`) VALUES
-(1, 'DC001', 'Anil Sharma', 'anil.sharma@company.com', '9876543220', 'Corporate Office, Connaught Place, New Delhi', '011-23456789', 'Active', 'CM001', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(2, 'DC002', 'Deepika Patel', 'deepika.patel@company.com', '9876543221', 'Business Center, Andheri East, Mumbai, Maharashtra', '022-26789012', 'Active', 'CM002', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(3, 'DC003', 'Ravi Kumar', 'ravi.kumar@company.com', '9876543222', 'Tech Hub, Koramangala, Bangalore, Karnataka', '080-25678901', 'Active', 'CM001', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(4, 'DC004', 'Sneha Reddy', 'sneha.reddy@company.com', '9876543223', 'Cyber Towers, HITEC City, Hyderabad, Telangana', '040-23456789', 'Active', 'CM003', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(5, 'DC005', 'Manish Gupta', 'manish.gupta@company.com', '9876543224', 'Commercial Complex, Satellite, Ahmedabad, Gujarat', '079-26543210', 'Active', 'CM002', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(6, 'DC006', 'Priyanka Nair', 'priyanka.nair@company.com', '9876543225', 'IT Park, Technopark, Thiruvananthapuram, Kerala', '0471-2345678', 'Inactive', 'CM004', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(7, 'DC007', 'Sanjay Banerjee', 'sanjay.banerjee@company.com', '9876543226', 'IT Hub, Salt Lake City, Kolkata, West Bengal', '033-22345678', 'Active', 'CM005', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(8, 'DC008', 'Lakshmi Krishnan', 'lakshmi.krishnan@company.com', '9876543227', 'Software Park, Sholinganallur, Chennai, Tamil Nadu', '044-24567890', 'Active', 'CM003', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(9, 'DC009', 'Rohit Malhotra', 'rohit.malhotra@company.com', '9876543228', 'Industrial Area, Phase 8B, Mohali, Punjab', '0172-2678901', 'Active', 'CM001', '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
-(10, 'DC010', 'Kavita Agarwal', 'kavita.agarwal@company.com', '9876543229', 'Business District, Malviya Nagar, Jaipur, Rajasthan', '0141-2567890', 'Active', 'CM002', '2025-10-27 05:25:10', '2025-10-27 05:25:10');
+(1, 'DC001', 'Anil Sharma', 'anil.sharma@company.com', '9876543220', 'Corporate Office, Connaught Place, New Delhi', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(2, 'DC002', 'Deepika Patel', 'deepika.patel@company.com', '9876543221', 'Business Center, Andheri East, Mumbai, Maharashtra', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(3, 'DC003', 'Ravi Kumar', 'ravi.kumar@company.com', '9876543222', 'Tech Hub, Koramangala, Bangalore, Karnataka', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(4, 'DC004', 'Sneha Reddy', 'sneha.reddy@company.com', '9876543223', 'Cyber Towers, HITEC City, Hyderabad, Telangana', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(5, 'DC005', 'Manish Gupta', 'manish.gupta@company.com', '9876543224', 'Commercial Complex, Satellite, Ahmedabad, Gujarat', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(6, 'DC006', 'Priyanka Nair', 'priyanka.nair@company.com', '9876543225', 'IT Park, Technopark, Thiruvananthapuram, Kerala', NULL, 'Inactive', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(7, 'DC007', 'Sanjay Banerjee', 'sanjay.banerjee@company.com', '9876543226', 'IT Hub, Salt Lake City, Kolkata, West Bengal', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(8, 'DC008', 'Lakshmi Krishnan', 'lakshmi.krishnan@company.com', '9876543227', 'Software Park, Sholinganallur, Chennai, Tamil Nadu', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(9, 'DC009', 'Rohit Malhotra', 'rohit.malhotra@company.com', '9876543228', 'Industrial Area, Phase 8B, Mohali, Punjab', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10'),
+(10, 'DC010', 'Kavita Agarwal', 'kavita.agarwal@company.com', '9876543229', 'Business District, Malviya Nagar, Jaipur, Rajasthan', NULL, 'Active', NULL, '2025-10-27 05:25:10', '2025-10-27 05:25:10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `expiry_ledger`
+--
+
+CREATE TABLE `expiry_ledger` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED NOT NULL,
+  `batch_id` bigint(20) UNSIGNED NOT NULL,
+  `customer_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `supplier_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `transaction_date` date NOT NULL,
+  `trans_no` varchar(255) DEFAULT NULL,
+  `transaction_type` varchar(255) NOT NULL,
+  `party_name` varchar(255) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `free_quantity` int(11) NOT NULL DEFAULT 0,
+  `running_balance` decimal(10,2) NOT NULL,
+  `expiry_date` date NOT NULL,
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -625,23 +816,92 @@ CREATE TABLE `general_managers` (
 --
 
 INSERT INTO `general_managers` (`id`, `name`, `code`, `address`, `telephone`, `mobile`, `email`, `status`, `dc_mgr`, `created_at`, `updated_at`) VALUES
-(1, 'Rajesh Kumar', 'GM001', 'Corporate Headquarters, Connaught Place, New Delhi', '011-23456789', '9876543210', 'rajesh.kumar@company.com', 'Active', 'DC001', '2025-10-27 05:08:45', '2025-10-27 05:08:45'),
-(2, 'Priya Sharma', 'GM002', 'Regional Office, Bandra Kurla Complex, Mumbai, Maharashtra', '022-26789012', '9876543211', 'priya.sharma@company.com', 'Active', 'DC002', '2025-10-27 05:08:45', '2025-10-27 05:08:45'),
-(3, 'Amit Patel', 'GM003', 'Tech Park, Electronic City, Bangalore, Karnataka', '080-25678901', '9876543212', 'amit.patel@company.com', 'Active', 'DC001', '2025-10-27 05:08:45', '2025-10-27 05:08:45'),
-(4, 'Sunita Reddy', 'GM004', 'HITEC City, Madhapur, Hyderabad, Telangana', '040-23456789', '9876543213', 'sunita.reddy@company.com', 'Active', 'DC003', '2025-10-27 05:08:45', '2025-10-27 05:08:45'),
-(5, 'Vikram Singh', 'GM005', 'Business District, Prahlad Nagar, Ahmedabad, Gujarat', '079-26543210', '9876543214', 'vikram.singh@company.com', 'Active', 'DC002', '2025-10-27 05:08:45', '2025-10-27 05:08:45'),
-(6, 'Meera Nair', 'GM006', 'InfoPark, Kakkanad, Kochi, Kerala', '0484-2345678', '9876543215', 'meera.nair@company.com', 'Inactive', 'DC004', '2025-10-27 05:08:45', '2025-10-27 05:08:45'),
-(7, 'Arjun Gupta', 'GM007', 'Salt Lake City, Sector V, Kolkata, West Bengal', '033-22345678', '9876543216', 'arjun.gupta@company.com', 'Active', 'DC005', '2025-10-27 05:08:45', '2025-10-27 05:08:45'),
-(8, 'Kavya Iyer', 'GM008', 'OMR IT Corridor, Thoraipakkam, Chennai, Tamil Nadu', '044-24567890', '9876543217', 'kavya.iyer@company.com', 'Active', 'DC003', '2025-10-27 05:08:45', '2025-10-27 05:08:45'),
-(9, 'fesf', '4', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:12:58', '2025-10-27 05:12:58'),
-(10, 'esf', '23', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:13:05', '2025-10-27 05:13:05'),
-(11, 'df', '32', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:13:20', '2025-10-27 05:13:20'),
-(13, 'dffdv', '3232', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:13:33', '2025-10-27 05:13:33'),
-(14, 'dfdgd', '233', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:13:44', '2025-10-27 05:13:44'),
-(15, 'fdfgg', '4334', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:13:50', '2025-10-27 05:13:50'),
-(16, 'fgdfg', '213', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:14:10', '2025-10-27 05:14:10'),
-(17, 'dsfsdf', '3232', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:14:16', '2025-10-27 05:14:16'),
-(18, 'dssdfsdf', '32', NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-27 05:14:22', '2025-10-27 05:14:22');
+(1, 'GERG', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-28 07:40:32', '2025-10-28 07:40:32'),
+(2, 'FSD', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-28 07:40:37', '2025-10-28 07:40:37'),
+(3, 'FVSD', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-10-28 07:40:42', '2025-10-28 07:40:42');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `general_notebooks`
+--
+
+CREATE TABLE `general_notebooks` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `general_reminders`
+--
+
+CREATE TABLE `general_reminders` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `code` varchar(255) DEFAULT NULL,
+  `due_date` date DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `general_reminders`
+--
+
+INSERT INTO `general_reminders` (`id`, `name`, `code`, `due_date`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Annual Meeting', 'AM001', '2025-01-15', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(2, 'Tax Filing', 'TF002', '2025-01-31', 'Urgent', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(3, 'Insurance Renewal', 'IR003', '2025-02-10', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(4, 'Audit Preparation', 'AP004', '2025-02-20', 'In Progress', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(5, 'License Renewal', 'LR005', '2025-03-05', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(6, 'Contract Review', 'CR006', '2025-03-15', 'Completed', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(7, 'Quarterly Report', 'QR007', '2025-03-31', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(8, 'Staff Appraisal', 'SA008', '2025-04-10', 'In Progress', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(9, 'Budget Planning', 'BP009', '2025-04-20', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(10, 'Vendor Payment', 'VP010', '2025-05-01', 'Urgent', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(11, 'Equipment Maintenance', 'EM011', '2025-05-15', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(12, 'Safety Inspection', 'SI012', '2025-05-25', 'Scheduled', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(13, 'Training Session', 'TS013', '2025-06-05', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(14, 'Product Launch', 'PL014', '2025-06-15', 'In Progress', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(15, 'Marketing Campaign', 'MC015', '2025-06-30', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(16, 'Client Meeting', 'CM016', '2025-07-10', 'Confirmed', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(17, 'Inventory Check', 'IC017', '2025-07-20', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(18, 'System Upgrade', 'SU018', '2025-08-01', 'Planned', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(19, 'Compliance Review', 'CR019', '2025-08-15', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(20, 'Lease Renewal', 'LR020', '2025-08-31', 'Urgent', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(21, 'Performance Review', 'PR021', '2025-09-10', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(22, 'Salary Revision', 'SR022', '2025-09-20', 'In Progress', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(23, 'Board Meeting', 'BM023', '2025-10-05', 'Scheduled', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(24, 'Financial Audit', 'FA024', '2025-10-15', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(25, 'Year End Closing', 'YE025', '2025-12-31', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(26, 'GST Filing', 'GF026', '2025-01-20', 'Urgent', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(27, 'PF Submission', 'PF027', '2025-02-15', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(28, 'ESI Payment', 'EP028', '2025-03-10', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(29, 'TDS Return', 'TR029', '2025-04-30', 'Urgent', '2025-10-29 01:17:46', '2025-10-29 01:17:46'),
+(30, 'Stock Verification', 'SV030', '2025-05-31', 'Pending', '2025-10-29 01:17:46', '2025-10-29 01:17:46');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `godown_expiry`
+--
+
+CREATE TABLE `godown_expiry` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED NOT NULL,
+  `batch_id` bigint(20) UNSIGNED NOT NULL,
+  `expiry_date` date NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `godown_location` varchar(255) DEFAULT NULL,
+  `status` varchar(255) NOT NULL DEFAULT 'active',
+  `remarks` text DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -994,7 +1254,73 @@ INSERT INTO `items` (`id`, `company_id`, `company_short_name`, `name`, `packing`
 (7, 67, 'AIRTEL', 'adi2', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 0.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 0.00, 0.00, 0, 0, NULL, 0.00, '34011190', 9.00, 9.00, 18.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-15 04:01:59', '2025-10-15 04:11:56'),
 (8, 65, 'WIPRO', 'adi3', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 0.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 0.00, 0.00, 0, 0, NULL, 0.00, '30059090', 0.00, 0.00, 0.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-15 04:02:17', '2025-10-15 04:11:44'),
 (9, 73, 'SUNPH', 'adi5', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 0.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 0.00, 0.00, 0, 0, NULL, 0.00, '30051090', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-15 04:02:34', '2025-10-15 04:11:28'),
-(10, 66, 'HDFC', 'adi6', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 0.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 0.00, 0.00, 0, 0, NULL, 0.00, '30059090', 0.00, 0.00, 0.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-15 04:02:43', '2025-10-15 04:11:14');
+(10, 66, 'HDFC', 'adi6', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 0.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 0.00, 0.00, 0, 0, NULL, 0.00, '30059090', 0.00, 0.00, 0.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-15 04:02:43', '2025-10-15 04:11:14'),
+(15, 64, 'INFY', 'mango', NULL, NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 0.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 0.00, 0.00, 0, 0, NULL, 0.00, '30059090', 9.00, 9.00, 18.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-29 06:03:27', '2025-10-29 06:03:27'),
+(16, 86, 'UDAAN', 'paracetamol', NULL, NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 20.00, 25.00, 21.00, 'Y', 22.00, 'Y', 0, 0, NULL, 0.00, 15.00, 10.00, 0, 0, NULL, 0.00, '90183990', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-30 01:58:32', '2025-11-03 00:41:36'),
+(17, 64, 'INFY', 'mg23', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 0.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 0.00, 10.00, 0, 0, NULL, 0.00, '30049990', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-30 02:03:11', '2025-11-01 00:04:26'),
+(18, 70, 'ITC', 'intas', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 0.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 0.00, 110.00, 0, 0, NULL, 0.00, '90189011', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-31 06:40:16', '2025-10-31 06:40:16'),
+(19, 63, 'TCS', 'cipla1', NULL, NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 21.00, 15.00, 5.00, 'Y', 5.00, 'Y', 0, 0, NULL, 0.00, 7.00, 10.00, 0, 0, NULL, 0.00, '90189019', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-31 23:52:36', '2025-11-02 23:16:08'),
+(20, 64, 'INFY', 'cipla2', NULL, NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 0.00, 25.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 15.00, 20.00, 0, 0, NULL, 0.00, '90189011', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-31 23:53:11', '2025-11-01 04:34:46'),
+(21, 64, 'INFY', 'cipla3', NULL, NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 40.00, 35.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 25.00, 25.00, 0, 0, NULL, 0.00, '90189019', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-10-31 23:53:28', '2025-11-06 06:05:48'),
+(22, 73, 'SUNPH', 'para', NULL, NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 10.00, 20.00, 0.00, 'Y', 0.00, 'Y', 0, 0, NULL, 0.00, 5.00, 25.00, 0, 0, NULL, 0.00, '38246090', 9.00, 9.00, 18.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-11-03 00:37:41', '2025-11-03 00:37:41'),
+(23, 73, 'SUNPH', 'para1', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'L.', 0.00, 0.00, 'N', 100.00, 110.00, 120.00, 'Y', 125.00, 'Y', 0, 0, NULL, 0.00, 130.00, 150.00, 0, 0, NULL, 0.00, '34011190', 9.00, 9.00, 18.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-11-04 03:59:23', '2025-11-04 03:59:23'),
+(24, 65, 'WIPRO', 'para2', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Kg.', 0.00, 0.00, 'N', 50.00, 55.00, 60.00, 'Y', 65.00, 'Y', 0, 0, NULL, 0.00, 70.00, 100.00, 0, 0, NULL, 0.00, '30051090', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-11-04 04:00:08', '2025-11-04 04:02:00'),
+(25, 79, 'ZOMATO', 'para3', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Gm.', 0.00, 0.00, 'N', 200.00, 201.00, 301.00, 'Y', 250.00, 'Y', 0, 0, NULL, 0.00, 220.00, 250.00, 0, 0, NULL, 0.00, '30059090', 9.00, 9.00, 18.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-11-04 04:00:48', '2025-11-04 04:00:48'),
+(26, 74, 'MSIL', 'ab11', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 20.00, 25.00, 30.00, 'Y', 45.00, 'Y', 0, 0, NULL, 0.00, 24.00, 45.00, 0, 0, NULL, 0.00, '90183990', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-11-04 06:56:51', '2025-11-04 06:57:49'),
+(27, 66, 'HDFC', 'ab12', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 40.00, 45.00, 35.00, 'Y', 30.00, 'Y', 0, 0, NULL, 0.00, 34.00, 55.00, 0, 0, NULL, 0.00, '30051090', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-11-04 06:57:37', '2025-11-04 06:57:37'),
+(28, 64, 'INFY', 'abhi1', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, '00', NULL, 1, 'Unit', 0.00, 0.00, 'N', 21.00, 52.00, 34.00, 'Y', 35.00, 'Y', 0, 0, NULL, 0.00, 41.00, 50.00, 0, 0, NULL, 0.00, '38220090', 6.00, 6.00, 12.00, 0.00, 0.00, NULL, 0.00, NULL, 'N', 'N', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, NULL, 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-11-04 07:53:34', '2025-11-04 07:53:34'),
+(29, 66, 'HDFC', 'bisolong', '1*10', NULL, NULL, NULL, '00', 0, 0, NULL, 'caryson', NULL, 1, 'Unit', 0.00, 0.00, 'N', 170.00, 150.00, 130.00, 'N', 140.00, 'N', 0, 0, NULL, 0.00, 160.00, 160.00, 0, 0, NULL, 0.00, '30049990', 6.00, 6.00, 12.00, 0.00, 4.00, 'N', 0.00, NULL, 'Y', 'Y', 'N', 'N', 'N', 'S', 0.00, NULL, 0.00, 'N', 'N', 0.00, 'Y', 'N', 'N', '1', 0.00, NULL, 'N', NULL, NULL, 0.00, 0.00, NULL, NULL, NULL, 0, '2025-11-05 01:49:39', '2025-11-06 08:20:22');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `item_categories`
+--
+
+CREATE TABLE `item_categories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `alter_code` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `item_categories`
+--
+
+INSERT INTO `item_categories` (`id`, `name`, `alter_code`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Tablets', 'TAB001', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(2, 'Capsules', 'CAP002', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(3, 'Syrups', 'SYR003', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(4, 'Injections', 'INJ004', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(5, 'Ointments', 'OIN005', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(6, 'Drops', 'DRP006', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(7, 'Powders', 'POW007', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(8, 'Creams', 'CRM008', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(9, 'Gels', 'GEL009', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(10, 'Lotions', 'LOT010', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(11, 'Sprays', 'SPR011', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(12, 'Inhalers', 'INH012', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(13, 'Sachets', 'SAC013', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(14, 'Suspensions', 'SUS014', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(15, 'Solutions', 'SOL015', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(16, 'Emulsions', 'EMU016', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(17, 'Granules', 'GRA017', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(18, 'Patches', 'PAT018', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(19, 'Suppositories', 'SUP019', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(20, 'Pessaries', 'PES020', 'Inactive', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(21, 'Liniments', 'LIN021', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(22, 'Tinctures', 'TIN022', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(23, 'Elixirs', 'ELI023', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(24, 'Mixtures', 'MIX024', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(25, 'Pastes', 'PAS025', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(26, 'Balms', 'BAL026', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(27, 'Oils', 'OIL027', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(28, 'Serums', 'SER028', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(29, 'Tonics', 'TON029', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48'),
+(30, 'Vaccines', 'VAC030', 'Active', '2025-10-29 01:31:48', '2025-10-29 01:31:48');
 
 -- --------------------------------------------------------
 
@@ -1044,9 +1370,13 @@ CREATE TABLE `marketing_managers` (
   `email` varchar(255) DEFAULT NULL,
   `mobile` varchar(255) DEFAULT NULL,
   `address` text DEFAULT NULL,
-  `telephone` varchar(255) DEFAULT NULL,
-  `gen_mgr` varchar(255) DEFAULT NULL,
+  `designation` varchar(255) NOT NULL DEFAULT 'Marketing Manager',
+  `target_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `reporting_to` varchar(255) DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL,
+  `is_deleted` tinyint(4) NOT NULL DEFAULT 0,
+  `created_date` timestamp NULL DEFAULT NULL,
+  `modified_date` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -1055,17 +1385,17 @@ CREATE TABLE `marketing_managers` (
 -- Dumping data for table `marketing_managers`
 --
 
-INSERT INTO `marketing_managers` (`id`, `code`, `name`, `email`, `mobile`, `address`, `telephone`, `gen_mgr`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'MM001', 'Arjun Kapoor', 'arjun.kapoor@company.com', '9876543230', 'Head Office, Nariman Point, Mumbai, Maharashtra', '022-26789012', 'GM001', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(2, 'MM002', 'Sanya Malhotra', 'sanya.malhotra@company.com', '9876543231', 'Corporate Tower, Cyber City, Gurgaon, Haryana', '0124-2345678', 'GM002', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(3, 'MM003', 'Vikash Sinha', 'vikash.sinha@company.com', '9876543232', 'IT Hub, Whitefield, Bangalore, Karnataka', '080-25678901', 'GM001', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(4, 'MM004', 'Ritika Sharma', 'ritika.sharma@company.com', '9876543233', 'Financial District, Gachibowli, Hyderabad, Telangana', '040-23456789', 'GM003', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(5, 'MM005', 'Karan Johar', 'karan.johar@company.com', '9876543234', 'Business Park, Vastrapur, Ahmedabad, Gujarat', '079-26543210', 'GM002', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(6, 'MM006', 'Pooja Hegde', 'pooja.hegde@company.com', '9876543235', 'IT Corridor, Technopark, Thiruvananthapuram, Kerala', '0471-2345678', 'GM004', 'Inactive', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(7, 'MM007', 'Rohit Sharma', 'rohit.sharma@company.com', '9876543236', 'New Town, Action Area II, Kolkata, West Bengal', '033-22345678', 'GM005', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(8, 'MM008', 'Shraddha Kapoor', 'shraddha.kapoor@company.com', '9876543237', 'IT Expressway, Sholinganallur, Chennai, Tamil Nadu', '044-24567890', 'GM003', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(9, 'MM009', 'Ayushmann Khurrana', 'ayushmann.khurrana@company.com', '9876543238', 'IT City, Mohali, Punjab', '0172-2678901', 'GM001', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
-(10, 'MM010', 'Kiara Advani', 'kiara.advani@company.com', '9876543239', 'Pink City Junction, Jaipur, Rajasthan', '0141-2567890', 'GM002', 'Active', '2025-10-15 04:52:18', '2025-10-15 04:52:18');
+INSERT INTO `marketing_managers` (`id`, `code`, `name`, `email`, `mobile`, `address`, `designation`, `target_amount`, `reporting_to`, `status`, `is_deleted`, `created_date`, `modified_date`, `created_at`, `updated_at`) VALUES
+(1, 'MM001', 'Arjun Kapoor', 'arjun.kapoor@company.com', '9876543230', 'Head Office, Nariman Point, Mumbai, Maharashtra', 'Marketing Manager', 0.00, 'GM001', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(2, 'MM002', 'Sanya Malhotra', 'sanya.malhotra@company.com', '9876543231', 'Corporate Tower, Cyber City, Gurgaon, Haryana', 'Marketing Manager', 0.00, 'GM002', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(3, 'MM003', 'Vikash Sinha', 'vikash.sinha@company.com', '9876543232', 'IT Hub, Whitefield, Bangalore, Karnataka', 'Marketing Manager', 0.00, 'GM001', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(4, 'MM004', 'Ritika Sharma', 'ritika.sharma@company.com', '9876543233', 'Financial District, Gachibowli, Hyderabad, Telangana', 'Marketing Manager', 0.00, 'GM003', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(5, 'MM005', 'Karan Johar', 'karan.johar@company.com', '9876543234', 'Business Park, Vastrapur, Ahmedabad, Gujarat', 'Marketing Manager', 0.00, 'GM002', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(6, 'MM006', 'Pooja Hegde', 'pooja.hegde@company.com', '9876543235', 'IT Corridor, Technopark, Thiruvananthapuram, Kerala', 'Marketing Manager', 0.00, 'GM004', 'Inactive', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(7, 'MM007', 'Rohit Sharma', 'rohit.sharma@company.com', '9876543236', 'New Town, Action Area II, Kolkata, West Bengal', 'Marketing Manager', 0.00, 'GM005', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(8, 'MM008', 'Shraddha Kapoor', 'shraddha.kapoor@company.com', '9876543237', 'IT Expressway, Sholinganallur, Chennai, Tamil Nadu', 'Marketing Manager', 0.00, 'GM003', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(9, 'MM009', 'Ayushmann Khurrana', 'ayushmann.khurrana@company.com', '9876543238', 'IT City, Mohali, Punjab', 'Marketing Manager', 0.00, 'GM001', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18'),
+(10, 'MM010', 'Kiara Advani', 'kiara.advani@company.com', '9876543239', 'Pink City Junction, Jaipur, Rajasthan', 'Marketing Manager', 0.00, 'GM002', 'Active', 0, NULL, NULL, '2025-10-15 04:52:18', '2025-10-15 04:52:18');
 
 -- --------------------------------------------------------
 
@@ -1170,9 +1500,155 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (86, '2025_10_15_094352_update_area_managers_table_structure', 57),
 (87, '2025_10_15_100210_update_regional_managers_table_structure', 58),
 (88, '2025_10_15_101141_update_marketing_managers_table_structure', 59),
-(89, '2025_10_15_102754_create_general_managers_table', 60),
-(90, '2025_10_27_104733_update_divisional_managers_table_structure', 61),
-(91, '2025_10_27_105735_update_country_managers_table_structure', 62);
+(100, '2025_10_15_102754_create_general_managers_table', 60),
+(101, '2025_10_27_104733_update_divisional_managers_table_structure', 60),
+(102, '2025_10_27_105735_update_country_managers_table_structure', 60),
+(103, '2025_10_28_104500_create_batches_table', 60),
+(104, '2025_10_28_104600_create_stock_ledgers_table', 60),
+(105, '2025_10_28_120000_add_party_fields_to_stock_ledgers', 60),
+(106, '2025_10_28_125000_create_pending_orders_table', 60),
+(107, '2025_10_28_125100_create_godown_expiry_table', 60),
+(108, '2025_10_28_125200_create_expiry_ledger_table', 60),
+(109, '2025_10_28_134800_create_customer_ledgers_table', 61),
+(110, '2025_10_28_134900_create_customer_dues_table', 61),
+(111, '2025_10_28_135000_create_customer_special_rates_table', 61),
+(112, '2025_10_28_135100_create_customer_discounts_table', 61),
+(113, '2025_10_28_135200_create_customer_challans_table', 61),
+(114, '2025_10_28_135300_create_customer_prescriptions_table', 61),
+(115, '2025_10_28_160000_recreate_customer_challans_table', 62),
+(116, '2025_10_28_160100_recreate_customer_dues_table', 63),
+(117, '2025_10_29_000001_create_personal_directories_table', 64),
+(118, '2025_10_29_000002_create_general_reminders_table', 64),
+(119, '2025_10_29_000003_create_general_notebooks_table', 64),
+(120, '2025_10_29_000004_create_item_categories_table', 64),
+(121, '2025_10_29_000005_create_transport_masters_table', 64),
+(122, '2025_10_29_000006_add_fields_to_personal_directories_table', 65),
+(123, '2025_10_29_000007_fix_personal_directories_address_fields', 66),
+(124, '2025_10_29_064334_add_fields_to_general_reminders_table', 67),
+(125, '2025_10_29_065817_add_fields_to_item_categories_table', 68),
+(126, '2025_10_29_070510_add_fields_to_transport_masters_table', 69),
+(127, '2025_10_29_081600_create_sales_table', 70),
+(128, '2025_10_29_081628_create_sale_items_table', 70),
+(129, '2025_10_30_080000_enhance_pending_orders_table', 71),
+(130, '2025_10_30_085000_fix_pending_orders_nullable_fields', 72),
+(131, '2025_10_30_090000_remove_unnecessary_columns_from_pending_orders', 73),
+(132, '2025_10_30_095000_cleanup_pending_orders_table', 74),
+(133, '2025_10_30_100000_final_cleanup_pending_orders', 75),
+(134, '2025_10_30_105000_remove_extra_columns_pending_orders', 76),
+(135, '2025_10_30_110000_restructure_pending_orders_for_supplier', 77),
+(136, '2025_10_30_115000_restore_item_id_to_pending_orders', 78),
+(137, '2025_10_30_120000_clean_pending_orders_final', 79),
+(139, '2025_10_30_113109_create_purchases_table', 80),
+(140, '2025_10_30_create_purchase_items_table', 81),
+(141, '2025_10_31_160900_add_fields_to_pending_orders_table', 82),
+(142, '2025_10_31_161200_remove_unused_columns_from_pending_orders', 83),
+(143, '2025_10_31_112124_add_order_no_to_pending_orders_table', 84),
+(144, '2025_11_01_080733_add_purchase_transaction_fields_to_purchases_table', 85),
+(145, '2025_11_01_081649_add_soft_deletes_to_purchases_table', 86),
+(146, '2025_11_03_160000_create_purchase_transactions_table', 87),
+(147, '2025_11_03_160100_create_purchase_transaction_items_table', 87),
+(148, '2025_11_03_170000_add_unique_bill_no_to_purchase_transactions', 88),
+(149, '2025_11_04_122043_add_s_rate_to_purchase_transaction_items_table', 89),
+(150, '2025_01_15_000000_add_s_rate_to_purchase_transaction_items_table', 90),
+(151, '2025_11_05_105640_add_ws_rate_spl_rate_to_purchase_transaction_items_table', 91),
+(152, '2025_11_06_184500_create_sale_transactions_table', 92),
+(153, '2025_11_06_184600_create_sale_transaction_items_table', 92);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pending_orders`
+--
+
+CREATE TABLE `pending_orders` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED NOT NULL,
+  `supplier_id` bigint(20) UNSIGNED NOT NULL,
+  `order_no` varchar(255) DEFAULT NULL,
+  `order_date` date NOT NULL,
+  `balance_qty` int(11) NOT NULL DEFAULT 0,
+  `order_qty` int(11) NOT NULL,
+  `free_qty` int(11) NOT NULL DEFAULT 0,
+  `other_order` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `pending_orders`
+--
+
+INSERT INTO `pending_orders` (`id`, `item_id`, `supplier_id`, `order_no`, `order_date`, `balance_qty`, `order_qty`, `free_qty`, `other_order`, `created_at`, `updated_at`) VALUES
+(14, 1, 15, '1', '2025-11-01', 0, 10, 0, 20.00, '2025-10-31 23:30:09', '2025-11-01 04:38:38'),
+(15, 18, 15, '2', '2025-11-01', 0, 10, 0, 40.00, '2025-10-31 23:41:49', '2025-11-04 02:45:14'),
+(23, 20, 18, '1', '2025-11-01', 0, 15, 1, 20.00, '2025-11-01 07:57:58', '2025-11-04 03:48:30'),
+(39, 21, 28, '1', '2025-11-04', 0, 3, 0, 20.00, '2025-11-04 05:41:50', '2025-11-06 06:03:23'),
+(40, 21, 38, '1', '2025-11-04', 0, 8, 0, 15.00, '2025-11-04 05:42:20', '2025-11-06 06:03:23'),
+(48, 21, 18, '2', '2025-11-04', 0, 7, 0, 16.00, '2025-11-04 07:19:30', '2025-11-06 06:03:23'),
+(66, 29, 14, '1', '2025-11-05', 0, 8, 0, 15.00, '2025-11-05 07:33:42', '2025-11-06 08:16:01'),
+(68, 29, 12, '1', '2025-11-06', 0, 5, 0, 18.00, '2025-11-05 23:35:24', '2025-11-06 08:16:01');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `personal_directories`
+--
+
+CREATE TABLE `personal_directories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `alt_code` varchar(255) DEFAULT NULL,
+  `tel_office` varchar(255) DEFAULT NULL,
+  `tel_residence` varchar(255) DEFAULT NULL,
+  `mobile` varchar(255) DEFAULT NULL,
+  `fax` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `contact_person` varchar(255) DEFAULT NULL,
+  `birthday` date DEFAULT NULL,
+  `anniversary` date DEFAULT NULL,
+  `spouse` varchar(255) DEFAULT NULL,
+  `spouse_dob` date DEFAULT NULL,
+  `child_1` varchar(255) DEFAULT NULL,
+  `child_1_dob` date DEFAULT NULL,
+  `child_2` varchar(255) DEFAULT NULL,
+  `child_2_dob` date DEFAULT NULL,
+  `address_office` text DEFAULT NULL,
+  `address_residence` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `personal_directories`
+--
+
+INSERT INTO `personal_directories` (`id`, `created_at`, `updated_at`, `name`, `alt_code`, `tel_office`, `tel_residence`, `mobile`, `fax`, `email`, `status`, `contact_person`, `birthday`, `anniversary`, `spouse`, `spouse_dob`, `child_1`, `child_1_dob`, `child_2`, `child_2_dob`, `address_office`, `address_residence`) VALUES
+(23, '2025-10-29 00:35:35', '2025-10-29 00:35:35', 'iuy', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(24, '2025-10-29 00:35:40', '2025-10-29 00:35:40', 'g', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(25, '2025-10-29 00:35:46', '2025-10-29 00:35:46', 'gug', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(26, '2025-10-29 00:35:53', '2025-10-29 00:35:53', 'jhghg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(27, '2025-10-29 00:35:58', '2025-10-29 00:35:58', 'jgug', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(28, '2025-10-29 00:36:05', '2025-10-29 00:36:05', 'ggjhyg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(29, '2025-10-29 00:36:11', '2025-10-29 00:36:11', 'kjhgg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(30, '2025-10-29 00:36:16', '2025-10-29 00:36:16', 'hjbhg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(31, '2025-10-29 00:36:21', '2025-10-29 00:36:21', 'hgjhg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(32, '2025-10-29 00:36:26', '2025-10-29 00:36:26', 'jkg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(33, '2025-10-29 00:36:31', '2025-10-29 00:36:31', 'jkhgh', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(34, '2025-10-29 00:36:38', '2025-10-29 00:36:38', 'jjkh', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(35, '2025-10-29 00:36:44', '2025-10-29 00:36:44', 'jhghg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(36, '2025-10-29 00:36:49', '2025-10-29 00:36:49', 'kjhh', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(37, '2025-10-29 00:36:55', '2025-10-29 00:36:55', 'jguyg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(38, '2025-10-29 00:36:59', '2025-10-29 00:36:59', 'khjgihg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(39, '2025-10-29 00:37:06', '2025-10-29 00:37:06', 'igg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(40, '2025-10-29 00:37:15', '2025-10-29 00:37:15', 'j', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(41, '2025-10-29 00:37:21', '2025-10-29 00:37:21', 'jhb', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(42, '2025-10-29 00:37:26', '2025-10-29 00:37:26', 'bbb', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(43, '2025-10-29 00:37:34', '2025-10-29 00:37:34', 'jhjh', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(44, '2025-10-29 00:37:40', '2025-10-29 00:37:40', 'jjj', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(45, '2025-10-29 00:37:46', '2025-10-29 00:37:46', 'jhg', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(46, '2025-10-29 00:37:54', '2025-10-29 00:37:54', 'iugiugh', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(47, '2025-10-29 00:38:02', '2025-10-29 00:38:02', 'kjhjkh', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1239,6 +1715,109 @@ INSERT INTO `purchase_ledgers` (`id`, `ledger_name`, `created_at`, `updated_at`,
 (28, 'PURCHASE - TAX EXEMPTED', '2025-10-15 05:06:20', '2025-10-15 05:06:20', 'TR', 17.52, 'Animi architecto doloribus veniam qui dolores maxime sed tenetur.', 'C', 'Pending', 'IC373', 52179.60, 'N', 3796.93, 'OPERATING EXPENSES', '41516 Cleo Unions\nLake Frankhaven, VA 95587', '1994-11-07', '2012-07-15', '+1.864.803.3285', '+1 (336) 285-6641', 'stokes.charles@gmail.com', 'Prof. Obie Kohler', '9875985951', 'Dr. Roxanne Corkery DVM', '9709771960'),
 (29, 'PURCHASE - LOCAL', '2025-10-15 05:06:20', '2025-10-15 05:06:20', 'PO', 7.82, 'Quia provident qui non ab placeat.', 'C', 'Active', 'JA306', 99415.03, 'N', 830.42, 'OPERATING EXPENSES', '76094 Della Viaduct Suite 272\nAufderharberg, KY 53094', '2007-05-18', '2012-06-25', '+1-978-959-7739', '+17247327981', 'gracie20@hotmail.com', 'Orpha Morissette', '9830472578', 'Toy Bartoletti', '9702728070'),
 (30, 'PURCHASE - TAXABLE', '2025-10-15 05:06:20', '2025-10-15 05:06:20', 'GRN', 15.97, 'Quas excepturi itaque corrupti voluptas quisquam vel.', 'C', 'Active', 'AO093', 18843.38, 'Y', 1864.34, 'INVENTORY', '76639 Electa Fall\nNew Agustinafort, MA 97025-1092', '1995-08-31', '2012-03-26', '510.494.7285', '564-503-7488', 'kayden.kreiger@hotmail.com', 'Paul Pouros', '9859464484', 'Mrs. Modesta Greenfelder', '9717111068');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `purchase_transactions`
+--
+
+CREATE TABLE `purchase_transactions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `trn_no` varchar(50) NOT NULL COMMENT 'Transaction Number (Auto-generated)',
+  `bill_date` date NOT NULL COMMENT 'Bill/Ledger Date',
+  `bill_no` varchar(100) DEFAULT NULL COMMENT 'Supplier Bill Number',
+  `supplier_id` bigint(20) UNSIGNED NOT NULL COMMENT 'FK to suppliers table',
+  `receive_date` date DEFAULT NULL COMMENT 'Material Receive Date',
+  `due_date` date DEFAULT NULL COMMENT 'Payment Due Date',
+  `cash_flag` char(1) NOT NULL DEFAULT 'N' COMMENT 'Cash Payment (Y/N)',
+  `transfer_flag` char(1) NOT NULL DEFAULT 'N' COMMENT 'Transfer Payment (Y/N)',
+  `remarks` text DEFAULT NULL COMMENT 'Transaction Remarks',
+  `nt_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Total NT Amount',
+  `sc_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Special Commission Amount',
+  `scm_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Scheme Amount',
+  `dis_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Discount Amount',
+  `less_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Less Amount',
+  `tax_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Total Tax (CGST+SGST+CESS)',
+  `net_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Net Amount (NT + Tax)',
+  `scm_percent` decimal(8,3) NOT NULL DEFAULT 0.000 COMMENT 'Scheme Percentage',
+  `tcs_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'TCS Amount',
+  `dis1_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Discount 1 Amount',
+  `tof_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'TOF Amount',
+  `inv_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Final Invoice Amount',
+  `status` enum('draft','completed','cancelled') NOT NULL DEFAULT 'draft',
+  `order_no` varchar(50) DEFAULT NULL COMMENT 'Reference to pending order if any',
+  `created_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `updated_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `purchase_transactions`
+--
+
+INSERT INTO `purchase_transactions` (`id`, `trn_no`, `bill_date`, `bill_no`, `supplier_id`, `receive_date`, `due_date`, `cash_flag`, `transfer_flag`, `remarks`, `nt_amount`, `sc_amount`, `scm_amount`, `dis_amount`, `less_amount`, `tax_amount`, `net_amount`, `scm_percent`, `tcs_amount`, `dis1_amount`, `tof_amount`, `inv_amount`, `status`, `order_no`, `created_by`, `updated_by`, `created_at`, `updated_at`) VALUES
+(52, '000001', '2025-11-05', '45151', 11, '2025-11-05', '2025-11-05', 'N', 'N', NULL, 488.56, 0.00, 0.00, 0.00, 0.00, 58.62, 547.18, 0.000, 0.00, 0.00, 0.00, 547.18, 'completed', NULL, 1, 1, '2025-11-05 05:59:21', '2025-11-05 06:03:23'),
+(53, '000002', '2025-11-05', '54514', 12, '2025-11-05', '2025-11-05', 'N', 'N', NULL, 977.12, 0.00, 0.00, 0.00, 0.00, 117.26, 1094.38, 0.000, 0.00, 0.00, 0.00, 1094.38, 'completed', NULL, 1, NULL, '2025-11-05 05:59:55', '2025-11-05 05:59:55'),
+(54, '000003', '2025-11-05', '255421454', 13, '2025-11-05', '2025-11-05', 'N', 'N', NULL, 854.98, 0.00, 0.00, 0.00, 0.00, 102.60, 957.58, 0.000, 0.00, 0.00, 0.00, 957.58, 'completed', NULL, 1, 1, '2025-11-05 06:02:47', '2025-11-05 07:23:59'),
+(55, '000004', '2025-11-06', '452742', 11, '2025-11-06', '2025-11-06', 'N', 'N', NULL, 1120.00, 0.00, 0.00, 0.00, 0.00, 134.40, 1254.40, 0.000, 0.00, 0.00, 0.00, 1254.40, 'completed', NULL, 1, NULL, '2025-11-05 23:39:27', '2025-11-05 23:39:27'),
+(56, '000005', '2025-11-06', '52385', 11, '2025-11-06', '2025-11-06', 'N', 'N', NULL, 125.00, 0.00, 0.00, 0.00, 0.00, 15.00, 140.00, 0.000, 0.00, 0.00, 0.00, 140.00, 'completed', NULL, 1, NULL, '2025-11-06 06:05:48', '2025-11-06 06:05:48'),
+(57, '000006', '2025-11-06', '252125', 11, '2025-11-06', '2025-11-06', 'N', 'N', NULL, 1600.00, 0.00, 0.00, 0.00, 0.00, 192.00, 1792.00, 0.000, 0.00, 0.00, 0.00, 1792.00, 'completed', NULL, 1, 1, '2025-11-06 08:18:17', '2025-11-06 08:20:22');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `purchase_transaction_items`
+--
+
+CREATE TABLE `purchase_transaction_items` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `purchase_transaction_id` bigint(20) UNSIGNED NOT NULL COMMENT 'FK to purchase_transactions',
+  `item_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `item_code` varchar(50) NOT NULL COMMENT 'Item Code (for reference)',
+  `item_name` varchar(255) NOT NULL COMMENT 'Item Name (for reference)',
+  `batch_no` varchar(100) DEFAULT NULL COMMENT 'Batch Number',
+  `expiry_date` date DEFAULT NULL COMMENT 'Expiry Date',
+  `qty` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Purchase Quantity',
+  `free_qty` decimal(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Free Quantity',
+  `pur_rate` decimal(15,2) NOT NULL COMMENT 'Purchase Rate per unit',
+  `mrp` decimal(15,2) DEFAULT NULL COMMENT 'MRP',
+  `s_rate` decimal(15,2) DEFAULT 0.00 COMMENT 'Special Rate (S.Rate)',
+  `ws_rate` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Wholesale Rate',
+  `spl_rate` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Special Rate',
+  `dis_percent` decimal(8,3) NOT NULL DEFAULT 0.000 COMMENT 'Discount Percentage',
+  `amount` decimal(15,2) NOT NULL COMMENT 'Amount = (Qty × Pur.Rate) - Discount',
+  `cgst_percent` decimal(8,3) NOT NULL DEFAULT 0.000 COMMENT 'CGST %',
+  `sgst_percent` decimal(8,3) NOT NULL DEFAULT 0.000 COMMENT 'SGST %',
+  `cess_percent` decimal(8,3) NOT NULL DEFAULT 0.000 COMMENT 'CESS %',
+  `cgst_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'CGST Amount',
+  `sgst_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'SGST Amount',
+  `cess_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'CESS Amount',
+  `tax_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Total Tax (CGST+SGST+CESS)',
+  `net_amount` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Net Amount (Amount + Tax)',
+  `cost` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Cost per unit (Amount/Qty)',
+  `cost_gst` decimal(15,2) NOT NULL DEFAULT 0.00 COMMENT 'Cost+GST per unit (Net/Qty)',
+  `unit` varchar(50) DEFAULT NULL COMMENT 'Unit',
+  `packing` varchar(100) DEFAULT NULL COMMENT 'Packing (e.g., 1*10)',
+  `company_name` varchar(255) DEFAULT NULL COMMENT 'Company Name',
+  `location` varchar(100) DEFAULT NULL COMMENT 'Storage Location',
+  `row_order` int(11) NOT NULL DEFAULT 0 COMMENT 'Display order in transaction',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `purchase_transaction_items`
+--
+
+INSERT INTO `purchase_transaction_items` (`id`, `purchase_transaction_id`, `item_id`, `item_code`, `item_name`, `batch_no`, `expiry_date`, `qty`, `free_qty`, `pur_rate`, `mrp`, `s_rate`, `ws_rate`, `spl_rate`, `dis_percent`, `amount`, `cgst_percent`, `sgst_percent`, `cess_percent`, `cgst_amount`, `sgst_amount`, `cess_amount`, `tax_amount`, `net_amount`, `cost`, `cost_gst`, `unit`, `packing`, `company_name`, `location`, `row_order`, `created_at`, `updated_at`) VALUES
+(127, 53, 29, '29', 'bisolong', 'ab42', NULL, 8.00, 0.00, 122.14, 190.00, 135.71, 0.00, 0.00, 0.000, 977.12, 6.000, 6.000, 0.000, 58.63, 58.63, 0.00, 117.26, 1094.38, 122.14, 136.80, '1', '1*10', 'HDFC Bank Ltd', NULL, 0, '2025-11-05 05:59:55', '2025-11-05 05:59:55'),
+(129, 52, 29, '29', 'bisolong', 'JHG778', NULL, 4.00, 0.00, 122.14, 190.00, 135.71, 0.00, 0.00, 0.000, 488.56, 6.000, 6.000, 0.000, 29.31, 29.31, 0.00, 58.62, 547.18, 122.14, 136.79, '1', '1*10', 'HDFC Bank Ltd', NULL, 0, '2025-11-05 06:03:23', '2025-11-05 06:03:23'),
+(131, 54, 29, '29', 'bisolong', 'nvt66g', NULL, 7.00, 0.00, 130.00, 200.00, 145.00, 125.00, 130.00, 0.000, 910.00, 6.000, 6.000, 0.000, 51.30, 51.30, 0.00, 102.60, 957.58, 122.14, 136.80, '1', '1*10', 'HDFC Bank Ltd', NULL, 0, '2025-11-05 07:23:59', '2025-11-05 07:23:59'),
+(132, 55, 29, '29', 'bisolong', 'GFFG665JG', '2025-11-28', 8.00, 0.00, 140.00, 140.00, 150.00, 130.00, 140.00, 0.000, 1120.00, 6.000, 6.000, 0.000, 67.20, 67.20, 0.00, 134.40, 1254.40, 140.00, 156.80, '1', '1*10', 'HDFC Bank Ltd', NULL, 0, '2025-11-05 23:39:27', '2025-11-05 23:39:27'),
+(133, 56, 21, '21', 'cipla3', 'jkhrjkeh34', '2025-11-28', 5.00, 0.00, 25.00, 35.00, 40.00, 0.00, 0.00, 0.000, 125.00, 6.000, 6.000, 0.000, 7.50, 7.50, 0.00, 15.00, 140.00, 25.00, 28.00, '1', NULL, 'Infosys Limited', NULL, 0, '2025-11-06 06:05:48', '2025-11-06 06:05:48'),
+(135, 57, 29, '29', 'bisolong', 'abhi12', NULL, 10.00, 0.00, 160.00, 150.00, 170.00, 130.00, 140.00, 0.000, 1600.00, 6.000, 6.000, 0.000, 96.00, 96.00, 0.00, 192.00, 1792.00, 160.00, 179.20, '1', '1*10', 'HDFC Bank Ltd', NULL, 0, '2025-11-06 08:20:22', '2025-11-06 08:20:22');
 
 -- --------------------------------------------------------
 
@@ -1313,6 +1892,73 @@ INSERT INTO `routes` (`id`, `name`, `alter_code`, `status`, `created_at`, `updat
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `sales`
+--
+
+CREATE TABLE `sales` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `series` varchar(10) NOT NULL DEFAULT 'SZ',
+  `date` date NOT NULL,
+  `invoice_no` varchar(50) NOT NULL,
+  `due_date` date DEFAULT NULL,
+  `customer_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `salesman_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `cash_type` enum('Y','N') NOT NULL DEFAULT 'N',
+  `due` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `pdc` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `total` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `cgst_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `sgst_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `cess_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `case` int(11) NOT NULL DEFAULT 0,
+  `box` int(11) NOT NULL DEFAULT 0,
+  `nt_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `sc` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `ft_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `dis` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `scm` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `scm_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `tax_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `excise` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `tcs` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `sc_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `tax` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `net` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `packing` varchar(100) DEFAULT NULL,
+  `packing_nt_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `packing_scm_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `sub_total` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `unit` varchar(50) DEFAULT NULL,
+  `sc_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `scm_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `tax_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `cl_qty` int(11) NOT NULL DEFAULT 0,
+  `dis_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `net_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `location` varchar(100) DEFAULT NULL,
+  `hs_amt` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `comp` varchar(100) DEFAULT NULL,
+  `srino` varchar(100) DEFAULT NULL,
+  `cost_gst` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `scm_final` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `volume` varchar(50) DEFAULT NULL,
+  `batch_code` varchar(100) DEFAULT NULL,
+  `status` enum('pending','completed','cancelled') NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `sales`
+--
+
+INSERT INTO `sales` (`id`, `series`, `date`, `invoice_no`, `due_date`, `customer_id`, `salesman_id`, `cash_type`, `due`, `pdc`, `total`, `cgst_percent`, `sgst_percent`, `cess_percent`, `case`, `box`, `nt_amt`, `sc`, `ft_amt`, `dis`, `scm`, `scm_percent`, `tax_percent`, `excise`, `tcs`, `sc_percent`, `tax`, `net`, `packing`, `packing_nt_amt`, `packing_scm_percent`, `sub_total`, `unit`, `sc_amt`, `scm_amt`, `tax_amt`, `cl_qty`, `dis_amt`, `net_amt`, `location`, `hs_amt`, `comp`, `srino`, `cost_gst`, `scm_final`, `volume`, `batch_code`, `status`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'SZ', '2025-10-29', '1', '2025-10-29', 4, 4, 'N', 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0, 0, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, NULL, 0.00, 0.00, 0.00, NULL, 0.00, 0.00, 0.00, 0, 0.00, 0.00, NULL, 0.00, NULL, NULL, 0.00, 0.00, NULL, NULL, 'pending', '2025-10-29 05:03:09', '2025-10-29 05:03:09', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `sales_men`
 --
 
@@ -1361,6 +2007,31 @@ INSERT INTO `sales_men` (`id`, `code`, `name`, `email`, `sales_type`, `delivery_
 (15, '345234', 'dfsdfsdf', NULL, 'B', 'B', NULL, NULL, NULL, NULL, NULL, '00', 'DIRECT', 0.00, NULL, 1, '2025-10-27 01:56:52', '2025-10-27 02:05:08', '2025-10-27 01:56:52', '2025-10-27 02:05:08'),
 (16, '3453434', 'dfgddgf', NULL, 'B', 'B', NULL, NULL, NULL, NULL, NULL, '00', 'DIRECT', 0.00, NULL, 1, '2025-10-27 01:57:02', '2025-10-27 02:05:05', '2025-10-27 01:57:02', '2025-10-27 02:05:05'),
 (17, '765', 'htryt', NULL, 'B', 'B', NULL, NULL, 'hgfg', NULL, NULL, '00', 'DIRECT', 0.00, NULL, 1, '2025-10-27 08:09:34', '2025-10-27 08:10:36', '2025-10-27 08:09:34', '2025-10-27 08:10:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sale_items`
+--
+
+CREATE TABLE `sale_items` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `sale_id` bigint(20) UNSIGNED NOT NULL,
+  `code` varchar(50) DEFAULT NULL,
+  `item_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `item_name` varchar(255) NOT NULL,
+  `batch_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `batch` varchar(100) DEFAULT NULL,
+  `expiry` varchar(20) DEFAULT NULL,
+  `qty` int(11) NOT NULL DEFAULT 0,
+  `free_qty` int(11) NOT NULL DEFAULT 0,
+  `rate` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `discount` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `mrp` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -1655,6 +2326,81 @@ INSERT INTO `sale_ledgers` (`id`, `created_at`, `updated_at`, `ledger_name`, `fo
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `sale_transactions`
+--
+
+CREATE TABLE `sale_transactions` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `invoice_no` varchar(100) NOT NULL,
+  `series` varchar(10) NOT NULL DEFAULT 'SB',
+  `sale_date` date NOT NULL,
+  `due_date` date DEFAULT NULL,
+  `customer_id` bigint(20) UNSIGNED NOT NULL,
+  `salesman_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `cash_flag` char(1) NOT NULL DEFAULT 'N',
+  `transfer_flag` char(1) NOT NULL DEFAULT 'N',
+  `remarks` text DEFAULT NULL,
+  `nt_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `sc_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `ft_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `dis_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `scm_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `tax_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `net_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `scm_percent` decimal(10,3) NOT NULL DEFAULT 0.000,
+  `tcs_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `excise_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `paid_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `balance_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `payment_status` varchar(50) NOT NULL DEFAULT 'pending',
+  `status` varchar(50) NOT NULL DEFAULT 'completed',
+  `created_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `updated_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sale_transaction_items`
+--
+
+CREATE TABLE `sale_transaction_items` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `sale_transaction_id` bigint(20) UNSIGNED NOT NULL,
+  `item_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `item_code` varchar(100) NOT NULL,
+  `item_name` varchar(255) NOT NULL,
+  `batch_no` varchar(100) DEFAULT NULL,
+  `expiry_date` varchar(20) DEFAULT NULL,
+  `qty` decimal(15,3) NOT NULL DEFAULT 0.000,
+  `free_qty` decimal(15,3) NOT NULL DEFAULT 0.000,
+  `sale_rate` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `mrp` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `discount_percent` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `discount_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `net_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `cgst_percent` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `sgst_percent` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `cess_percent` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `cgst_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `sgst_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `cess_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `tax_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `unit` varchar(50) DEFAULT NULL,
+  `packing` varchar(100) DEFAULT NULL,
+  `company_name` varchar(255) DEFAULT NULL,
+  `hsn_code` varchar(50) DEFAULT NULL,
+  `row_order` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `sessions`
 --
 
@@ -1672,8 +2418,7 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
-('fbU3d3jiPy1iONdkb5RHvTZ6L4Ifsb5XPlF35JWW', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiZ1A2Zm45c1R5ZUtIYlVVanlhY04zdHpHSnpxQmlraGowOW1JS2hUbCI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzc6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9kYXNoYm9hcmQiO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1761626706),
-('l5goPJYyKpuTmrCpEbZTQHpxu0ncPKZYaP1aSJ6j', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiaVc0aHZMbDBmTlBYN3BXSFpxdlVYUmtIem9ZNGlRVURWbjFiblZVOSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6Mzc6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9zYWxlcy1tZW4iO31zOjY6Il9mbGFzaCI7YToyOntzOjM6Im9sZCI7YTowOnt9czozOiJuZXciO2E6MDp7fX1zOjUwOiJsb2dpbl93ZWJfNTliYTM2YWRkYzJiMmY5NDAxNTgwZjAxNGM3ZjU4ZWE0ZTMwOTg5ZCI7aToxO30=', 1761572437);
+('cU5ar57uJOR2WW0xKijceTyJqMyydwSwsyPGquTh', 1, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiTDI3SjNyTG00VHAwMlVZR1BkVUVkeGtyaldabXBuMXNjbjIxWEdUYSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6NDc6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMC9hZG1pbi9hcGkvaXRlbS1iYXRjaGVzLzI5Ijt9czo2OiJfZmxhc2giO2E6Mjp7czozOiJvbGQiO2E6MDp7fXM6MzoibmV3IjthOjA6e319czo1MDoibG9naW5fd2ViXzU5YmEzNmFkZGMyYjJmOTQwMTU4MGYwMTRjN2Y1OGVhNGUzMDk4OWQiO2k6MTt9', 1762437219);
 
 -- --------------------------------------------------------
 
@@ -1706,6 +2451,39 @@ INSERT INTO `states` (`id`, `name`, `alter_code`, `status`, `created_at`, `updat
 (10, 'Kerala', 'KL010', 'Active', '2025-10-15 04:11:48', '2025-10-15 04:11:48'),
 (11, 'Punjab', 'PB011', 'Active', '2025-10-15 04:11:48', '2025-10-15 04:11:48'),
 (12, 'Haryana', 'HR012', 'Active', '2025-10-15 04:11:48', '2025-10-15 04:11:48');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stock_ledgers`
+--
+
+CREATE TABLE `stock_ledgers` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `trans_no` varchar(255) DEFAULT NULL,
+  `item_id` bigint(20) UNSIGNED NOT NULL,
+  `batch_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `customer_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `supplier_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `transaction_type` varchar(255) NOT NULL,
+  `quantity` decimal(12,2) NOT NULL,
+  `free_quantity` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `salesman_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `bill_number` varchar(255) DEFAULT NULL,
+  `bill_date` date DEFAULT NULL,
+  `rate` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `opening_qty` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `closing_qty` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `running_balance` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `reference_type` varchar(255) DEFAULT NULL,
+  `reference_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `transaction_date` date NOT NULL,
+  `godown` varchar(255) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `created_by` bigint(20) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -1828,6 +2606,64 @@ INSERT INTO `suppliers` (`supplier_id`, `name`, `code`, `address`, `telephone`, 
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `transport_masters`
+--
+
+CREATE TABLE `transport_masters` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `alter_code` varchar(255) DEFAULT NULL,
+  `telephone` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `mobile` varchar(255) DEFAULT NULL,
+  `gst_no` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `vehicle_no` varchar(255) DEFAULT NULL,
+  `trans_mode` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `transport_masters`
+--
+
+INSERT INTO `transport_masters` (`id`, `name`, `address`, `alter_code`, `telephone`, `email`, `mobile`, `gst_no`, `status`, `vehicle_no`, `trans_mode`, `created_at`, `updated_at`) VALUES
+(1, 'Blue Dart Express', 'Plot 12, Industrial Area\\nMumbai, Maharashtra 400001', 'BD001', '022-12345678', 'info@bluedart.com', '9876543210', '27AABCU9603R1ZM', 'Active', 'MH-01-AB-1234', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(2, 'DTDC Courier', 'Sector 15, Transport Hub\\nDelhi, Delhi 110001', 'DT002', '011-23456789', 'contact@dtdc.com', '9876543211', '07AABCD1234E1Z5', 'Active', 'DL-02-BC-5678', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(3, 'Professional Couriers', 'Zone 8, Logistics Park\\nAhmedabad, Gujarat 380001', 'PC003', '079-34567890', 'info@procourier.com', '9876543212', '24AABCP1234F1Z6', 'Active', 'GJ-03-CD-9012', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(4, 'First Flight Couriers', 'Building 5, Tech City\\nBangalore, Karnataka 560001', 'FF004', '080-45678901', 'support@firstflight.com', '9876543213', '29AABCF1234G1Z7', 'Active', 'KA-04-DE-3456', 'Air', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(5, 'Gati Packers', 'Warehouse 3, Port Area\\nChennai, Tamil Nadu 600001', 'GP005', '044-56789012', 'info@gati.com', '9876543214', '33AABCG1234H1Z8', 'Active', 'TN-05-EF-7890', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(6, 'VRL Logistics', 'Station Road, Transport Nagar\\nPune, Maharashtra 411001', 'VL006', '020-67890123', 'contact@vrl.com', '9876543215', '27AABCV1234I1Z9', 'Active', 'MH-06-FG-1234', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(7, 'TCI Express', 'Sector 22, Industrial Zone\\nHyderabad, Telangana 500001', 'TC007', '040-78901234', 'info@tciexpress.com', '9876543216', '36AABCT1234J1ZA', 'Active', 'TS-07-GH-5678', 'Rail', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(8, 'Safexpress', 'Plot 45, Cargo Complex\\nKolkata, West Bengal 700001', 'SX008', '033-89012345', 'support@safexpress.com', '9876543217', '19AABCS1234K1ZB', 'Active', 'WB-08-HI-9012', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(9, 'Delhivery', 'Warehouse 12, Logistics Hub\\nJaipur, Rajasthan 302001', 'DL009', '0141-90123456', 'info@delhivery.com', '9876543218', '08AABCD1234L1ZC', 'Active', 'RJ-09-IJ-3456', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(10, 'Ecom Express', 'Zone 5, Distribution Center\\nLucknow, Uttar Pradesh 226001', 'EC010', '0522-01234567', 'contact@ecomexpress.com', '9876543219', '09AABCE1234M1ZD', 'Active', 'UP-10-JK-7890', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(11, 'Shadowfax', 'Building 8, Tech Park\\nNoida, Uttar Pradesh 201301', 'SF011', '0120-12345678', 'info@shadowfax.com', '9876543220', '09AABCS1234N1ZE', 'Active', 'UP-11-KL-1234', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(12, 'Xpressbees', 'Sector 18, Logistics Zone\\nGurgaon, Haryana 122001', 'XB012', '0124-23456789', 'support@xpressbees.com', '9876543221', '06AABCX1234O1ZF', 'Active', 'HR-12-LM-5678', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(13, 'Ekart Logistics', 'Plot 25, Warehouse District\\nIndore, Madhya Pradesh 452001', 'EK013', '0731-34567890', 'info@ekartlogistics.com', '9876543222', '23AABCE1234P1ZG', 'Active', 'MP-13-MN-9012', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(14, 'Rivigo', 'Zone 12, Transport Hub\\nNagpur, Maharashtra 440001', 'RV014', '0712-45678901', 'contact@rivigo.com', '9876543223', '27AABCR1234Q1ZH', 'Active', 'MH-14-NO-3456', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(15, 'Mahindra Logistics', 'Sector 30, Industrial Area\\nSurat, Gujarat 395001', 'ML015', '0261-56789012', 'info@mahindralogistics.com', '9876543224', '24AABCM1234R1ZI', 'Active', 'GJ-15-OP-7890', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(16, 'Allcargo Logistics', 'Port Zone, Shipping Area\\nVisakhapatnam, AP 530001', 'AL016', '0891-67890123', 'support@allcargo.com', '9876543225', '37AABCA1234S1ZJ', 'Active', 'AP-16-PQ-1234', 'Ship', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(17, 'Container Corporation', 'Railway Yard, Cargo Terminal\\nBhopal, Madhya Pradesh 462001', 'CC017', '0755-78901234', 'info@concorindia.com', '9876543226', '23AABCC1234T1ZK', 'Active', 'MP-17-QR-5678', 'Rail', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(18, 'SpiceJet Cargo', 'Airport Complex, Cargo Terminal\\nCochin, Kerala 682001', 'SJ018', '0484-89012345', 'cargo@spicejet.com', '9876543227', '32AABCS1234U1ZL', 'Active', 'KL-18-RS-9012', 'Air', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(19, 'IndiGo CarGo', 'Terminal 2, Airport Road\\nThiruvananthapuram, Kerala 695001', 'IC019', '0471-90123456', 'cargo@goindigo.in', '9876543228', '32AABCI1234V1ZM', 'Active', 'KL-19-ST-3456', 'Air', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(20, 'Maersk Shipping', 'Dock 5, Port Area\\nMumbai, Maharashtra 400001', 'MS020', '022-01234567', 'info@maersk.com', '9876543229', '27AABCM1234W1ZN', 'Inactive', 'MH-20-TU-7890', 'Ship', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(21, 'Om Logistics', 'Sector 45, Transport Nagar\\nChandigarh, Chandigarh 160001', 'OL021', '0172-12345678', 'info@omlogistics.com', '9876543230', '04AABCO1234X1ZO', 'Active', 'CH-21-UV-1234', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(22, 'Agarwal Packers', 'Plot 18, Industrial Zone\\nLudhiana, Punjab 141001', 'AP022', '0161-23456789', 'contact@agarwalpackers.com', '9876543231', '03AABCA1234Y1ZP', 'Active', 'PB-22-VW-5678', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(23, 'VRL Packers', 'Station Road, Transport Hub\\nVijayawada, AP 520001', 'VP023', '0866-34567890', 'info@vrlpackers.com', '9876543232', '37AABCV1234Z1ZQ', 'Active', 'AP-23-WX-9012', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(24, 'Leo Packers', 'Zone 8, Logistics Park\\nCoimbatore, Tamil Nadu 641001', 'LP024', '0422-45678901', 'support@leopackers.com', '9876543233', '33AABCL1234A2ZR', 'Active', 'TN-24-XY-3456', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(25, 'Shree Maruti', 'Warehouse 15, Port Road\\nMangalore, Karnataka 575001', 'SM025', '0824-56789012', 'info@shreemaruti.com', '9876543234', '29AABCS1234B2ZS', 'Active', 'KA-25-YZ-7890', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(26, 'Balaji Cargo', 'Sector 12, Industrial Area\\nRanchi, Jharkhand 834001', 'BC026', '0651-67890123', 'contact@balajicargo.com', '9876543235', '20AABCB1234C2ZT', 'Active', 'JH-26-ZA-1234', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(27, 'Shree Ganesh', 'Plot 22, Transport Zone\\nPatna, Bihar 800001', 'SG027', '0612-78901234', 'info@shreeganesh.com', '9876543236', '10AABCS1234D2ZU', 'Active', 'BR-27-AB-5678', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(28, 'Raj Transport', 'Zone 5, Logistics Hub\\nJodhpur, Rajasthan 342001', 'RT028', '0291-89012345', 'support@rajtransport.com', '9876543237', '08AABCR1234E2ZV', 'Active', 'RJ-28-BC-9012', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(29, 'Shivam Logistics', 'Building 10, Cargo Complex\\nUdaipur, Rajasthan 313001', 'SL029', '0294-90123456', 'info@shivamlogistics.com', '9876543238', '08AABCS1234F2ZW', 'Active', 'RJ-29-CD-3456', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00'),
+(30, 'Krishna Cargo', 'Sector 18, Transport Nagar\\nAgra, Uttar Pradesh 282001', 'KC030', '0562-01234567', 'contact@krishnacargo.com', '9876543239', '09AABCK1234G2ZX', 'Active', 'UP-30-DE-7890', 'Road', '2025-10-29 01:44:00', '2025-10-29 01:44:00');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -1871,6 +2707,17 @@ ALTER TABLE `area_managers`
   ADD UNIQUE KEY `area_managers_code_unique` (`code`);
 
 --
+-- Indexes for table `batches`
+--
+ALTER TABLE `batches`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `batches_batch_number_unique` (`batch_number`),
+  ADD KEY `batches_item_id_index` (`item_id`),
+  ADD KEY `batches_expiry_date_index` (`expiry_date`),
+  ADD KEY `batches_status_index` (`status`),
+  ADD KEY `batches_batch_number_index` (`batch_number`);
+
+--
 -- Indexes for table `cache`
 --
 ALTER TABLE `cache`
@@ -1910,11 +2757,70 @@ ALTER TABLE `customers`
   ADD KEY `customers_modified_by_foreign` (`modified_by`);
 
 --
+-- Indexes for table `customer_challans`
+--
+ALTER TABLE `customer_challans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_challans_customer_id_index` (`customer_id`),
+  ADD KEY `customer_challans_challan_date_index` (`challan_date`);
+
+--
+-- Indexes for table `customer_discounts`
+--
+ALTER TABLE `customer_discounts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_discounts_customer_id_index` (`customer_id`);
+
+--
+-- Indexes for table `customer_dues`
+--
+ALTER TABLE `customer_dues`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_dues_customer_id_index` (`customer_id`),
+  ADD KEY `customer_dues_due_date_index` (`due_date`);
+
+--
+-- Indexes for table `customer_ledgers`
+--
+ALTER TABLE `customer_ledgers`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_ledgers_customer_id_index` (`customer_id`),
+  ADD KEY `customer_ledgers_transaction_date_index` (`transaction_date`);
+
+--
+-- Indexes for table `customer_prescriptions`
+--
+ALTER TABLE `customer_prescriptions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_prescriptions_customer_id_index` (`customer_id`),
+  ADD KEY `customer_prescriptions_validity_date_index` (`validity_date`);
+
+--
+-- Indexes for table `customer_special_rates`
+--
+ALTER TABLE `customer_special_rates`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_special_rates_item_id_foreign` (`item_id`),
+  ADD KEY `customer_special_rates_customer_id_item_id_index` (`customer_id`,`item_id`);
+
+--
 -- Indexes for table `divisional_managers`
 --
 ALTER TABLE `divisional_managers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `divisional_managers_code_unique` (`code`);
+
+--
+-- Indexes for table `expiry_ledger`
+--
+ALTER TABLE `expiry_ledger`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `expiry_ledger_item_id_foreign` (`item_id`),
+  ADD KEY `expiry_ledger_batch_id_foreign` (`batch_id`),
+  ADD KEY `expiry_ledger_customer_id_foreign` (`customer_id`),
+  ADD KEY `expiry_ledger_supplier_id_foreign` (`supplier_id`),
+  ADD KEY `expiry_ledger_transaction_date_index` (`transaction_date`),
+  ADD KEY `expiry_ledger_expiry_date_index` (`expiry_date`);
 
 --
 -- Indexes for table `failed_jobs`
@@ -1934,6 +2840,27 @@ ALTER TABLE `general_ledgers`
 --
 ALTER TABLE `general_managers`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `general_notebooks`
+--
+ALTER TABLE `general_notebooks`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `general_reminders`
+--
+ALTER TABLE `general_reminders`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `godown_expiry`
+--
+ALTER TABLE `godown_expiry`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `godown_expiry_item_id_foreign` (`item_id`),
+  ADD KEY `godown_expiry_batch_id_foreign` (`batch_id`),
+  ADD KEY `godown_expiry_expiry_date_index` (`expiry_date`);
 
 --
 -- Indexes for table `hsn_codes`
@@ -1989,6 +2916,12 @@ ALTER TABLE `items`
   ADD KEY `items_company_id_foreign` (`company_id`);
 
 --
+-- Indexes for table `item_categories`
+--
+ALTER TABLE `item_categories`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `jobs`
 --
 ALTER TABLE `jobs`
@@ -2015,10 +2948,47 @@ ALTER TABLE `migrations`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `pending_orders`
+--
+ALTER TABLE `pending_orders`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `pending_orders_supplier_id_index` (`supplier_id`),
+  ADD KEY `pending_orders_order_date_index` (`order_date`),
+  ADD KEY `pending_orders_item_id_foreign` (`item_id`);
+
+--
+-- Indexes for table `personal_directories`
+--
+ALTER TABLE `personal_directories`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `purchase_ledgers`
 --
 ALTER TABLE `purchase_ledgers`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `purchase_transactions`
+--
+ALTER TABLE `purchase_transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `purchase_transactions_trn_no_unique` (`trn_no`),
+  ADD UNIQUE KEY `unique_bill_no_per_supplier` (`bill_no`,`supplier_id`),
+  ADD KEY `purchase_transactions_bill_date_index` (`bill_date`),
+  ADD KEY `purchase_transactions_supplier_id_index` (`supplier_id`),
+  ADD KEY `purchase_transactions_trn_no_index` (`trn_no`),
+  ADD KEY `purchase_transactions_status_index` (`status`);
+
+--
+-- Indexes for table `purchase_transaction_items`
+--
+ALTER TABLE `purchase_transaction_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `purchase_transaction_items_purchase_transaction_id_index` (`purchase_transaction_id`),
+  ADD KEY `purchase_transaction_items_item_id_index` (`item_id`),
+  ADD KEY `purchase_transaction_items_batch_no_index` (`batch_no`),
+  ADD KEY `purchase_transaction_items_expiry_date_index` (`expiry_date`);
 
 --
 -- Indexes for table `regional_managers`
@@ -2034,6 +3004,15 @@ ALTER TABLE `routes`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `sales`
+--
+ALTER TABLE `sales`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `sales_invoice_no_unique` (`invoice_no`),
+  ADD KEY `sales_customer_id_foreign` (`customer_id`),
+  ADD KEY `sales_salesman_id_foreign` (`salesman_id`);
+
+--
 -- Indexes for table `sales_men`
 --
 ALTER TABLE `sales_men`
@@ -2041,10 +3020,39 @@ ALTER TABLE `sales_men`
   ADD UNIQUE KEY `sales_men_code_unique` (`code`);
 
 --
+-- Indexes for table `sale_items`
+--
+ALTER TABLE `sale_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sale_items_sale_id_foreign` (`sale_id`),
+  ADD KEY `sale_items_item_id_foreign` (`item_id`),
+  ADD KEY `sale_items_batch_id_foreign` (`batch_id`);
+
+--
 -- Indexes for table `sale_ledgers`
 --
 ALTER TABLE `sale_ledgers`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `sale_transactions`
+--
+ALTER TABLE `sale_transactions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `sale_transactions_invoice_no_unique` (`invoice_no`),
+  ADD KEY `sale_transactions_salesman_id_foreign` (`salesman_id`),
+  ADD KEY `sale_transactions_sale_date_index` (`sale_date`),
+  ADD KEY `sale_transactions_customer_id_index` (`customer_id`),
+  ADD KEY `sale_transactions_invoice_no_index` (`invoice_no`);
+
+--
+-- Indexes for table `sale_transaction_items`
+--
+ALTER TABLE `sale_transaction_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sale_transaction_items_sale_transaction_id_index` (`sale_transaction_id`),
+  ADD KEY `sale_transaction_items_item_id_index` (`item_id`),
+  ADD KEY `sale_transaction_items_item_code_index` (`item_code`);
 
 --
 -- Indexes for table `sessions`
@@ -2061,12 +3069,32 @@ ALTER TABLE `states`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `stock_ledgers`
+--
+ALTER TABLE `stock_ledgers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `stock_ledgers_trans_no_unique` (`trans_no`),
+  ADD KEY `stock_ledgers_item_id_index` (`item_id`),
+  ADD KEY `stock_ledgers_batch_id_index` (`batch_id`),
+  ADD KEY `stock_ledgers_transaction_date_index` (`transaction_date`),
+  ADD KEY `stock_ledgers_transaction_type_index` (`transaction_type`),
+  ADD KEY `stock_ledgers_customer_id_index` (`customer_id`),
+  ADD KEY `stock_ledgers_supplier_id_index` (`supplier_id`),
+  ADD KEY `stock_ledgers_salesman_id_index` (`salesman_id`);
+
+--
 -- Indexes for table `suppliers`
 --
 ALTER TABLE `suppliers`
   ADD PRIMARY KEY (`supplier_id`),
   ADD KEY `suppliers_created_by_foreign` (`created_by`),
   ADD KEY `suppliers_updated_by_foreign` (`updated_by`);
+
+--
+-- Indexes for table `transport_masters`
+--
+ALTER TABLE `transport_masters`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `users`
@@ -2093,6 +3121,12 @@ ALTER TABLE `area_managers`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
+-- AUTO_INCREMENT for table `batches`
+--
+ALTER TABLE `batches`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `cash_bank_books`
 --
 ALTER TABLE `cash_bank_books`
@@ -2117,10 +3151,52 @@ ALTER TABLE `customers`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
+-- AUTO_INCREMENT for table `customer_challans`
+--
+ALTER TABLE `customer_challans`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `customer_discounts`
+--
+ALTER TABLE `customer_discounts`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `customer_dues`
+--
+ALTER TABLE `customer_dues`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `customer_ledgers`
+--
+ALTER TABLE `customer_ledgers`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `customer_prescriptions`
+--
+ALTER TABLE `customer_prescriptions`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `customer_special_rates`
+--
+ALTER TABLE `customer_special_rates`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `divisional_managers`
 --
 ALTER TABLE `divisional_managers`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `expiry_ledger`
+--
+ALTER TABLE `expiry_ledger`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -2138,7 +3214,25 @@ ALTER TABLE `general_ledgers`
 -- AUTO_INCREMENT for table `general_managers`
 --
 ALTER TABLE `general_managers`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `general_notebooks`
+--
+ALTER TABLE `general_notebooks`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `general_reminders`
+--
+ALTER TABLE `general_reminders`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT for table `godown_expiry`
+--
+ALTER TABLE `godown_expiry`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `hsn_codes`
@@ -2180,7 +3274,13 @@ ALTER TABLE `invoice_templates`
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+
+--
+-- AUTO_INCREMENT for table `item_categories`
+--
+ALTER TABLE `item_categories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `jobs`
@@ -2198,13 +3298,37 @@ ALTER TABLE `marketing_managers`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=154;
+
+--
+-- AUTO_INCREMENT for table `pending_orders`
+--
+ALTER TABLE `pending_orders`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+
+--
+-- AUTO_INCREMENT for table `personal_directories`
+--
+ALTER TABLE `personal_directories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `purchase_ledgers`
 --
 ALTER TABLE `purchase_ledgers`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+
+--
+-- AUTO_INCREMENT for table `purchase_transactions`
+--
+ALTER TABLE `purchase_transactions`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+
+--
+-- AUTO_INCREMENT for table `purchase_transaction_items`
+--
+ALTER TABLE `purchase_transaction_items`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
 
 --
 -- AUTO_INCREMENT for table `regional_managers`
@@ -2219,10 +3343,22 @@ ALTER TABLE `routes`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
+-- AUTO_INCREMENT for table `sales`
+--
+ALTER TABLE `sales`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `sales_men`
 --
 ALTER TABLE `sales_men`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `sale_items`
+--
+ALTER TABLE `sale_items`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `sale_ledgers`
@@ -2231,16 +3367,40 @@ ALTER TABLE `sale_ledgers`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=251;
 
 --
+-- AUTO_INCREMENT for table `sale_transactions`
+--
+ALTER TABLE `sale_transactions`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `sale_transaction_items`
+--
+ALTER TABLE `sale_transaction_items`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `states`
 --
 ALTER TABLE `states`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
+-- AUTO_INCREMENT for table `stock_ledgers`
+--
+ALTER TABLE `stock_ledgers`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `suppliers`
 --
 ALTER TABLE `suppliers`
   MODIFY `supplier_id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+
+--
+-- AUTO_INCREMENT for table `transport_masters`
+--
+ALTER TABLE `transport_masters`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -2253,11 +3413,70 @@ ALTER TABLE `users`
 --
 
 --
+-- Constraints for table `batches`
+--
+ALTER TABLE `batches`
+  ADD CONSTRAINT `batches_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `customers`
 --
 ALTER TABLE `customers`
   ADD CONSTRAINT `customers_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`user_id`),
   ADD CONSTRAINT `customers_modified_by_foreign` FOREIGN KEY (`modified_by`) REFERENCES `users` (`user_id`);
+
+--
+-- Constraints for table `customer_challans`
+--
+ALTER TABLE `customer_challans`
+  ADD CONSTRAINT `customer_challans_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `customer_discounts`
+--
+ALTER TABLE `customer_discounts`
+  ADD CONSTRAINT `customer_discounts_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `customer_dues`
+--
+ALTER TABLE `customer_dues`
+  ADD CONSTRAINT `customer_dues_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `customer_ledgers`
+--
+ALTER TABLE `customer_ledgers`
+  ADD CONSTRAINT `customer_ledgers_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `customer_prescriptions`
+--
+ALTER TABLE `customer_prescriptions`
+  ADD CONSTRAINT `customer_prescriptions_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `customer_special_rates`
+--
+ALTER TABLE `customer_special_rates`
+  ADD CONSTRAINT `customer_special_rates_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `customer_special_rates_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `expiry_ledger`
+--
+ALTER TABLE `expiry_ledger`
+  ADD CONSTRAINT `expiry_ledger_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `batches` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `expiry_ledger_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `expiry_ledger_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `expiry_ledger_supplier_id_foreign` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `godown_expiry`
+--
+ALTER TABLE `godown_expiry`
+  ADD CONSTRAINT `godown_expiry_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `batches` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `godown_expiry_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `invoices`
@@ -2299,6 +3518,61 @@ ALTER TABLE `invoice_templates`
 --
 ALTER TABLE `items`
   ADD CONSTRAINT `items_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `pending_orders`
+--
+ALTER TABLE `pending_orders`
+  ADD CONSTRAINT `pending_orders_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `pending_orders_supplier_id_foreign` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `purchase_transactions`
+--
+ALTER TABLE `purchase_transactions`
+  ADD CONSTRAINT `purchase_transactions_supplier_id_foreign` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`supplier_id`);
+
+--
+-- Constraints for table `purchase_transaction_items`
+--
+ALTER TABLE `purchase_transaction_items`
+  ADD CONSTRAINT `purchase_transaction_items_purchase_transaction_id_foreign` FOREIGN KEY (`purchase_transaction_id`) REFERENCES `purchase_transactions` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `sales`
+--
+ALTER TABLE `sales`
+  ADD CONSTRAINT `sales_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `sales_salesman_id_foreign` FOREIGN KEY (`salesman_id`) REFERENCES `sales_men` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `sale_items`
+--
+ALTER TABLE `sale_items`
+  ADD CONSTRAINT `sale_items_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `batches` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `sale_items_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `sale_items_sale_id_foreign` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `sale_transactions`
+--
+ALTER TABLE `sale_transactions`
+  ADD CONSTRAINT `sale_transactions_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `sale_transactions_salesman_id_foreign` FOREIGN KEY (`salesman_id`) REFERENCES `sales_men` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `sale_transaction_items`
+--
+ALTER TABLE `sale_transaction_items`
+  ADD CONSTRAINT `sale_transaction_items_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `sale_transaction_items_sale_transaction_id_foreign` FOREIGN KEY (`sale_transaction_id`) REFERENCES `sale_transactions` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `stock_ledgers`
+--
+ALTER TABLE `stock_ledgers`
+  ADD CONSTRAINT `stock_ledgers_batch_id_foreign` FOREIGN KEY (`batch_id`) REFERENCES `batches` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `stock_ledgers_item_id_foreign` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `suppliers`

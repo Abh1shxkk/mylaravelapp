@@ -78,6 +78,8 @@ class BatchController extends Controller
                 'qty',
                 'pur_rate',
                 'mrp',
+                's_rate',
+                'cost_gst',
                 'purchase_transaction_id',
                 'packing',
                 'unit'
@@ -85,30 +87,94 @@ class BatchController extends Controller
             ->where('item_id', $itemId)
             ->whereNotNull('batch_no')
             ->where('batch_no', '!=', '')
-            ->with(['transaction', 'item'])
+            ->with(['transaction.supplier', 'item'])
             ->orderBy('batch_no')
             ->orderBy('expiry_date')
             ->get();
             
-            // Group by batch_no and calculate totals
+            // Group by batch_no and expiry_date, calculate totals
             $grouped = [];
             foreach ($batches as $batch) {
                 $key = $batch->batch_no . '_' . ($batch->expiry_date ? $batch->expiry_date->format('Y-m') : '');
                 
                 if (!isset($grouped[$key])) {
+                    // Get purchase date from transaction (bill_date is the purchase date)
+                    // Make sure transaction is loaded
+                    $purchaseDate = null;
+                    $supplierName = 'N/A';
+                    
+                    // Load transaction if not already loaded
+                    if (!$batch->relationLoaded('transaction')) {
+                        $batch->load('transaction.supplier');
+                    }
+                    
+                    if ($batch->transaction) {
+                        // Get bill_date from transaction
+                        $purchaseDate = $batch->transaction->bill_date;
+                        
+                        // Get supplier name
+                        if ($batch->transaction->relationLoaded('supplier') && $batch->transaction->supplier) {
+                            $supplierName = $batch->transaction->supplier->name;
+                        } elseif ($batch->transaction->supplier_id) {
+                            // Load supplier if not loaded
+                            $batch->transaction->load('supplier');
+                            if ($batch->transaction->supplier) {
+                                $supplierName = $batch->transaction->supplier->name;
+                            }
+                        }
+                    }
+                    
+                    // Get item name for brand
+                    $itemName = 'N/A';
+                    if ($batch->relationLoaded('item') && $batch->item) {
+                        $itemName = $batch->item->name;
+                    } elseif ($batch->item_id) {
+                        $batch->load('item');
+                        if ($batch->item) {
+                            $itemName = $batch->item->name;
+                        }
+                    }
+                    
+                    if (!$itemName || $itemName === 'N/A') {
+                        $itemName = $batch->item_name ?? 'N/A';
+                    }
+                    
+                    // Format purchase date for display (dd-mm-yy)
+                    $purchaseDateDisplay = 'N/A';
+                    if ($purchaseDate) {
+                        try {
+                            // If it's already a Carbon instance
+                            if ($purchaseDate instanceof \Carbon\Carbon) {
+                                $purchaseDateDisplay = $purchaseDate->format('d-m-y');
+                            } else {
+                                // If it's a string, parse it
+                                $dateObj = \Carbon\Carbon::parse($purchaseDate);
+                                $purchaseDateDisplay = $dateObj->format('d-m-y');
+                            }
+                        } catch (\Exception $e) {
+                            // If parsing fails, try to use as is
+                            $purchaseDateDisplay = is_string($purchaseDate) ? $purchaseDate : 'N/A';
+                        }
+                    }
+                    
                     $grouped[$key] = [
                         'batch_no' => $batch->batch_no,
                         'expiry_date' => $batch->expiry_date,
                         'expiry_display' => $batch->expiry_date ? $batch->expiry_date->format('m/Y') : '---',
+                        'purchase_date' => $purchaseDate ? ($purchaseDate instanceof \Carbon\Carbon ? $purchaseDate->format('Y-m-d') : (is_string($purchaseDate) ? $purchaseDate : null)) : null,
+                        'purchase_date_display' => $purchaseDateDisplay,
                         'total_qty' => 0,
                         'avg_pur_rate' => 0,
+                        'avg_s_rate' => 0,
                         'avg_mrp' => 0,
+                        'avg_cost_gst' => 0,
                         'max_rate' => 0,
                         'items' => [],
-                        'item_name' => $batch->item_name,
+                        'item_name' => $itemName,
                         'item_code' => $batch->item_code,
                         'packing' => $batch->packing ?? '1*10',
-                        'unit' => $batch->unit ?? '1'
+                        'unit' => $batch->unit ?? '1',
+                        'supplier_name' => $supplierName
                     ];
                 }
                 
@@ -117,9 +183,18 @@ class BatchController extends Controller
                 
                 // Calculate averages
                 $rates = array_column($grouped[$key]['items'], 'pur_rate');
+                $sRates = array_filter(array_column($grouped[$key]['items'], 's_rate'), function($val) {
+                    return $val !== null && $val > 0;
+                });
                 $mrps = array_column($grouped[$key]['items'], 'mrp');
+                $costGsts = array_filter(array_column($grouped[$key]['items'], 'cost_gst'), function($val) {
+                    return $val !== null && $val > 0;
+                });
+                
                 $grouped[$key]['avg_pur_rate'] = count($rates) > 0 ? array_sum($rates) / count($rates) : 0;
+                $grouped[$key]['avg_s_rate'] = count($sRates) > 0 ? array_sum($sRates) / count($sRates) : 0;
                 $grouped[$key]['avg_mrp'] = count($mrps) > 0 ? array_sum($mrps) / count($mrps) : 0;
+                $grouped[$key]['avg_cost_gst'] = count($costGsts) > 0 ? array_sum($costGsts) / count($costGsts) : 0;
                 $grouped[$key]['max_rate'] = max($rates);
             }
             

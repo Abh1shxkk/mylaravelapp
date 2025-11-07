@@ -4,35 +4,31 @@
 
 @section('content')
 <style>
-    body {
-        font-size: 11px;
-    }
-    
-    .compact-form {
+    /* Scoped styles - only affect content area, not sidebar */
+    .content .compact-form {
         padding: 8px;
-        background: #f5f5f5;
     }
     
-    .compact-form label {
+    .content .compact-form label {
         font-weight: 600;
         font-size: 11px;
         margin-bottom: 0;
         white-space: nowrap;
     }
     
-    .compact-form input,
-    .compact-form select {
+    .content .compact-form input,
+    .content .compact-form select {
         font-size: 11px;
         padding: 2px 6px;
         height: 26px;
     }
     
-    .compact-form .form-control:focus {
+    .content .compact-form .form-control:focus {
         box-shadow: none;
         border-color: #0d6efd;
     }
     
-    .header-section {
+    .content .header-section {
         background: white;
         border: 1px solid #dee2e6;
         padding: 10px;
@@ -40,20 +36,20 @@
         border-radius: 4px;
     }
     
-    .header-row {
+    .content .header-row {
         display: flex;
         align-items: center;
         gap: 15px;
         margin-bottom: 6px;
     }
     
-    .field-group {
+    .content .field-group {
         display: flex;
         align-items: center;
         gap: 6px;
     }
     
-    .inner-card {
+    .content .inner-card {
         background: #e8f4f8;
         border: 1px solid #b8d4e0;
         padding: 8px;
@@ -300,7 +296,15 @@
     }
 </style>
 
-<div class="container-fluid compact-form">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h4 class="mb-0 d-flex align-items-center"><i class="bi bi-pencil-square me-2"></i> Purchase Modification</h4>
+        <div class="text-muted small">Modify existing purchase transaction</div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded">
+    <div class="card-body compact-form">
     <form id="purchaseForm" method="POST" autocomplete="off" onsubmit="return false;">
         @csrf
         
@@ -710,6 +714,7 @@
             </button>
         </div>
     </form>
+    </div>
 </div>
 
 <!-- MRP Details Modal Backdrop -->
@@ -1122,10 +1127,17 @@ function fetchItemDetails(itemCode) {
 
 // Fetch item details for calculation section (when focusing on any cell in row)
 function fetchItemDetailsForCalculation(itemCode, rowIndex) {
+    // Preserve existing s_rate from rowGstData before fetching item
+    const savedSRate = rowGstData[rowIndex]?.s_rate;
+    
     fetch(`/admin/items/get-by-code/${itemCode}`)
         .then(response => response.json())
         .then(data => {
             if (data.success && data.item) {
+                // If we have a saved s_rate, preserve it in the item data
+                if (savedSRate !== undefined && savedSRate !== null) {
+                    data.item.s_rate = savedSRate;
+                }
                 populateCalculationSectionForRow(data.item, rowIndex);
             } else {
                 clearCalculationSection();
@@ -1193,26 +1205,49 @@ function populateCalculationSectionForRow(item, rowIndex) {
     
     // Populate rate fields
     document.getElementById('calc_sc_percent').value = parseFloat(item.fixed_dis_percent || 0).toFixed(3);
-    document.getElementById('calc_spl_rate').value = parseFloat(item.spl_rate || 0).toFixed(2);
-    document.getElementById('calc_ws_rate').value = parseFloat(item.ws_rate || 0).toFixed(2);
     document.getElementById('calc_tax_percent').value = (parseFloat(item.cgst_percent || 0) + parseFloat(item.sgst_percent || 0)).toFixed(3);
     document.getElementById('calc_excise').value = '0.00';
-    document.getElementById('calc_mrp').value = parseFloat(item.mrp || 0).toFixed(2);
     
-    // Check if this row has a saved s_rate (user-modified), otherwise use item's s_rate
-    let sRateValue = parseFloat(item.s_rate || 0);
-    if (rowGstData[rowIndex] && rowGstData[rowIndex].s_rate !== undefined) {
-        sRateValue = rowGstData[rowIndex].s_rate;
-    }
-    document.getElementById('calc_s_rate').value = sRateValue.toFixed(2);
-    
-    // Save s_rate to rowGstData if not already saved
+    // Initialize rowGstData if needed
     if (!rowGstData[rowIndex]) {
         rowGstData[rowIndex] = {};
     }
-    if (rowGstData[rowIndex].s_rate === undefined) {
+    
+    // Handle S Rate - Priority: rowGstData > item.s_rate
+    let sRateValue = parseFloat(item.s_rate || 0);
+    if (rowGstData[rowIndex].s_rate !== undefined && rowGstData[rowIndex].s_rate !== null) {
+        sRateValue = parseFloat(rowGstData[rowIndex].s_rate) || 0;
+    } else {
         rowGstData[rowIndex].s_rate = sRateValue;
     }
+    document.getElementById('calc_s_rate').value = sRateValue.toFixed(2);
+    
+    // Handle WS Rate - Priority: rowGstData > item.ws_rate
+    let wsRateValue = parseFloat(item.ws_rate || 0);
+    if (rowGstData[rowIndex].ws_rate !== undefined && rowGstData[rowIndex].ws_rate !== null) {
+        wsRateValue = parseFloat(rowGstData[rowIndex].ws_rate) || 0;
+    } else {
+        rowGstData[rowIndex].ws_rate = wsRateValue;
+    }
+    document.getElementById('calc_ws_rate').value = wsRateValue.toFixed(2);
+    
+    // Handle SPL Rate - Priority: rowGstData > item.spl_rate
+    let splRateValue = parseFloat(item.spl_rate || 0);
+    if (rowGstData[rowIndex].spl_rate !== undefined && rowGstData[rowIndex].spl_rate !== null) {
+        splRateValue = parseFloat(rowGstData[rowIndex].spl_rate) || 0;
+    } else {
+        rowGstData[rowIndex].spl_rate = splRateValue;
+    }
+    document.getElementById('calc_spl_rate').value = splRateValue.toFixed(2);
+    
+    // Handle MRP - Priority: rowGstData > item.mrp > row value
+    let mrpValue = parseFloat(item.mrp || 0);
+    if (rowGstData[rowIndex].mrp !== undefined && rowGstData[rowIndex].mrp !== null) {
+        mrpValue = parseFloat(rowGstData[rowIndex].mrp) || 0;
+    } else {
+        rowGstData[rowIndex].mrp = mrpValue;
+    }
+    document.getElementById('calc_mrp').value = mrpValue.toFixed(2);
     
     // Check if this row has saved GST calculations
     if (rowGstData[rowIndex] && rowGstData[rowIndex].calculated) {
@@ -1277,6 +1312,12 @@ function calculateAndSaveGstForRow(rowIndex) {
                 const cost = qty > 0 ? (amount / qty).toFixed(2) : '0.00';
                 const costGst = qty > 0 ? (netAmount / qty).toFixed(2) : '0.00';
                 
+                // CRITICAL: Preserve existing rates before updating rowGstData
+                const existingSRate = rowGstData[rowIndex]?.s_rate;
+                const existingWsRate = rowGstData[rowIndex]?.ws_rate;
+                const existingSplRate = rowGstData[rowIndex]?.spl_rate;
+                const existingMrp = rowGstData[rowIndex]?.mrp;
+                
                 // Save calculated amounts for this row
                 rowGstData[rowIndex] = {
                     calculated: true,
@@ -1290,10 +1331,15 @@ function calculateAndSaveGstForRow(rowIndex) {
                     sgstPercent: sgstPercent,
                     cessPercent: cessPercent,
                     cost: cost,
-                    costGst: costGst
+                    costGst: costGst,
+                    // Preserve rates from before (user entered or from saved transaction)
+                    s_rate: existingSRate !== undefined && existingSRate !== null ? existingSRate : 0,
+                    ws_rate: existingWsRate !== undefined && existingWsRate !== null ? existingWsRate : 0,
+                    spl_rate: existingSplRate !== undefined && existingSplRate !== null ? existingSplRate : 0,
+                    mrp: existingMrp !== undefined && existingMrp !== null ? existingMrp : 0
                 };
                 
-                console.log(`✅ GST calculated and saved for row ${rowIndex}:`, rowGstData[rowIndex]);
+                console.log(`✅ GST calculated and saved for row ${rowIndex}. S.Rate preserved:`, rowGstData[rowIndex].s_rate, rowGstData[rowIndex]);
                 
                 // Update display immediately if this is the current active row
                 if (currentActiveRow === rowIndex) {
@@ -1660,12 +1706,40 @@ document.getElementById('saveMrpDetailsBtn').addEventListener('click', function(
     const rows = document.querySelectorAll('#itemsTableBody tr');
     const currentRow = rows[currentActiveRow];
     
-    // Update current row with MRP and Purchase Rate
-    const mrp = document.getElementById('mrp_value').value || 0;
-    const purRate = document.getElementById('mrp_pur_rate').value || 0;
+    // Get values from modal
+    const mrp = parseFloat(document.getElementById('mrp_value').value) || 0;
+    const purRate = parseFloat(document.getElementById('mrp_pur_rate').value) || 0;
+    const saleRate = parseFloat(document.getElementById('mrp_sale_rate').value) || 0;
+    const wsRate = parseFloat(document.getElementById('mrp_ws_rate').value) || 0;
+    const splRate = parseFloat(document.getElementById('mrp_spl_rate').value) || 0;
     
-    currentRow.querySelector('input[name*="[mrp]"]').value = mrp;
-    currentRow.querySelector('input[name*="[pur_rate]"]').value = purRate;
+    // Update current row with MRP and Purchase Rate
+    currentRow.querySelector('input[name*="[mrp]"]').value = mrp.toFixed(2);
+    currentRow.querySelector('input[name*="[pur_rate]"]').value = purRate.toFixed(2);
+    
+    // Initialize rowGstData for this row if not exists
+    if (!rowGstData[currentActiveRow]) {
+        rowGstData[currentActiveRow] = {};
+    }
+    
+    // Save rates to rowGstData so they can be used in calculation section and saved to DB
+    rowGstData[currentActiveRow].s_rate = saleRate;
+    rowGstData[currentActiveRow].ws_rate = wsRate;
+    rowGstData[currentActiveRow].spl_rate = splRate;
+    rowGstData[currentActiveRow].mrp = mrp;
+    
+    console.log('MRP Modal - Rates saved for row', currentActiveRow, {
+        s_rate: saleRate,
+        ws_rate: wsRate,
+        spl_rate: splRate,
+        mrp: mrp
+    });
+    
+    // Update calculation section immediately
+    document.getElementById('calc_s_rate').value = saleRate.toFixed(2);
+    document.getElementById('calc_ws_rate').value = wsRate.toFixed(2);
+    document.getElementById('calc_spl_rate').value = splRate.toFixed(2);
+    document.getElementById('calc_mrp').value = mrp.toFixed(2);
     
     // Recalculate amount
     const qty = parseFloat(currentRow.querySelector('input[name*="[qty]"]').value) || 0;
@@ -2384,8 +2458,10 @@ function savePurchase() {
                 mrp: parseFloat(row.querySelector(`input[name="items[${index}][mrp]"]`)?.value) || 0,
                 amount: parseFloat(row.querySelector(`input[name="items[${index}][amount]"]`)?.value) || 0,
                 
-                // S.Rate from rowGstData (user-modified or from item)
-                s_rate: calculatedData.s_rate !== undefined ? calculatedData.s_rate : 0,
+                // Rates from rowGstData (user-modified via MRP modal or from item master)
+                s_rate: (calculatedData.s_rate !== undefined && calculatedData.s_rate !== null) ? parseFloat(calculatedData.s_rate) : 0,
+                ws_rate: (calculatedData.ws_rate !== undefined && calculatedData.ws_rate !== null) ? parseFloat(calculatedData.ws_rate) : 0,
+                spl_rate: (calculatedData.spl_rate !== undefined && calculatedData.spl_rate !== null) ? parseFloat(calculatedData.spl_rate) : 0,
                 
                 // Calculated GST data
                 cgst_percent: calculatedData.cgstPercent || 0,
@@ -3234,12 +3310,19 @@ function populateBillData(bill) {
             row.querySelector('input[name*="[mrp]"]').value = item.mrp || '';
             row.querySelector('input[name*="[amount]"]').value = item.amount || '';
             
-            // Store s_rate in rowGstData for this row (from saved data)
+            // Store s_rate in rowGstData for this row (from saved data) - MUST be saved BEFORE any item fetch
             if (item.s_rate !== undefined && item.s_rate !== null) {
                 if (!rowGstData[rowIndex]) {
                     rowGstData[rowIndex] = {};
                 }
+                // Force save s_rate - this is from saved transaction, should not be overwritten
                 rowGstData[rowIndex].s_rate = parseFloat(item.s_rate) || 0;
+                console.log(`Row ${rowIndex}: Saved s_rate from transaction:`, rowGstData[rowIndex].s_rate);
+            } else {
+                // Initialize rowGstData even if s_rate is not provided
+                if (!rowGstData[rowIndex]) {
+                    rowGstData[rowIndex] = {};
+                }
             }
             
             // Trigger amount calculation for this row

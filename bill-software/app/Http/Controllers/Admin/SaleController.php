@@ -9,6 +9,7 @@ use App\Models\SaleItem;
 use App\Models\Customer;
 use App\Models\SalesMan;
 use App\Models\Item;
+use Illuminate\Support\Facades\Log;
 
 class SaleController extends Controller
 {
@@ -35,21 +36,35 @@ class SaleController extends Controller
                 'date' => 'required|date',
                 'due_date' => 'nullable|date',
                 'salesman_id' => 'nullable|exists:sales_men,id',
+                'invoice_no' => 'required|string',
+                'series' => 'nullable|string',
+                'items' => 'required|array|min:1',
+                'items.*.item_name' => 'required|string',
+                'items.*.qty' => 'required|numeric|min:0',
+                'items.*.rate' => 'required|numeric|min:0',
             ]);
 
-            // Generate invoice number
-            $invoiceNo = $this->generateInvoiceNumber();
+            // Use invoice_no from request if provided, otherwise generate
+            $invoiceNo = $request->invoice_no ?? $this->generateInvoiceNumber();
+            
+            // Calculate total from items
+            $total = 0;
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $total += floatval($item['amount'] ?? 0);
+                }
+            }
             
             // Create Sale
             $sale = Sale::create([
-                'series' => $request->series ?? 'SZ',
+                'series' => $request->series ?? 'SB',
                 'date' => $request->date,
                 'invoice_no' => $invoiceNo,
                 'due_date' => $request->due_date,
                 'customer_id' => $request->customer_id,
                 'salesman_id' => $request->salesman_id,
                 'cash_type' => $request->cash_type ?? 'N',
-                'total' => $request->total ?? 0,
+                'total' => $total,
                 'status' => 'pending',
             ]);
 
@@ -59,7 +74,7 @@ class SaleController extends Controller
                     if (!empty($item['item_name'])) {
                         SaleItem::create([
                             'sale_id' => $sale->id,
-                            'code' => $item['code'] ?? null,
+                            'code' => $item['item_code'] ?? $item['code'] ?? null,
                             'item_name' => $item['item_name'],
                             'batch' => $item['batch'] ?? null,
                             'expiry' => $item['expiry'] ?? null,
@@ -82,6 +97,9 @@ class SaleController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Sale Store Error: ' . $e->getMessage());
+            Log::error('Stack Trace: ' . $e->getTraceAsString());
+            
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -94,11 +112,20 @@ class SaleController extends Controller
      */
     public function getItems()
     {
-        $items = Item::select('id', 'name', 'bar_code', 's_rate', 'mrp', 'packing', 
-                             'hsn_code', 'cgst_percent', 'sgst_percent', 'cess_percent',
-                             'case_qty', 'box_qty')
-                     ->orderBy('name')
+        $items = Item::select('items.id', 'items.name', 'items.bar_code', 'items.s_rate', 'items.mrp', 'items.packing', 
+                             'items.hsn_code', 'items.cgst_percent', 'items.sgst_percent', 'items.cess_percent',
+                             'items.case_qty', 'items.box_qty', 'items.unit', 'items.company_id', 'items.company_short_name',
+                             'companies.name as company_name')
+                     ->leftJoin('companies', 'items.company_id', '=', 'companies.id')
+                     ->where('items.is_deleted', '!=', 1)
+                     ->orderBy('items.name')
                      ->get();
+        
+        // Add company_name or company_short_name to each item
+        $items->transform(function ($item) {
+            $item->company = $item->company_name ?? $item->company_short_name ?? 'N/A';
+            return $item;
+        });
         
         return response()->json($items);
     }
